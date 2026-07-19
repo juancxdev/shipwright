@@ -1,0 +1,9 @@
+docs/references
+/test-loom/
+/loom
+/shipwright.exe
+/dist/
+/coverage.out
+.DS_Store
+/shipwright
+/loom.exe

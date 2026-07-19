@@ -1,0 +1,42 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Test
+        run: go test ./...
+
+      - name: Ensure packaging tools
+        run: sudo apt-get update && sudo apt-get install -y zip
+
+      - name: Build release artifacts
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: ./scripts/build-release.sh
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/shipwright-*
+            dist/checksums.txt
+            dist/latest.json
+          generate_release_notes: true
