@@ -16,7 +16,7 @@ func TestCLISmokeHelpInitConfigValidateAndDoctor(t *testing.T) {
 	withWorkingDir(t, tmp)
 
 	help := captureStdout(t, func() { cmd.PrintUsage() })
-	for _, want := range []string{"shipwright config <subcommand>", "shipwright doctor [--json] [--fix]", "validate --json", "shipwright skills <subcommand>", "shipwright tdd <subcommand>"} {
+	for _, want := range []string{"shipwright config <subcommand>", "shipwright doctor [--json] [--fix]", "validate --json", "shipwright skills <subcommand>", "shipwright tdd <subcommand>", "assign              Detect stack"} {
 		if !strings.Contains(help, want) {
 			t.Fatalf("help missing %q in:\n%s", want, help)
 		}
@@ -33,7 +33,7 @@ func TestCLISmokeHelpInitConfigValidateAndDoctor(t *testing.T) {
 	if !strings.Contains(initOutput, "Portable config creada") || !strings.Contains(initOutput, "Project calibration creada") || !strings.Contains(initOutput, "TDD policy creada") {
 		t.Fatalf("init output missing portable config message:\n%s", initOutput)
 	}
-	for _, path := range []string{".harness/state.json", ".harness/config.json", ".harness/integrations.json", ".harness/project-profile.json", ".harness/project-profile.md", ".harness/tdd-policy.json", ".harness/tdd-policy.md", ".harness/skill-registry.json", ".harness/skill-registry.md", ".harness/skill-digests.json", ".harness/skill-digests.md", "AGENTS.md", ".harness/bin/shipwright", ".opencode/opencode.json", ".opencode/agents/product-owner.md"} {
+	for _, path := range []string{".harness/state.json", ".harness/config.json", ".harness/integrations.json", ".harness/project-profile.json", ".harness/project-profile.md", ".harness/tdd-policy.json", ".harness/tdd-policy.md", ".harness/skill-registry.json", ".harness/skill-registry.md", ".harness/skill-assignments.json", ".harness/skill-assignments.md", ".harness/skill-digests.json", ".harness/skill-digests.md", "AGENTS.md", ".harness/bin/shipwright", ".opencode/opencode.json", ".opencode/agents/product-owner.md"} {
 		if _, err := os.Stat(filepath.Join(tmp, path)); err != nil {
 			t.Fatalf("expected %s after init: %v", path, err)
 		}
@@ -59,6 +59,11 @@ func TestCLISmokeHelpInitConfigValidateAndDoctor(t *testing.T) {
 	skillsStatus := captureStdout(t, func() { cmd.Skills([]string{"status"}) })
 	if !strings.Contains(skillsStatus, "Skill Registry") || !strings.Contains(skillsStatus, "product-owner") {
 		t.Fatalf("skills status output = %q", skillsStatus)
+	}
+
+	skillsAssign := captureStdout(t, func() { cmd.Skills([]string{"assign"}) })
+	if !strings.Contains(skillsAssign, "Skill Assignments") || !strings.Contains(skillsAssign, ".harness/skill-assignments.md") {
+		t.Fatalf("skills assign output = %q", skillsAssign)
 	}
 
 	skillsDigest := captureStdout(t, func() { cmd.Skills([]string{"digest", "frontend-engineer"}) })

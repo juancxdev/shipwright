@@ -98,3 +98,20 @@ func containsSkillTestString(values []string, want string) bool {
 	}
 	return false
 }
+
+func TestOpenCodeExecutorCuratedSkillsAreIndexed(t *testing.T) {
+	withTempWorkingDir(t)
+	if _, err := GenerateExecutor(ExecutorOpenCode); err != nil {
+		t.Fatalf("GenerateExecutor: %v", err)
+	}
+	registry, err := BuildSkillRegistry()
+	if err != nil {
+		t.Fatalf("BuildSkillRegistry: %v", err)
+	}
+	if FindSkill(registry, "frontend-design") == nil {
+		t.Fatalf("frontend-design skill not indexed: %+v", registry.Skills)
+	}
+	if FindSkill(registry, "openpencil-canvas-qa") == nil {
+		t.Fatalf("openpencil-canvas-qa skill not indexed: %+v", registry.Skills)
+	}
+}

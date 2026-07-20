@@ -100,7 +100,7 @@ Before OpenCode advances from implementation to integration, it must run:
 .harness/bin/shipwright tdd status
 ```
 
-If `.harness/tdd-policy.md` is `strict`, frontend/backend progress or `reports/tdd-report.md` must include executed test evidence. OpenCode must not claim implementation is complete without that evidence.
+If `.harness/tdd-policy.md` is `strict`, frontend/backend progress or `.harness/artifacts/reports/tdd-report.md` must include executed test evidence. OpenCode must not claim implementation is complete without that evidence.
 
 ## OpenCode workflow
 
@@ -255,7 +255,7 @@ Then ask the `ui-ux-designer` to use the `open-pencil` MCP tools. OpenCode regis
 
 If another MCP server named `pencil` is also connected, do not use it for Shipwright OpenPencil work. It may belong to another desktop host (for example Antigravity) and fail even when `open-pencil` is healthy.
 
-The first tool call should be `open-pencil_get_editor_state`. If that call succeeds, continue with OpenPencil even if `shipwright status` still says `installed_no_active_canvas`.
+The first tool call should prefer `open-pencil_get_editor_state` when present. If that exact tool is absent, use any equivalent `open-pencil_*` state/canvas/snapshot tool exposed by OpenCode. If any OpenPencil state/design call succeeds, continue with OpenPencil even if `shipwright status` still says `installed_no_active_canvas`.
 
 ## Safety rules
 
@@ -286,3 +286,19 @@ OpenCode supports the generated formats documented by the official docs:
 - Project agents: `.opencode/agents/*.md`
 - Project commands: `.opencode/commands/*.md`
 - Project skills: `.opencode/skills/<name>/SKILL.md`
+
+
+## Curated UI/UX skills
+
+Shipwright writes local UI/UX lifecycle skills into `.opencode/skills/` during executor generation. These skills are indexed by `shipwright skills refresh` and can be assigned when detected or planned stack signals indicate frontend/UI work. They are bundled with Shipwright and do not require remote installation.
+
+
+## Optional autoskills-compatible import
+
+Shipwright does not run autoskills from `shipwright init`. To keep initialization deterministic and safe, external providers are opt-in. If `.agents/skills` exists, run:
+
+```bash
+shipwright skills import autoskills
+```
+
+This copies `.agents/skills/*` into `.opencode/skills/*` and refreshes Shipwright skill artifacts.

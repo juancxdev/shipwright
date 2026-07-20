@@ -10,7 +10,7 @@ import (
 const TDDPolicyJSON = ".harness/tdd-policy.json"
 const TDDPolicyMarkdown = ".harness/tdd-policy.md"
 const TDDPolicyVersion = "1"
-const TDDReportFile = "reports/tdd-report.md"
+const TDDReportFile = ".harness/artifacts/reports/tdd-report.md"
 
 const (
 	TDDModeStrict    = "strict"
@@ -79,8 +79,8 @@ func BuildTDDPolicy(profile *ProjectProfile) *TDDPolicy {
 	switch policy.Mode {
 	case TDDModeStrict:
 		policy.RequiredEvidence = []string{
-			"progress/frontend.md must include TDD/Test evidence, or reports/tdd-report.md must cover frontend evidence",
-			"progress/backend.md must include TDD/Test evidence, or reports/tdd-report.md must cover backend evidence",
+			".harness/artifacts/progress/frontend.md must include TDD/Test evidence, or .harness/artifacts/reports/tdd-report.md must cover frontend evidence",
+			".harness/artifacts/progress/backend.md must include TDD/Test evidence, or .harness/artifacts/reports/tdd-report.md must cover backend evidence",
 			"Evidence must mention the detected test command when available",
 		}
 	case TDDModeSuggested:
@@ -130,8 +130,8 @@ func AssessTDDCompliance() TDDAssessment {
 	assessment.Mode = normalizeTDDMode(policy.Mode)
 	assessment.Supported = policy.Supported
 	assessment.TestCommand = policy.TestCommand
-	assessment.HasFrontendEvidence = fileHasTDDEvidence("progress/frontend.md", policy)
-	assessment.HasBackendEvidence = fileHasTDDEvidence("progress/backend.md", policy)
+	assessment.HasFrontendEvidence = fileHasTDDEvidence(".harness/artifacts/progress/frontend.md", policy)
+	assessment.HasBackendEvidence = fileHasTDDEvidence(".harness/artifacts/progress/backend.md", policy)
 	assessment.HasReportEvidence = fileHasTDDEvidence(TDDReportFile, policy)
 	if !present {
 		assessment.Warnings = append(assessment.Warnings, "TDD policy file is missing; inferred mode from project profile")
@@ -140,10 +140,10 @@ func AssessTDDCompliance() TDDAssessment {
 
 	if assessment.Mode == TDDModeStrict {
 		if !assessment.HasReportEvidence && !assessment.HasFrontendEvidence {
-			assessment.Issues = append(assessment.Issues, "strict TDD requires frontend test evidence in progress/frontend.md or reports/tdd-report.md")
+			assessment.Issues = append(assessment.Issues, "strict TDD requires frontend test evidence in .harness/artifacts/progress/frontend.md or .harness/artifacts/reports/tdd-report.md")
 		}
 		if !assessment.HasReportEvidence && !assessment.HasBackendEvidence {
-			assessment.Issues = append(assessment.Issues, "strict TDD requires backend test evidence in progress/backend.md or reports/tdd-report.md")
+			assessment.Issues = append(assessment.Issues, "strict TDD requires backend test evidence in .harness/artifacts/progress/backend.md or .harness/artifacts/reports/tdd-report.md")
 		}
 	}
 	return assessment
@@ -164,7 +164,7 @@ func TDDBlockReason() string {
 		sb.WriteString("\n")
 	}
 	sb.WriteString("\nRun: shipwright tdd status\n")
-	sb.WriteString("Then update progress/frontend.md, progress/backend.md, or reports/tdd-report.md with the executed test evidence.")
+	sb.WriteString("Then update .harness/artifacts/progress/frontend.md, .harness/artifacts/progress/backend.md, or .harness/artifacts/reports/tdd-report.md with the executed test evidence.")
 	return sb.String()
 }
 
@@ -209,7 +209,7 @@ func RenderTDDPolicyMarkdown(policy *TDDPolicy) string {
 	sb.WriteString("\n## How agents must use this\n\n")
 	sb.WriteString("- Read this policy before implementation work.\n")
 	sb.WriteString("- If mode is `strict`, write tests before or alongside behavior changes and record evidence.\n")
-	sb.WriteString("- Do not claim done unless progress files or `reports/tdd-report.md` contain executed test evidence.\n")
+	sb.WriteString("- Do not claim done unless progress files or `.harness/artifacts/reports/tdd-report.md` contain executed test evidence.\n")
 	return sb.String()
 }
 

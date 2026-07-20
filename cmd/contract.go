@@ -35,7 +35,7 @@ func Contract(args []string) {
 
 func contractValidate(args []string) {
 	if !harness.ContractExists() {
-		Fail("contracts/openapi.yaml does not exist. Run: shipwright generate contracts/openapi.yaml")
+		Fail(".harness/artifacts/contracts/openapi.yaml does not exist. Run: shipwright generate .harness/artifacts/contracts/openapi.yaml")
 	}
 
 	result := harness.ValidateContract(harness.ContractFile)
@@ -74,7 +74,7 @@ func contractValidate(args []string) {
 
 func contractGenerateTasks(args []string) {
 	if !harness.ContractExists() {
-		Fail("contracts/openapi.yaml does not exist. Generate it first or run: shipwright scaffold")
+		Fail(".harness/artifacts/contracts/openapi.yaml does not exist. Generate it first or run: shipwright scaffold")
 	}
 
 	parseResult := harness.ParseContract(harness.ContractFile)
@@ -91,8 +91,8 @@ func contractGenerateTasks(args []string) {
 
 	feTasks, beTasks := harness.GenerateContractTasks(spec, state.ProjectName)
 
-	fePath := "backlog/frontend-tasks.md"
-	bePath := "backlog/backend-tasks.md"
+	fePath := ".harness/artifacts/backlog/frontend-tasks.md"
+	bePath := ".harness/artifacts/backlog/backend-tasks.md"
 
 	if harness.ArtifactExists(fePath) {
 		fmt.Printf("  → %s (already exists, overwriting)\n", fePath)
@@ -118,7 +118,7 @@ func contractGenerateTasks(args []string) {
 
 func contractCheckMocks(args []string) {
 	if !harness.ContractExists() {
-		Fail("contracts/openapi.yaml does not exist.")
+		Fail(".harness/artifacts/contracts/openapi.yaml does not exist.")
 	}
 
 	parseResult := harness.ParseContract(harness.ContractFile)
@@ -126,8 +126,8 @@ func contractCheckMocks(args []string) {
 		Fail("cannot parse contract.")
 	}
 
-	if !harness.ArtifactExists("progress/frontend.md") {
-		Fail("progress/frontend.md does not exist. Run: shipwright scaffold or shipwright agents run frontend-engineer")
+	if !harness.ArtifactExists(".harness/artifacts/progress/frontend.md") {
+		Fail(".harness/artifacts/progress/frontend.md does not exist. Run: shipwright scaffold or shipwright agents run frontend-engineer")
 	}
 
 	result := harness.CheckMockCompliance(parseResult.Spec)
@@ -140,7 +140,7 @@ func contractCheckMocks(args []string) {
 
 func contractCheckCompliance(args []string) {
 	if !harness.ContractExists() {
-		Fail("contracts/openapi.yaml does not exist.")
+		Fail(".harness/artifacts/contracts/openapi.yaml does not exist.")
 	}
 
 	parseResult := harness.ParseContract(harness.ContractFile)
@@ -148,8 +148,8 @@ func contractCheckCompliance(args []string) {
 		Fail("cannot parse contract.")
 	}
 
-	if !harness.ArtifactExists("progress/backend.md") {
-		Fail("progress/backend.md does not exist. Run: shipwright scaffold or shipwright agents run backend-engineer")
+	if !harness.ArtifactExists(".harness/artifacts/progress/backend.md") {
+		Fail(".harness/artifacts/progress/backend.md does not exist. Run: shipwright scaffold or shipwright agents run backend-engineer")
 	}
 
 	result := harness.CheckBackendCompliance(parseResult.Spec)
@@ -162,7 +162,7 @@ func contractCheckCompliance(args []string) {
 
 func contractShow(args []string) {
 	if !harness.ContractExists() {
-		Fail("contracts/openapi.yaml does not exist.")
+		Fail(".harness/artifacts/contracts/openapi.yaml does not exist.")
 	}
 
 	parseResult := harness.ParseContract(harness.ContractFile)

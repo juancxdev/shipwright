@@ -1,7 +1,7 @@
 param(
-  [string]$Repo = $(if ($env:SHIPWRIGHT_REPO) { $env:SHIPWRIGHT_REPO } elseif ($env:LOOM_REPO) { $env:LOOM_REPO } else { "juancxdev/shipwright" }),
-  [string]$Version = $(if ($env:SHIPWRIGHT_VERSION) { $env:SHIPWRIGHT_VERSION } elseif ($env:LOOM_VERSION) { $env:LOOM_VERSION } else { "latest" }),
-  [string]$InstallDir = $(if ($env:SHIPWRIGHT_INSTALL_DIR) { $env:SHIPWRIGHT_INSTALL_DIR } elseif ($env:LOOM_INSTALL_DIR) { $env:LOOM_INSTALL_DIR } else { "$HOME\.shipwright\bin" })
+  [string]$Repo = $(if ($env:SHIPWRIGHT_REPO) { $env:SHIPWRIGHT_REPO } else { "juancxdev/shipwright" }),
+  [string]$Version = $(if ($env:SHIPWRIGHT_VERSION) { $env:SHIPWRIGHT_VERSION } else { "latest" }),
+  [string]$InstallDir = $(if ($env:SHIPWRIGHT_INSTALL_DIR) { $env:SHIPWRIGHT_INSTALL_DIR } else { "$HOME\.shipwright\bin" })
 )
 
 $ErrorActionPreference = "Stop"

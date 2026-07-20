@@ -23,11 +23,11 @@ Traducir intención humana ambigua en contexto de producto, alcance funcional y 
 
 ### Artefactos
 
-- `product/discovery.md`
-- `product/context.md`
-- `product/scope.md`
-- `product/open-questions.md`
-- `product/assumptions.md`
+- `.harness/artifacts/product/discovery.md`
+- `.harness/artifacts/product/context.md`
+- `.harness/artifacts/product/scope.md`
+- `.harness/artifacts/product/open-questions.md`
+- `.harness/artifacts/product/assumptions.md`
 
 ## Project Manager / Delivery Manager Agent
 
@@ -37,14 +37,14 @@ Aplicar PMBOK-lite: planificación, riesgos, comunicación, cambios y cierre.
 
 ### Artefactos
 
-- `project/project-charter.md`
-- `project/stakeholders.md`
-- `project/project-plan.md`
-- `project/risk-register.md`
-- `project/communication-plan.md`
-- `project/change-management.md`
-- `project/status-report.md`
-- `project/acceptance-report.md`
+- `.harness/artifacts/project/project-charter.md`
+- `.harness/artifacts/project/stakeholders.md`
+- `.harness/artifacts/project/project-plan.md`
+- `.harness/artifacts/project/risk-register.md`
+- `.harness/artifacts/project/communication-plan.md`
+- `.harness/artifacts/project/change-management.md`
+- `.harness/artifacts/project/status-report.md`
+- `.harness/artifacts/project/acceptance-report.md`
 
 ## Technical Lead Agent
 
@@ -69,16 +69,16 @@ Convertir alcance aprobado en arquitectura, contratos, backlog y criterios técn
 
 ### Artefactos
 
-- `architecture/system-architecture.md`
-- `architecture/frontend-architecture.md`
-- `architecture/backend-architecture.md`
-- `architecture/data-model.md`
-- `architecture/security-model.md`
-- `contracts/openapi.yaml`
-- `backlog/epics.md`
-- `backlog/user-stories.md`
-- `backlog/frontend-tasks.md`
-- `backlog/backend-tasks.md`
+- `.harness/artifacts/architecture/system-architecture.md`
+- `.harness/artifacts/architecture/frontend-architecture.md`
+- `.harness/artifacts/architecture/backend-architecture.md`
+- `.harness/artifacts/architecture/data-model.md`
+- `.harness/artifacts/architecture/security-model.md`
+- `.harness/artifacts/contracts/openapi.yaml`
+- `.harness/artifacts/backlog/epics.md`
+- `.harness/artifacts/backlog/user-stories.md`
+- `.harness/artifacts/backlog/frontend-tasks.md`
+- `.harness/artifacts/backlog/backend-tasks.md`
 
 ## UI/UX Designer Agent
 
@@ -92,13 +92,13 @@ Este rol puede usar OpenPencil para crear y modificar artefactos visuales.
 
 ### Artefactos
 
-- `design/ux-brief.md`
-- `design/user-flows.md`
-- `design/wireframes.md`
-- `design/prototype.md`
-- `design/design-decisions.md`
-- `design/design-approval.md`
-- `design/openpencil/`
+- `.harness/artifacts/design/ux-brief.md`
+- `.harness/artifacts/design/user-flows.md`
+- `.harness/artifacts/design/wireframes.md`
+- `.harness/artifacts/design/prototype.md`
+- `.harness/artifacts/design/design-decisions.md`
+- `.harness/artifacts/design/design-approval.md`
+- `.harness/artifacts/design/openpencil/`
 
 ## Frontend Engineer Agent
 
@@ -115,7 +115,7 @@ Implementar UI usando contrato y mantener modo mock + modo HTTP real.
 
 ### Artefactos
 
-- `progress/frontend.md`
+- `.harness/artifacts/progress/frontend.md`
 - evidencias de tests frontend,
 - componentes/páginas reales en el repo destino.
 
@@ -140,9 +140,9 @@ Verificar funcionalidad, regresión, seguridad y cumplimiento de criterios.
 
 ### Artefactos
 
-- `reports/qa-report.md`
-- `reports/security-review.md`
-- `reports/contract-test-report.md`
+- `.harness/artifacts/reports/qa-report.md`
+- `.harness/artifacts/reports/security-review.md`
+- `.harness/artifacts/reports/contract-test-report.md`
 
 ## Orchestrator
 

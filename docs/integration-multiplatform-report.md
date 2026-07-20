@@ -114,7 +114,7 @@ Hoy Shipwright básicamente trata “detectado” como “usable”. Eso no alca
 Resultado esperado:
 
 - Engram: disabled/unavailable.
-- Memory: fallback local a `progress/decisions.md`.
+- Memory: fallback local a `.harness/artifacts/progress/decisions.md`.
 - OpenPencil: unavailable.
 - Design: fallback `doc-only`.
 - El harness debe seguir funcionando.
@@ -319,7 +319,7 @@ Actual:
     "enabled": false,
     "mode": "mcp",
     "status": "not_configured",
-    "fallback": "progress/decisions.md"
+    "fallback": ".harness/artifacts/progress/decisions.md"
   },
   "openpencil": {
     "enabled": false,
@@ -343,7 +343,7 @@ Propuesto:
     "enabled": false,
     "mode": "mcp",
     "status": "not_installed",
-    "fallback": "progress/decisions.md",
+    "fallback": ".harness/artifacts/progress/decisions.md",
     "binary_path": "",
     "health_url": "http://localhost:7437/health",
     "version": "",
@@ -492,7 +492,7 @@ Mínimo deben explicar:
 
 Shipwright ya tiene fallback conceptual correcto:
 
-- sin Engram -> `progress/decisions.md`
+- sin Engram -> `.harness/artifacts/progress/decisions.md`
 - sin OpenPencil -> `design-doc-only`
 
 Pero todavía le falta **detección portable y confiable**.
@@ -625,7 +625,7 @@ Ejemplo conceptual:
       "mode": "mcp",
       "binary_path": "",
       "health_url": "http://localhost:7437/health",
-      "fallback": "progress/decisions.md"
+      "fallback": ".harness/artifacts/progress/decisions.md"
     },
     "openpencil": {
       "mode": "mcp",

@@ -49,9 +49,9 @@ type SchemaMatch struct {
 func CheckMockCompliance(spec *ContractSpec) *MockCompliance {
 	result := &MockCompliance{}
 
-	feProgress, err := os.ReadFile("progress/frontend.md")
+	feProgress, err := os.ReadFile(".harness/artifacts/progress/frontend.md")
 	if err != nil {
-		result.Issues = append(result.Issues, "progress/frontend.md not found — cannot verify mock compliance")
+		result.Issues = append(result.Issues, ".harness/artifacts/progress/frontend.md not found — cannot verify mock compliance")
 		return result
 	}
 
@@ -99,13 +99,13 @@ func CheckBackendCompliance(spec *ContractSpec) *BackendCompliance {
 	result := &BackendCompliance{}
 
 	if !ContractExists() {
-		result.Issues = append(result.Issues, "contracts/openapi.yaml does not exist")
+		result.Issues = append(result.Issues, ".harness/artifacts/contracts/openapi.yaml does not exist")
 		return result
 	}
 
-	beProgress, err := os.ReadFile("progress/backend.md")
+	beProgress, err := os.ReadFile(".harness/artifacts/progress/backend.md")
 	if err != nil {
-		result.Issues = append(result.Issues, "progress/backend.md not found — cannot verify backend compliance")
+		result.Issues = append(result.Issues, ".harness/artifacts/progress/backend.md not found — cannot verify backend compliance")
 		return result
 	}
 

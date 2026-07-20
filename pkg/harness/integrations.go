@@ -34,7 +34,7 @@ func DefaultIntegrations() *Integrations {
 			Enabled:   false,
 			Mode:      "mcp",
 			Status:    "not_configured",
-			Fallback:  "progress/decisions.md",
+			Fallback:  ".harness/artifacts/progress/decisions.md",
 			HealthURL: "http://localhost:7437/health",
 		},
 		OpenPencil: IntegrationConfig{

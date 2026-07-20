@@ -139,21 +139,21 @@ func computeNextAction(state *harness.State) string {
 		return "Run: shipwright start \"<your request>\""
 
 	case harness.StateDiscovery:
-		missing := harness.CheckArtifacts([]string{"product/context.md", "product/assumptions.md", "product/open-questions.md"})
+		missing := harness.CheckArtifacts([]string{".harness/artifacts/product/context.md", ".harness/artifacts/product/assumptions.md", ".harness/artifacts/product/open-questions.md"})
 		if len(missing) > 0 {
 			return discoveryNextAction(missing)
 		}
 		return "Product discovery artifacts exist. If critical questions are resolved, run: shipwright next"
 
 	case harness.StateProductContextReady:
-		missing := harness.CheckArtifacts([]string{"architecture/technology-options.md"})
+		missing := harness.CheckArtifacts([]string{".harness/artifacts/architecture/technology-options.md"})
 		if len(missing) > 0 {
 			return fmt.Sprintf("Blocked — missing:\n  %s\n\nRun: shipwright scaffold", strings.Join(missing, "\n  "))
 		}
 		return "Gates met. Run: shipwright next  (or: shipwright run)"
 
 	case harness.StateTechnicalScopeDraft:
-		missing := harness.CheckArtifacts([]string{"product/scope.md"})
+		missing := harness.CheckArtifacts([]string{".harness/artifacts/product/scope.md"})
 		if len(missing) > 0 {
 			return fmt.Sprintf("Blocked — missing:\n  %s\n\nRun: shipwright scaffold", strings.Join(missing, "\n  "))
 		}
@@ -161,19 +161,19 @@ func computeNextAction(state *harness.State) string {
 
 	case harness.StateScopeReview:
 		if !state.IsApproved(harness.GateScope) {
-			return "Approval gate — present product/scope.md to the user and ask: approve scope or request changes. If user approves, run: shipwright approve scope. If user wants changes, run: shipwright request-change \"<reason>\""
+			return "Approval gate — present .harness/artifacts/product/scope.md to the user and ask: approve scope or request changes. If user approves, run: shipwright approve scope. If user wants changes, run: shipwright request-change \"<reason>\""
 		}
 		return "Scope approved. Run: shipwright next"
 
 	case harness.StateScopeApproved:
-		missing := harness.CheckArtifacts([]string{"project/project-charter.md", "project/project-plan.md", "project/risk-register.md"})
+		missing := harness.CheckArtifacts([]string{".harness/artifacts/project/project-charter.md", ".harness/artifacts/project/project-plan.md", ".harness/artifacts/project/risk-register.md"})
 		if len(missing) > 0 {
 			return fmt.Sprintf("Blocked — missing:\n  %s\n\nRun: shipwright scaffold", strings.Join(missing, "\n  "))
 		}
 		return "Gates met. Run: shipwright next  (or: shipwright run)"
 
 	case harness.StateProjectPlanning:
-		missing := harness.CheckArtifacts([]string{"project/delivery-plan.md"})
+		missing := harness.CheckArtifacts([]string{".harness/artifacts/project/delivery-plan.md"})
 		if len(missing) > 0 {
 			return fmt.Sprintf("Blocked — missing:\n  %s\n\nRun: shipwright scaffold", strings.Join(missing, "\n  "))
 		}
@@ -184,7 +184,7 @@ func computeNextAction(state *harness.State) string {
 			return "Blocked — set requires_ui in .harness/state.json to true or false"
 		}
 		if *state.RequiresUI {
-			missing := harness.CheckArtifacts([]string{"design/ux-brief.md"})
+			missing := harness.CheckArtifacts([]string{".harness/artifacts/design/ux-brief.md"})
 			if len(missing) > 0 {
 				return "Blocked — run: shipwright design start\n  (generates ux-brief.md, user-flows.md, design-decisions.md)\n\nOr: shipwright run  (auto-runs design start)"
 			}
@@ -192,7 +192,7 @@ func computeNextAction(state *harness.State) string {
 		return "Gates met. Run: shipwright next  (or: shipwright run)"
 
 	case harness.StateUXDesign:
-		missing := harness.CheckArtifacts([]string{"design/prototype.md", "design/user-flows.md", "design/responsive-qa.md"})
+		missing := harness.CheckArtifacts([]string{".harness/artifacts/design/prototype.md", ".harness/artifacts/design/user-flows.md", ".harness/artifacts/design/responsive-qa.md"})
 		if len(missing) > 0 {
 			return fmt.Sprintf("Blocked — missing:\n  %s\n\nRun: shipwright scaffold", strings.Join(missing, "\n  "))
 		}
@@ -206,19 +206,19 @@ func computeNextAction(state *harness.State) string {
 
 	case harness.StateTechnicalDesign:
 		missing := harness.CheckArtifacts([]string{
-			"architecture/system-architecture.md",
-			"contracts/openapi.yaml",
-			"backlog/epics.md",
-			"backlog/user-stories.md",
-			"backlog/frontend-tasks.md",
-			"backlog/backend-tasks.md",
-			"sdd/proposal.md",
-			"sdd/spec.md",
-			"sdd/tasks.md",
+			".harness/artifacts/architecture/system-architecture.md",
+			".harness/artifacts/contracts/openapi.yaml",
+			".harness/artifacts/backlog/epics.md",
+			".harness/artifacts/backlog/user-stories.md",
+			".harness/artifacts/backlog/frontend-tasks.md",
+			".harness/artifacts/backlog/backend-tasks.md",
+			".harness/artifacts/sdd/proposal.md",
+			".harness/artifacts/sdd/spec.md",
+			".harness/artifacts/sdd/tasks.md",
 		})
 		if len(missing) > 0 {
-			if harness.ArtifactExists("contracts/openapi.yaml") &&
-				(!harness.ArtifactExists("backlog/frontend-tasks.md") || !harness.ArtifactExists("backlog/backend-tasks.md")) {
+			if harness.ArtifactExists(".harness/artifacts/contracts/openapi.yaml") &&
+				(!harness.ArtifactExists(".harness/artifacts/backlog/frontend-tasks.md") || !harness.ArtifactExists(".harness/artifacts/backlog/backend-tasks.md")) {
 				return fmt.Sprintf("Blocked — missing:\n  %s\n\nRun: shipwright contract validate\nThen: shipwright contract generate-tasks", strings.Join(missing, "\n  "))
 			}
 			return fmt.Sprintf("Blocked — missing:\n  %s\n\nRun: shipwright scaffold\nIf contract exists, run: shipwright contract generate-tasks", strings.Join(missing, "\n  "))
@@ -235,17 +235,17 @@ func computeNextAction(state *harness.State) string {
 		return "Run: shipwright next"
 
 	case harness.StateImplementation:
-		missing := harness.CheckArtifacts([]string{"progress/frontend.md", "progress/backend.md"})
+		missing := harness.CheckArtifacts([]string{".harness/artifacts/progress/frontend.md", ".harness/artifacts/progress/backend.md"})
 		if len(missing) > 0 {
 			return fmt.Sprintf("Blocked — missing:\n  %s\n\nRun: shipwright scaffold (placeholders)", strings.Join(missing, "\n  "))
 		}
 		if harness.TDDBlockReason() != "" {
-			return "Strict TDD evidence is not ready.\nRun: shipwright tdd status\nThen add executed test evidence to progress/frontend.md, progress/backend.md, or reports/tdd-report.md"
+			return "Strict TDD evidence is not ready.\nRun: shipwright tdd status\nThen add executed test evidence to .harness/artifacts/progress/frontend.md, .harness/artifacts/progress/backend.md, or .harness/artifacts/reports/tdd-report.md"
 		}
 		return "Verify contract-first work:\n  shipwright contract check-mocks\n  shipwright contract check-compliance\n  shipwright tdd status\n\nIf all gates pass, run: shipwright next  (or: shipwright run)"
 
 	case harness.StateIntegration:
-		missing := harness.CheckArtifacts([]string{"reports/contract-test-report.md", "reports/review-checklist.md"})
+		missing := harness.CheckArtifacts([]string{".harness/artifacts/reports/contract-test-report.md", ".harness/artifacts/reports/review-checklist.md"})
 		if len(missing) > 0 {
 			return fmt.Sprintf("Blocked — missing:\n  %s\n\nRun: shipwright review start", strings.Join(missing, "\n  "))
 		}
@@ -272,7 +272,7 @@ func computeNextAction(state *harness.State) string {
 
 	case harness.StateUserAcceptance:
 		if !state.IsApproved(harness.GateFinalAcceptance) {
-			missing := harness.CheckArtifacts([]string{"project/acceptance-report.md"})
+			missing := harness.CheckArtifacts([]string{".harness/artifacts/project/acceptance-report.md"})
 			if len(missing) > 0 {
 				return fmt.Sprintf("Blocked — missing:\n  %s\n\nRun: shipwright scaffold", strings.Join(missing, "\n  "))
 			}
@@ -284,7 +284,7 @@ func computeNextAction(state *harness.State) string {
 		return "Project closed. ✅"
 
 	case harness.StateChangeRequest:
-		missing := harness.CheckArtifacts([]string{"project/change-management.md"})
+		missing := harness.CheckArtifacts([]string{".harness/artifacts/project/change-management.md"})
 		if len(missing) > 0 {
 			return fmt.Sprintf("Blocked — missing:\n  %s\n\nRun: shipwright scaffold", strings.Join(missing, "\n  "))
 		}

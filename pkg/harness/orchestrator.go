@@ -254,7 +254,7 @@ func RequestChange(s *State, reason string) *ChangeResult {
 	}
 
 	crID := generateCRID()
-	crFile := fmt.Sprintf("project/change-requests/CR-%s.md", crID)
+	crFile := fmt.Sprintf(".harness/artifacts/project/change-requests/CR-%s.md", crID)
 
 	crContent := fmt.Sprintf(`# CR-%s — Change Request
 
@@ -345,9 +345,9 @@ func StartRequest(s *State, request string) error {
 
 El harness NO avanza de DISCOVERY sin:
 
-- product/context.md
-- product/assumptions.md
-- product/open-questions.md (sin preguntas críticas pendientes)
+- .harness/artifacts/product/context.md
+- .harness/artifacts/product/assumptions.md
+- .harness/artifacts/product/open-questions.md (sin preguntas críticas pendientes)
 
 Completá esos archivos y ejecutá: shipwright next)
 
@@ -356,8 +356,8 @@ Completá esos archivos y ejecutá: shipwright next)
 (pendiente)
 `, escapeForMarkdown(request))
 
-	if err := WriteFile("product/discovery.md", discoveryContent); err != nil {
-		return fmt.Errorf("no se pudo crear product/discovery.md: %w", err)
+	if err := WriteFile(".harness/artifacts/product/discovery.md", discoveryContent); err != nil {
+		return fmt.Errorf("no se pudo crear .harness/artifacts/product/discovery.md: %w", err)
 	}
 
 	s.SetPhase(StateDiscovery)

@@ -26,8 +26,8 @@ technical decisions.
 
 ## What You Receive
 
-- product/scope.md (approved by user — gate:scope is true)
-- architecture/technology-options.md (written by Technical Lead)
+- .harness/artifacts/product/scope.md (approved by user — gate:scope is true)
+- .harness/artifacts/architecture/technology-options.md (written by Technical Lead)
 - Risk inputs from TL and PO
 - Change requests (if user ran shipwright request-change)
 
@@ -43,17 +43,17 @@ technical decisions.
 
 | Condition | Action |
 |---|---|
-| product/scope.md not approved (gate:scope false) | STOP — return blocked |
+| .harness/artifacts/product/scope.md not approved (gate:scope false) | STOP — return blocked |
 | requires_ui not set in state.json | Note in delivery-plan.md, let harness block at UX_DECISION |
-| Active change request exists | Write project/change-management.md with impact assessment |
-| At USER_ACCEPTANCE phase | Write project/acceptance-report.md for user sign-off |
+| Active change request exists | Write .harness/artifacts/project/change-management.md with impact assessment |
+| At USER_ACCEPTANCE phase | Write .harness/artifacts/project/acceptance-report.md for user sign-off |
 
 ## What to Do
 
 ### Step 1: Read Approved Scope
 
-Read product/scope.md. Verify it has real content (not placeholder).
-Read architecture/technology-options.md for technical context.
+Read .harness/artifacts/product/scope.md. Verify it has real content (not placeholder).
+Read .harness/artifacts/architecture/technology-options.md for technical context.
 
 ### Step 2: Write Project Charter
 
@@ -73,7 +73,7 @@ PROJECT/PROJECT-CHARTER.MD FORMAT:
 
 ## Scope summary
 
-{Reference product/scope.md — do NOT copy it, summarize in 2-3 sentences}
+{Reference .harness/artifacts/product/scope.md — do NOT copy it, summarize in 2-3 sentences}
 
 ## Stakeholders
 
@@ -84,7 +84,7 @@ PROJECT/PROJECT-CHARTER.MD FORMAT:
 
 ## Success criteria
 
-{Reference product/scope.md success criteria — do NOT invent new ones}
+{Reference .harness/artifacts/product/scope.md success criteria — do NOT invent new ones}
 
 ## Budget/Resources
 
@@ -108,12 +108,12 @@ PROJECT/PROJECT-PLAN.MD FORMAT:
 
 | Phase | Estimated duration | Status | Key deliverable |
 |-------|-------------------|--------|-----------------|
-| Discovery | {N days} | Complete | product/context.md |
-| Planning | {N days} | In progress | project/project-plan.md |
-| Design | {N days} | Pending | design/prototype.md |
-| Implementation | {N days} | Pending | progress/frontend.md, progress/backend.md |
-| QA | {N days} | Pending | reports/qa-report.md |
-| Acceptance | {N days} | Pending | project/acceptance-report.md |
+| Discovery | {N days} | Complete | .harness/artifacts/product/context.md |
+| Planning | {N days} | In progress | .harness/artifacts/project/project-plan.md |
+| Design | {N days} | Pending | .harness/artifacts/design/prototype.md |
+| Implementation | {N days} | Pending | .harness/artifacts/progress/frontend.md, .harness/artifacts/progress/backend.md |
+| QA | {N days} | Pending | .harness/artifacts/reports/qa-report.md |
+| Acceptance | {N days} | Pending | .harness/artifacts/project/acceptance-report.md |
 
 ## Milestones
 
@@ -200,7 +200,7 @@ PROJECT/ACCEPTANCE-REPORT.MD FORMAT:
 
 ## Acceptance criteria met
 
-- [x] {Criterion from product/scope.md — verified}
+- [x] {Criterion from .harness/artifacts/product/scope.md — verified}
 - [ ] {Criterion not yet verified}
 
 ## Known issues
@@ -221,7 +221,7 @@ PROJECT/ACCEPTANCE-REPORT.MD FORMAT:
 
 ### Step 7: Handle Change Requests (CHANGE_REQUEST only)
 
-If the current phase is CHANGE_REQUEST or a CR file exists in project/change-requests/:
+If the current phase is CHANGE_REQUEST or a CR file exists in .harness/artifacts/project/change-requests/:
 
 ```
 PROJECT/CHANGE-MANAGEMENT.MD FORMAT:
@@ -237,7 +237,7 @@ PROJECT/CHANGE-MANAGEMENT.MD FORMAT:
 ## Change process
 
 1. User requests change via: shipwright request-change "reason"
-2. CR file created in project/change-requests/CR-{id}.md
+2. CR file created in .harness/artifacts/project/change-requests/CR-{id}.md
 3. Impact assessment completed (below)
 4. Decision: approved / rejected / postponed
 5. If approved, scope/backlog updated and phase adjusted
@@ -245,7 +245,7 @@ PROJECT/CHANGE-MANAGEMENT.MD FORMAT:
 ## Impact assessment for current CR
 
 - **Functional impact**: {what functionality changes}
-- **Technical impact**: {what architecture/code changes}
+- **Technical impact**: {what .harness/artifacts/architecture/code changes}
 - **Schedule impact**: {how much time is added/removed}
 - **Risk impact**: {new risks introduced}
 ```
@@ -255,17 +255,17 @@ PROJECT/CHANGE-MANAGEMENT.MD FORMAT:
 ```
 **Status**: success | partial | blocked
 **Summary**: Project charter, plan, risk register, and delivery plan written. N risks identified.
-**Artifacts**: project/project-charter.md, project/project-plan.md, project/risk-register.md, project/delivery-plan.md
+**Artifacts**: .harness/artifacts/project/project-charter.md, .harness/artifacts/project/project-plan.md, .harness/artifacts/project/risk-register.md, .harness/artifacts/project/delivery-plan.md
 **Next**: shipwright next (advances to UX_DECISION)
 **Risks**: {top risks from register, or "None"}
 ```
 
 ## Done Criteria
 
-1. project/project-charter.md defines vision, objectives, stakeholders
-2. project/project-plan.md has phases, milestones, dependencies
-3. project/risk-register.md has at least 3 risks with mitigations
-4. project/delivery-plan.md states UI requirement and team allocation
+1. .harness/artifacts/project/project-charter.md defines vision, objectives, stakeholders
+2. .harness/artifacts/project/project-plan.md has phases, milestones, dependencies
+3. .harness/artifacts/project/risk-register.md has at least 3 risks with mitigations
+4. .harness/artifacts/project/delivery-plan.md states UI requirement and team allocation
 
 ## Handoff Rules
 

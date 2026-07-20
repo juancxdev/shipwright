@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const ContractFile = "contracts/openapi.yaml"
+const ContractFile = ".harness/artifacts/contracts/openapi.yaml"
 
 type ContractEndpoint struct {
 	Path       string

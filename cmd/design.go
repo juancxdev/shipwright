@@ -69,19 +69,19 @@ func designStart(args []string) {
 	if result.FallbackUsed {
 		_ = memService.SaveDiscovery(
 			"Design started in doc-only mode: "+state.ProjectName,
-			"design/ux-approval",
+			".harness/artifacts/design/ux-approval",
 			"Design phase started with doc-only fallback (OpenPencil unavailable)",
 			"OpenPencil not available — generated text-based wireframes and prototype",
-			"design/wireframes.md, design/prototype.md, design/responsive-qa.md",
+			".harness/artifacts/design/wireframes.md, .harness/artifacts/design/prototype.md, .harness/artifacts/design/responsive-qa.md",
 			"OpenPencil can be enabled later with 'shipwright integrations enable openpencil'",
 		)
 	} else {
 		_ = memService.SaveDecision(
 			"Design started with OpenPencil: "+state.ProjectName,
-			"design/ux-approval",
+			".harness/artifacts/design/ux-approval",
 			"Design phase started with OpenPencil adapter",
 			"OpenPencil available — design task created for AI agent",
-			"design/openpencil/design-task.md, design/openpencil/app.pen",
+			".harness/artifacts/design/openpencil/design-task.md, .harness/artifacts/design/openpencil/app.pen",
 			"",
 		)
 	}
@@ -99,9 +99,9 @@ func designStart(args []string) {
 		fmt.Println("Next steps for AI agent:")
 		fmt.Printf("  1. Read %s\n", result.TaskFile)
 		fmt.Println("  2. Use open-pencil_* MCP tools to create responsive mobile/tablet/desktop frames")
-		fmt.Println("  3. Export wireframes to design/openpencil/exports/")
-		fmt.Println("  4. Inspect screenshots for overflow/clipping and create design/responsive-qa.md")
-		fmt.Println("  5. Create design/prototype.md describing the visual design")
+		fmt.Println("  3. Export wireframes to .harness/artifacts/design/openpencil/exports/")
+		fmt.Println("  4. Inspect screenshots for overflow/clipping and create .harness/artifacts/design/responsive-qa.md")
+		fmt.Println("  5. Create .harness/artifacts/design/prototype.md describing the visual design")
 		fmt.Println("  6. Run: shipwright design status")
 	} else {
 		fmt.Println()
@@ -139,12 +139,12 @@ func designStatus(args []string) {
 	fmt.Println()
 
 	fmt.Println("Artifacts:")
-	printArtifactStatus("design/ux-brief.md", status.HasBrief)
-	printArtifactStatus("design/user-flows.md", status.HasFlows)
-	printArtifactStatus("design/design-decisions.md", status.HasDecisions)
-	printArtifactStatus("design/wireframes.md", status.HasWireframes)
-	printArtifactStatus("design/prototype.md", status.HasPrototype)
-	printArtifactStatus("design/responsive-qa.md", status.HasResponsiveQA)
+	printArtifactStatus(".harness/artifacts/design/ux-brief.md", status.HasBrief)
+	printArtifactStatus(".harness/artifacts/design/user-flows.md", status.HasFlows)
+	printArtifactStatus(".harness/artifacts/design/design-decisions.md", status.HasDecisions)
+	printArtifactStatus(".harness/artifacts/design/wireframes.md", status.HasWireframes)
+	printArtifactStatus(".harness/artifacts/design/prototype.md", status.HasPrototype)
+	printArtifactStatus(".harness/artifacts/design/responsive-qa.md", status.HasResponsiveQA)
 
 	if status.HasTaskFile {
 		printArtifactStatus(harness.DesignTaskFile, true)
@@ -166,7 +166,7 @@ func designStatus(args []string) {
 				}
 			} else {
 				fmt.Println("✗ Missing required artifacts for UX_APPROVAL.")
-				fmt.Println("  Need: design/ux-brief.md, design/user-flows.md, design/prototype.md, design/responsive-qa.md")
+				fmt.Println("  Need: .harness/artifacts/design/ux-brief.md, .harness/artifacts/design/user-flows.md, .harness/artifacts/design/prototype.md, .harness/artifacts/design/responsive-qa.md")
 			}
 		}
 	}

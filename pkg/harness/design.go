@@ -12,10 +12,10 @@ const (
 )
 
 const (
-	DesignDir           = "design"
-	DesignOpenPencilDir = "design/openpencil"
-	DesignExportsDir    = "design/openpencil/exports"
-	DesignTaskFile      = "design/openpencil/design-task.md"
+	DesignDir           = ".harness/artifacts/design"
+	DesignOpenPencilDir = ".harness/artifacts/design/openpencil"
+	DesignExportsDir    = ".harness/artifacts/design/openpencil/exports"
+	DesignTaskFile      = ".harness/artifacts/design/openpencil/design-task.md"
 	DesignStateFile     = ".harness/design-state.json"
 )
 

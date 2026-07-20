@@ -6,3 +6,7 @@ func formatYesNo(value bool) string {
 	}
 	return "no"
 }
+
+func SortedUniqueForDisplay(values []string) []string {
+	return sortedUnique(values)
+}

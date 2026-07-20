@@ -26,11 +26,11 @@ you do NOT fix them.
 
 ## What You Receive
 
-- progress/frontend.md (what FE implemented)
-- progress/backend.md (what BE implemented)
-- contracts/openapi.yaml (the contract to verify against)
-- product/scope.md (for acceptance criteria)
-- sdd/tasks.md (for done criteria)
+- .harness/artifacts/progress/frontend.md (what FE implemented)
+- .harness/artifacts/progress/backend.md (what BE implemented)
+- .harness/artifacts/contracts/openapi.yaml (the contract to verify against)
+- .harness/artifacts/product/scope.md (for acceptance criteria)
+- .harness/artifacts/sdd/tasks.md (for done criteria)
 
 ## Hard Rules
 
@@ -40,13 +40,13 @@ you do NOT fix them.
 - You CANNOT skip security review. Security is mandatory.
 - You CANNOT rubber-stamp. If something is wrong, SAY SO.
 - You MUST include a pass/fail recommendation, not just data.
-- You MUST verify against acceptance criteria from product/scope.md.
+- You MUST verify against acceptance criteria from .harness/artifacts/product/scope.md.
 
 ## Decision Gates
 
 | Condition | Action |
 |---|---|
-| progress/frontend.md or progress/backend.md missing | STOP — cannot review without progress reports |
+| .harness/artifacts/progress/frontend.md or .harness/artifacts/progress/backend.md missing | STOP — cannot review without progress reports |
 | Critical issues found | Recommend FAIL: user runs shipwright request-change "QA issues" |
 | No critical issues, some warnings | Recommend PASS WITH WARNINGS |
 | All checks pass | Recommend PASS: user runs shipwright next (advances to TECH_LEAD_REVIEW) |
@@ -57,24 +57,24 @@ you do NOT fix them.
 
 ### Step 1: Read Progress Reports
 
-Read progress/frontend.md and progress/backend.md. Understand:
+Read .harness/artifacts/progress/frontend.md and .harness/artifacts/progress/backend.md. Understand:
 - What was implemented?
 - What is blocked?
 - What evidence exists (tests)?
 
 ### Step 2: Read Acceptance Criteria
 
-Read product/scope.md for success criteria.
-Read sdd/tasks.md for done criteria.
+Read .harness/artifacts/product/scope.md for success criteria.
+Read .harness/artifacts/sdd/tasks.md for done criteria.
 These are the benchmarks you verify against.
 
 ### Step 3: Run Contract Tests
 
-Verify implementation matches contracts/openapi.yaml.
+Verify implementation matches .harness/artifacts/contracts/openapi.yaml.
 
 ```
 CONTRACT VERIFICATION:
-├── For each endpoint in contracts/openapi.yaml:
+├── For each endpoint in .harness/artifacts/contracts/openapi.yaml:
 │   ├── Does the implementation expose this endpoint?
 │   ├── Does the request schema match?
 │   ├── Does the response schema match?
@@ -85,7 +85,7 @@ CONTRACT VERIFICATION:
 └── Report mismatches as CRITICAL
 ```
 
-Write reports/contract-test-report.md:
+Write .harness/artifacts/reports/contract-test-report.md:
 
 ```
 REPORTS/CONTRACT-TEST-REPORT.MD FORMAT:
@@ -122,7 +122,7 @@ REPORTS/CONTRACT-TEST-REPORT.MD FORMAT:
 
 ### Step 4: Run QA Review
 
-Write reports/qa-report.md:
+Write .harness/artifacts/reports/qa-report.md:
 
 ```
 REPORTS/QA-REPORT.MD FORMAT:
@@ -174,7 +174,7 @@ REPORTS/QA-REPORT.MD FORMAT:
 
 ### Step 5: Run Security Review
 
-Write reports/security-review.md:
+Write .harness/artifacts/reports/security-review.md:
 
 ```
 REPORTS/SECURITY-REVIEW.MD FORMAT:
@@ -226,16 +226,16 @@ REPORTS/SECURITY-REVIEW.MD FORMAT:
 ```
 **Status**: success | partial | blocked
 **Summary**: Contract tests: N pass, M fail. QA: {recommendation}. Security: {risk level}. {N critical, M major, L minor issues}.
-**Artifacts**: reports/contract-test-report.md, reports/qa-report.md, reports/security-review.md
+**Artifacts**: .harness/artifacts/reports/contract-test-report.md, .harness/artifacts/reports/qa-report.md, .harness/artifacts/reports/security-review.md
 **Next**: shipwright next (if PASS) or shipwright request-change "QA issues" (if FAIL)
 **Risks**: {security risks, or "None"}
 ```
 
 ## Done Criteria
 
-1. reports/contract-test-report.md shows contract test results
-2. reports/qa-report.md has test summary, coverage, issues, recommendation
-3. reports/security-review.md has findings, risk assessment, recommendations
+1. .harness/artifacts/reports/contract-test-report.md shows contract test results
+2. .harness/artifacts/reports/qa-report.md has test summary, coverage, issues, recommendation
+3. .harness/artifacts/reports/security-review.md has findings, risk assessment, recommendations
 
 ## Handoff Rules
 

@@ -1,0 +1,54 @@
+{
+  "id": "frontend-ui-quality",
+  "name": "Frontend UI Quality",
+  "kind": "design",
+  "description": "Generic UI/UX quality pack for frontend, responsive, accessibility, OpenPencil QA, design tokens, interaction design, and design-to-frontend handoff.",
+  "when": {
+    "stacks": [
+      "React",
+      "Next.js",
+      "Vue",
+      "Angular",
+      "Svelte",
+      "Tailwind CSS",
+      "shadcn/ui",
+      "Vite",
+      "Astro",
+      "Flutter"
+    ],
+    "stack_name_contains": [
+      "frontend",
+      "ui",
+      "mobile"
+    ],
+    "stack_kind_contains": [
+      "frontend",
+      "ui",
+      "styling",
+      "forms"
+    ],
+    "structure": [
+      "frontend"
+    ],
+    "artifacts_prefix": [
+      ".harness/artifacts/design/"
+    ]
+  },
+  "skills": [
+    "frontend-design",
+    "existing-web-to-openpencil",
+    "canvas-generate-design",
+    "openpencil-generate-design",
+    "accessibility",
+    "responsive-layout-systems",
+    "design-system-tokens",
+    "interaction-design-patterns",
+    "openpencil-canvas-qa",
+    "visual-handoff-to-frontend"
+  ],
+  "agents": [
+    "ui-ux-designer",
+    "frontend-engineer",
+    "qa-security-reviewer"
+  ]
+}

@@ -87,3 +87,16 @@ Agents must:
 Calibration is intentionally conservative. It detects common project markers but does not execute build/test commands during `init`.
 
 That is deliberate: `init` should be safe and fast. Real execution evidence still belongs to QA/review phases.
+
+
+## Planned stack refresh
+
+For existing repositories, calibration detects technologies from files already present. For greenfield repositories, the final stack may not exist until the Technical Lead writes planning artifacts. Shipwright therefore supports a planned stack layer:
+
+- `.harness/artifacts/architecture/technology-options.md`
+- `.harness/artifacts/architecture/system-architecture.md`
+- `.harness/artifacts/project/delivery-plan.md`
+- `.harness/artifacts/sdd/design.md`
+- `.harness/artifacts/sdd/tasks.md`
+
+When these files mention technologies such as Next.js, React, Go, PostgreSQL, Playwright, Docker, Prisma, Supabase, etc., Shipwright stores them in `.harness/project-profile.json` under `planned_stacks`. `shipwright next` refreshes this automatically around Technical Lead transitions, then updates skill assignments and digests.

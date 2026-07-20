@@ -105,7 +105,7 @@ func validateIntegrationsConfig(prefix string, cfg PortableIntegrationsConfig, r
 			Path:     prefix + ".engram.fallback",
 			Severity: ConfigIssueSeverityError,
 			Message:  "Engram fallback cannot be empty",
-			Action:   "Set fallback to progress/decisions.md.",
+			Action:   "Set fallback to .harness/artifacts/progress/decisions.md.",
 		})
 	}
 	if requireFallbacks && strings.TrimSpace(cfg.OpenPencil.Fallback) == "" {

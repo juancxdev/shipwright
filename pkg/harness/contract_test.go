@@ -134,7 +134,7 @@ func TestGenerateContractTasksIncludesContractFirstRules(t *testing.T) {
 func TestCheckMockComplianceRequiresMockMode(t *testing.T) {
 	chdirTemp(t)
 	writeTestFile(t, ContractFile, validOpenAPI)
-	writeTestFile(t, "progress/frontend.md", "# Frontend Progress\n\nImplemented HTTP mode for /invoices.\n")
+	writeTestFile(t, ".harness/artifacts/progress/frontend.md", "# Frontend Progress\n\nImplemented HTTP mode for /invoices.\n")
 
 	spec := ParseContract(ContractFile).Spec
 	result := CheckMockCompliance(spec)
@@ -148,7 +148,7 @@ func TestCheckMockComplianceRequiresMockMode(t *testing.T) {
 func TestCheckBackendComplianceRequiresErrorFormat(t *testing.T) {
 	chdirTemp(t)
 	writeTestFile(t, ContractFile, validOpenAPI)
-	writeTestFile(t, "progress/backend.md", "# Backend Progress\n\nImplemented GET /invoices and POST /invoices using Invoice model.\n")
+	writeTestFile(t, ".harness/artifacts/progress/backend.md", "# Backend Progress\n\nImplemented GET /invoices and POST /invoices using Invoice model.\n")
 
 	spec := ParseContract(ContractFile).Spec
 	result := CheckBackendCompliance(spec)

@@ -29,7 +29,7 @@ Usage:
   shipwright doctor [--json] [--fix]       Diagnose/fix config, integrations and fallbacks
   shipwright design <subcommand>     Design management (start|status)
   shipwright review <subcommand>     Review evidence (start|status)
-  shipwright skills <subcommand>     Skill registry/digests (refresh|status|show|digest)
+  shipwright skills <subcommand>     Skill registry/assignments/digests/providers (refresh|status|assign|show|digest|providers|import)
   shipwright tdd <subcommand>        TDD policy/evidence gate (refresh|status|policy)
 
 Config:
@@ -76,8 +76,8 @@ Scaffold:
   run                 Walk the full lifecycle: scaffold + advance, stop at approval gates
 
 Contract:
-  validate            Validate contracts/openapi.yaml structure (endpoints, schemas, errors)
-  generate-tasks      Generate backlog/frontend-tasks.md + backend-tasks.md from contract
+  validate            Validate .harness/artifacts/contracts/openapi.yaml structure (endpoints, schemas, errors)
+  generate-tasks      Generate .harness/artifacts/backlog/frontend-tasks.md + backend-tasks.md from contract
   check-mocks         Verify frontend mock mode compliance (mocks mandatory, preserved)
   check-compliance    Verify backend API matches contract (endpoints, schemas, errors)
   show                Display parsed contract summary (endpoints, schemas, auth)
@@ -87,9 +87,13 @@ Review:
   status              Validate review evidence and finding severity gates
 
 Skills:
-  refresh             Scan project skill sources and update .harness/skill-registry.*
+  refresh             Scan project skill sources and update registry, assignments, and digests
   status              Show indexed skills and warnings
+  assign              Detect stack and recommend/assign skills by agent
+  assign --json       Emit skill assignments as JSON
   show <name>         Show one indexed skill
+  providers           Show embedded skill packs and optional providers
+  import autoskills   Import .agents/skills into .opencode/skills, then refresh registry/assignments/digests
   digest [agent]      Show compact skill rules for all agents or one agent
 
 TDD:

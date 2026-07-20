@@ -108,7 +108,7 @@ shipwright contract check-mocks
 shipwright contract check-compliance
 ```
 
-Current limitation: Phase 6/7 checks are MVP-level and mostly document-backed through `progress/*.md` and reports. Real source-code contract tests should be added in future hardening once FE/BE repos exist.
+Current limitation: Phase 6/7 checks are MVP-level and mostly document-backed through `.harness/artifacts/progress/*.md` and reports. Real source-code contract tests should be added in future hardening once FE/BE repos exist.
 
 ## OpenPencil integration
 
@@ -122,11 +122,11 @@ opencode mcp list
 
 Then, inside OpenCode, the `ui-ux-designer` should try the `open-pencil` MCP tools before falling back:
 
-1. Try `open-pencil_get_editor_state`.
-2. If the editor-state call succeeds, continue with OpenPencil.
+1. Prefer `open-pencil_get_editor_state` when present, but if that exact tool is absent use any equivalent `open-pencil_*` state/canvas/snapshot tool exposed by OpenCode.
+2. If any OpenPencil state/canvas/snapshot call succeeds, continue with OpenPencil.
 3. If a separate MCP server named `pencil` is connected, do not use it for Shipwright OpenPencil work; it can belong to another desktop host such as Antigravity.
 4. If no `open-pencil_*` MCP tool is visible, restart OpenCode after regenerating `.opencode/opencode.json`.
-5. Only use doc-only mode after the `open-pencil` MCP tool call fails or no `open-pencil_*` tools are registered.
+5. Only use doc-only mode after no usable `open-pencil_*` tool is registered or all available state/design calls fail.
 
 Rules:
 
@@ -139,7 +139,7 @@ Rules:
 If Engram is enabled but unavailable, memory must fall back to local decisions log:
 
 ```txt
-progress/decisions.md
+.harness/artifacts/progress/decisions.md
 ```
 
 Do not store raw logs or ephemeral progress in Engram. Store decisions, discoveries, bug fixes, patterns, and session summaries.

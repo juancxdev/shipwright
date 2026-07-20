@@ -41,13 +41,13 @@ Implementá:
    - .harness/state.json
    - .harness/integrations.json
    - .harness/approvals/
-   - progress/history.md
-   - progress/current.md
+   - .harness/artifacts/progress/history.md
+   - .harness/artifacts/progress/current.md
 
 3. Engram integration:
    - Crear MemoryPort.
    - Si Engram MCP está disponible, guardar decisiones importantes.
-   - Si no está disponible, fallback a progress/decisions.md.
+   - Si no está disponible, fallback a .harness/artifacts/progress/decisions.md.
    - No guardar logs brutos ni estado efímero.
 
 4. OpenPencil integration:

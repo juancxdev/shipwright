@@ -39,7 +39,7 @@ func RefreshSkillDigests() (*SkillDigestSet, error) {
 			return nil, err
 		}
 	}
-	profile, _ := LoadProjectProfile()
+	profile, _, _ := RefreshProjectProfileFromPlannedArtifacts()
 	digests := BuildSkillDigests(registry, profile)
 	if err := SaveSkillDigests(digests); err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func RefreshSkillDigestsFromRegistry(registry *SkillRegistry) (*SkillDigestSet, 
 	if registry == nil {
 		return RefreshSkillDigests()
 	}
-	profile, _ := LoadProjectProfile()
+	profile, _, _ := RefreshProjectProfileFromPlannedArtifacts()
 	digests := BuildSkillDigests(registry, profile)
 	if err := SaveSkillDigests(digests); err != nil {
 		return nil, err
@@ -227,6 +227,9 @@ func profileCompactRulesForAgent(agent string, profile *ProjectProfile) []string
 	if len(profile.Languages) > 0 {
 		rules = append(rules, "Respect detected stack: "+strings.Join(profile.Languages, ", ")+".")
 	}
+	if len(profile.PlannedStacks) > 0 {
+		rules = append(rules, "Respect planned technical stack: "+strings.Join(stackSignalNames(profile.PlannedStacks), ", ")+".")
+	}
 	if len(profile.Commands.Test) > 0 && agentUsesTests(agent) {
 		rules = append(rules, "Use detected test command for evidence: `"+profile.Commands.Test[0].Command+"`.")
 	}
@@ -301,4 +304,12 @@ func containsStringValue(values []string, want string) bool {
 		}
 	}
 	return false
+}
+
+func stackSignalNames(stacks []StackSignal) []string {
+	values := make([]string, 0, len(stacks))
+	for _, stack := range stacks {
+		values = append(values, stack.Name)
+	}
+	return sortedUnique(values)
 }

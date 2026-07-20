@@ -7,9 +7,9 @@ import (
 
 func writeReviewArtifacts(t *testing.T, contract, qa, security, checklist string) {
 	t.Helper()
-	writeTestFile(t, "reports/contract-test-report.md", contract)
-	writeTestFile(t, "reports/qa-report.md", qa)
-	writeTestFile(t, "reports/security-review.md", security)
+	writeTestFile(t, ".harness/artifacts/reports/contract-test-report.md", contract)
+	writeTestFile(t, ".harness/artifacts/reports/qa-report.md", qa)
+	writeTestFile(t, ".harness/artifacts/reports/security-review.md", security)
 	writeTestFile(t, ReviewChecklistFile, checklist)
 }
 
@@ -63,9 +63,9 @@ func validChecklist() string {
 
 ## Evidence gate
 
-- [x] reports/contract-test-report.md includes Contract evidence
-- [x] reports/qa-report.md includes Test evidence
-- [x] reports/security-review.md includes Security evidence
+- [x] .harness/artifacts/reports/contract-test-report.md includes Contract evidence
+- [x] .harness/artifacts/reports/qa-report.md includes Test evidence
+- [x] .harness/artifacts/reports/security-review.md includes Security evidence
 - [x] No report is still placeholder-only
 
 ## Finding policy

@@ -29,16 +29,16 @@ CHANGE_REQUEST
 | From | To | Trigger | Gate |
 |---|---|---|---|
 | INTAKE | DISCOVERY | Nueva petición | Solicitud registrada |
-| DISCOVERY | PRODUCT_CONTEXT_READY | PO sin más dudas | `product/context.md` |
-| PRODUCT_CONTEXT_READY | TECHNICAL_SCOPE_DRAFT | TL analiza contexto | `architecture/options.md` |
-| TECHNICAL_SCOPE_DRAFT | SCOPE_REVIEW | PO prepara explicación | `product/scope.md` |
+| DISCOVERY | PRODUCT_CONTEXT_READY | PO sin más dudas | `.harness/artifacts/product/context.md` |
+| PRODUCT_CONTEXT_READY | TECHNICAL_SCOPE_DRAFT | TL analiza contexto | `.harness/artifacts/architecture/options.md` |
+| TECHNICAL_SCOPE_DRAFT | SCOPE_REVIEW | PO prepara explicación | `.harness/artifacts/product/scope.md` |
 | SCOPE_REVIEW | DISCOVERY | Usuario pide cambios | Feedback registrado |
 | SCOPE_REVIEW | SCOPE_APPROVED | Usuario aprueba | `approvals/scope.json` |
-| SCOPE_APPROVED | PROJECT_PLANNING | PM genera plan | `project/project-plan.md` |
-| PROJECT_PLANNING | UX_DECISION | Evaluar necesidad UI | `project/delivery-plan.md` |
-| UX_DECISION | UX_DESIGN | Requiere UI | `design/ux-brief.md` |
+| SCOPE_APPROVED | PROJECT_PLANNING | PM genera plan | `.harness/artifacts/project/project-plan.md` |
+| PROJECT_PLANNING | UX_DECISION | Evaluar necesidad UI | `.harness/artifacts/project/delivery-plan.md` |
+| UX_DECISION | UX_DESIGN | Requiere UI | `.harness/artifacts/design/ux-brief.md` |
 | UX_DECISION | TECHNICAL_DESIGN | No requiere UI | Decisión registrada |
-| UX_DESIGN | UX_APPROVAL | Diseño listo | `design/prototype.md` |
+| UX_DESIGN | UX_APPROVAL | Diseño listo | `.harness/artifacts/design/prototype.md` |
 | UX_APPROVAL | UX_DESIGN | Usuario rechaza | Feedback registrado |
 | UX_APPROVAL | TECHNICAL_DESIGN | Usuario aprueba | `approvals/ux-design.json` |
 | TECHNICAL_DESIGN | BACKLOG_READY | TL crea docs y backlog | Arquitectura + contratos + backlog |
@@ -50,7 +50,7 @@ CHANGE_REQUEST
 | TECH_LEAD_REVIEW | IMPLEMENTATION | TL rechaza | Feedback técnico |
 | TECH_LEAD_REVIEW | USER_ACCEPTANCE | TL aprueba | `approvals/tech-lead.json` |
 | USER_ACCEPTANCE | CHANGE_REQUEST | Usuario pide cambios | CR creado |
-| USER_ACCEPTANCE | CLOSED | Usuario acepta | `project/acceptance-report.md` |
+| USER_ACCEPTANCE | CLOSED | Usuario acepta | `.harness/artifacts/project/acceptance-report.md` |
 | CHANGE_REQUEST | DISCOVERY | Cambio grande | Nueva discovery parcial |
 | CHANGE_REQUEST | TECHNICAL_DESIGN | Cambio técnico claro | Impact assessment |
 | CHANGE_REQUEST | BACKLOG_READY | Cambio menor | Backlog actualizado |
@@ -74,8 +74,8 @@ El harness debe detenerse y pedir intervención humana en:
   "approved_by": "user",
   "approved_at": "2026-07-15T00:00:00Z",
   "artifact_refs": [
-    "product/scope.md",
-    "architecture/options.md"
+    ".harness/artifacts/product/scope.md",
+    ".harness/artifacts/architecture/options.md"
   ],
   "notes": "Usuario aprueba alcance inicial sin integración con SUNAT real para MVP."
 }

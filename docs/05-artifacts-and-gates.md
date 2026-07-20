@@ -9,14 +9,14 @@
   approvals/
   runs/
 
-product/
+.harness/artifacts/product/
   discovery.md
   context.md
   scope.md
   open-questions.md
   assumptions.md
 
-project/
+.harness/artifacts/project/
   project-charter.md
   stakeholders.md
   project-plan.md
@@ -26,7 +26,7 @@ project/
   status-report.md
   acceptance-report.md
 
-design/
+.harness/artifacts/design/
   ux-brief.md
   user-flows.md
   wireframes.md
@@ -35,7 +35,7 @@ design/
   design-approval.md
   openpencil/
 
-architecture/
+.harness/artifacts/architecture/
   system-architecture.md
   frontend-architecture.md
   backend-architecture.md
@@ -43,32 +43,32 @@ architecture/
   security-model.md
   technology-options.md
 
-contracts/
+.harness/artifacts/contracts/
   openapi.yaml
   events.md
   integration-contracts.md
 
-backlog/
+.harness/artifacts/backlog/
   epics.md
   user-stories.md
   frontend-tasks.md
   backend-tasks.md
   qa-tasks.md
 
-sdd/
+.harness/artifacts/sdd/
   proposal.md
   spec.md
   design.md
   tasks.md
   verification.md
 
-knowledge/
+.harness/artifacts/knowledge/
   index.md
   domain/
-  architecture/
+  .harness/artifacts/architecture/
   decisions/
 
-progress/
+.harness/artifacts/progress/
   current.md
   history.md
   frontend.md
@@ -76,7 +76,7 @@ progress/
   reviews.md
   decisions.md
 
-reports/
+.harness/artifacts/reports/
   qa-report.md
   security-review.md
   contract-test-report.md
@@ -88,16 +88,16 @@ reports/
 
 Requiere:
 
-- `product/context.md`
-- `product/assumptions.md`
-- `product/open-questions.md` sin preguntas críticas pendientes
+- `.harness/artifacts/product/context.md`
+- `.harness/artifacts/product/assumptions.md`
+- `.harness/artifacts/product/open-questions.md` sin preguntas críticas pendientes
 
 ### Gate 2 — Scope approval
 
 Requiere:
 
-- `product/scope.md`
-- `architecture/technology-options.md`
+- `.harness/artifacts/product/scope.md`
+- `.harness/artifacts/architecture/technology-options.md`
 - explicación del PO al usuario
 - aprobación explícita en `.harness/approvals/scope.json`
 
@@ -105,33 +105,33 @@ Requiere:
 
 Requiere:
 
-- `project/project-charter.md`
-- `project/project-plan.md`
-- `project/risk-register.md`
-- `project/change-management.md`
+- `.harness/artifacts/project/project-charter.md`
+- `.harness/artifacts/project/project-plan.md`
+- `.harness/artifacts/project/risk-register.md`
+- `.harness/artifacts/project/change-management.md`
 
 ### Gate 4 — UX approval cuando aplica
 
 Requiere:
 
-- `design/ux-brief.md`
-- `design/user-flows.md`
-- `design/prototype.md` o `design/wireframes.md`
+- `.harness/artifacts/design/ux-brief.md`
+- `.harness/artifacts/design/user-flows.md`
+- `.harness/artifacts/design/prototype.md` o `.harness/artifacts/design/wireframes.md`
 - `.harness/approvals/ux-design.json`
 
 ### Gate 5 — Technical plan approval
 
 Requiere:
 
-- `architecture/system-architecture.md`
-- `architecture/frontend-architecture.md` si hay frontend
-- `architecture/backend-architecture.md` si hay backend
-- `architecture/data-model.md` si hay persistencia
-- `contracts/openapi.yaml` si hay API
-- `backlog/epics.md`
-- `backlog/user-stories.md`
-- `backlog/frontend-tasks.md`
-- `backlog/backend-tasks.md`
+- `.harness/artifacts/architecture/system-architecture.md`
+- `.harness/artifacts/architecture/frontend-architecture.md` si hay frontend
+- `.harness/artifacts/architecture/backend-architecture.md` si hay backend
+- `.harness/artifacts/architecture/data-model.md` si hay persistencia
+- `.harness/artifacts/contracts/openapi.yaml` si hay API
+- `.harness/artifacts/backlog/epics.md`
+- `.harness/artifacts/backlog/user-stories.md`
+- `.harness/artifacts/backlog/frontend-tasks.md`
+- `.harness/artifacts/backlog/backend-tasks.md`
 
 ### Gate 6 — Implementation review
 
@@ -147,7 +147,7 @@ Requiere:
 Requiere:
 
 - demo o descripción de entrega,
-- `project/acceptance-report.md`,
+- `.harness/artifacts/project/acceptance-report.md`,
 - aprobación del usuario o change request.
 
 ## Change Request Template

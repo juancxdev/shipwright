@@ -14,8 +14,8 @@ Before starting phase work:
 1. Run: shipwright status — read the current phase, active agent, and approvals
 2. Run: shipwright agents active — confirm YOU are the active agent for this phase
 3. Read .harness/state.json — check requires_ui, active_change_request, block_reason
-4. Read progress/current.md — understand what happened before you
-5. Read progress/handoffs.md — understand who handed off to you and why
+4. Read .harness/artifacts/progress/current.md — understand what happened before you
+5. Read .harness/artifacts/progress/handoffs.md — understand who handed off to you and why
 
 If any of these fail or are missing, proceed with what you have — the harness
 guarantees state.json exists (checked at init).
@@ -52,8 +52,8 @@ When you complete your phase work:
 
 1. Write all output artifacts to the paths in "Can Modify"
 2. Log your completion by running: shipwright next (or shipwright run)
-   - The harness logs the handoff to progress/handoffs.md automatically
-   - The harness logs the phase transition to progress/history.md
+   - The harness logs the handoff to .harness/artifacts/progress/handoffs.md automatically
+   - The harness logs the phase transition to .harness/artifacts/progress/history.md
    - The harness saves memory events (Engram or fallback) automatically
 3. If the next phase requires user approval (gate), the harness will STOP and
    display the gate name. Do NOT attempt to approve it yourself.
@@ -61,7 +61,7 @@ When you complete your phase work:
    and set block_reason in state.json or report to the orchestrator.
 
 CRITICAL: Every handoff goes to file. No phone-game. The next agent reads
-progress/handoffs.md and progress/current.md to understand context — they do
+.harness/artifacts/progress/handoffs.md and .harness/artifacts/progress/current.md to understand context — they do
 NOT talk to you directly.
 
 ## E. Return Envelope
@@ -79,7 +79,7 @@ Example:
 
 **Status**: success
 **Summary**: Product context written with 5 assumptions and 3 open questions. Scope drafted with 4 in-scope items.
-**Artifacts**: product/context.md, product/assumptions.md, product/open-questions.md, product/scope.md
+**Artifacts**: .harness/artifacts/product/context.md, .harness/artifacts/product/assumptions.md, .harness/artifacts/product/open-questions.md, .harness/artifacts/product/scope.md
 **Next**: shipwright approve scope (user must approve scope)
 **Risks**: None
 
@@ -107,7 +107,7 @@ The harness automatically saves memory events on:
 - Change requests (discovery type)
 
 If Engram is enabled, events queue in .harness/memory-queue.json for AI sync.
-If Engram is disabled, events write to progress/decisions.md (fallback).
+If Engram is disabled, events write to .harness/artifacts/progress/decisions.md (fallback).
 
 You do NOT need to manually save memory — the harness does it. But if you
 discover something non-obvious during your work (a risk, a pattern, a gotcha),

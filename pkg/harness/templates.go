@@ -28,32 +28,32 @@ func TemplateDataFromState(s *State) TemplateData {
 
 func GenerateArtifact(path string, data TemplateData) (string, error) {
 	generators := map[string]func(TemplateData) string{
-		"product/context.md":                  genProductContext,
-		"product/assumptions.md":              genProductAssumptions,
-		"product/open-questions.md":           genProductOpenQuestions,
-		"product/scope.md":                    genProductScope,
-		"architecture/technology-options.md":  genTechOptions,
-		"architecture/system-architecture.md": genSystemArchitecture,
-		"project/project-charter.md":          genProjectCharter,
-		"project/project-plan.md":             genProjectPlan,
-		"project/risk-register.md":            genRiskRegister,
-		"project/delivery-plan.md":            genDeliveryPlan,
-		"project/change-management.md":        genChangeManagement,
-		"project/acceptance-report.md":        genAcceptanceReport,
-		"contracts/openapi.yaml":              genOpenAPI,
-		"backlog/epics.md":                    genEpics,
-		"backlog/user-stories.md":             genUserStories,
-		"backlog/frontend-tasks.md":           genFrontendTasksPlaceholder,
-		"backlog/backend-tasks.md":            genBackendTasksPlaceholder,
-		"sdd/proposal.md":                     genSDDProposal,
-		"sdd/spec.md":                         genSDDSpec,
-		"sdd/tasks.md":                        genSDDTasks,
-		"progress/frontend.md":                genFrontendProgress,
-		"progress/backend.md":                 genBackendProgress,
-		"reports/contract-test-report.md":     genContractTestReport,
-		"reports/qa-report.md":                genQAReport,
-		"reports/security-review.md":          genSecurityReview,
-		"reports/review-checklist.md":         genReviewChecklist,
+		".harness/artifacts/product/context.md":                  genProductContext,
+		".harness/artifacts/product/assumptions.md":              genProductAssumptions,
+		".harness/artifacts/product/open-questions.md":           genProductOpenQuestions,
+		".harness/artifacts/product/scope.md":                    genProductScope,
+		".harness/artifacts/architecture/technology-options.md":  genTechOptions,
+		".harness/artifacts/architecture/system-architecture.md": genSystemArchitecture,
+		".harness/artifacts/project/project-charter.md":          genProjectCharter,
+		".harness/artifacts/project/project-plan.md":             genProjectPlan,
+		".harness/artifacts/project/risk-register.md":            genRiskRegister,
+		".harness/artifacts/project/delivery-plan.md":            genDeliveryPlan,
+		".harness/artifacts/project/change-management.md":        genChangeManagement,
+		".harness/artifacts/project/acceptance-report.md":        genAcceptanceReport,
+		".harness/artifacts/contracts/openapi.yaml":              genOpenAPI,
+		".harness/artifacts/backlog/epics.md":                    genEpics,
+		".harness/artifacts/backlog/user-stories.md":             genUserStories,
+		".harness/artifacts/backlog/frontend-tasks.md":           genFrontendTasksPlaceholder,
+		".harness/artifacts/backlog/backend-tasks.md":            genBackendTasksPlaceholder,
+		".harness/artifacts/sdd/proposal.md":                     genSDDProposal,
+		".harness/artifacts/sdd/spec.md":                         genSDDSpec,
+		".harness/artifacts/sdd/tasks.md":                        genSDDTasks,
+		".harness/artifacts/progress/frontend.md":                genFrontendProgress,
+		".harness/artifacts/progress/backend.md":                 genBackendProgress,
+		".harness/artifacts/reports/contract-test-report.md":     genContractTestReport,
+		".harness/artifacts/reports/qa-report.md":                genQAReport,
+		".harness/artifacts/reports/security-review.md":          genSecurityReview,
+		".harness/artifacts/reports/review-checklist.md":         genReviewChecklist,
 	}
 
 	gen, ok := generators[path]
@@ -256,7 +256,7 @@ func genProjectCharter(d TemplateData) string {
 
 ## Scope summary
 
-(pending — brief scope summary, reference product/scope.md)
+(pending — brief scope summary, reference .harness/artifacts/product/scope.md)
 
 ## Stakeholders
 
@@ -355,12 +355,12 @@ func genChangeManagement(d TemplateData) string {
 
 ## Active change requests
 
-(pending — reference any CR files in project/change-requests/)
+(pending — reference any CR files in .harness/artifacts/project/change-requests/)
 
 ## Change process
 
 1. User requests change via `+"`shipwright request-change`"+`
-2. CR file created in project/change-requests/
+2. CR file created in .harness/artifacts/project/change-requests/
 3. Impact assessment completed
 4. Decision: approved / rejected / postponed
 5. If approved, scope/backlog updated and phase adjusted
@@ -384,7 +384,7 @@ func genAcceptanceReport(d TemplateData) string {
 
 ## Acceptance criteria met
 
-(pending — reference success criteria from product/scope.md)
+(pending — reference success criteria from .harness/artifacts/product/scope.md)
 
 ## Known issues
 
@@ -436,13 +436,13 @@ func genEpics(d TemplateData) string {
 
 **Description:** (pending)
 
-**User stories:** (reference backlog/user-stories.md)
+**User stories:** (reference .harness/artifacts/backlog/user-stories.md)
 
 ## Epic 2: (pending)
 
 **Description:** (pending)
 
-**User stories:** (reference backlog/user-stories.md)
+**User stories:** (reference .harness/artifacts/backlog/user-stories.md)
 `, ph(d), d.ProjectName)
 }
 
@@ -488,11 +488,11 @@ func genSDDProposal(d TemplateData) string {
 
 ## Scope
 
-(pending — reference product/scope.md)
+(pending — reference .harness/artifacts/product/scope.md)
 
 ## Target users
 
-(pending — reference product/context.md)
+(pending — reference .harness/artifacts/product/context.md)
 
 ## Main scenario
 
@@ -500,11 +500,11 @@ func genSDDProposal(d TemplateData) string {
 
 ## Success criteria
 
-(pending — reference product/scope.md success criteria)
+(pending — reference .harness/artifacts/product/scope.md success criteria)
 
 ## Risks
 
-(pending — reference project/risk-register.md)
+(pending — reference .harness/artifacts/project/risk-register.md)
 `, ph(d), d.ProjectID)
 }
 
@@ -738,9 +738,9 @@ func genReviewChecklist(d TemplateData) string {
 
 ## Evidence gate
 
-- [ ] reports/contract-test-report.md includes Contract evidence
-- [ ] reports/qa-report.md includes Test evidence
-- [ ] reports/security-review.md includes Security evidence
+- [ ] .harness/artifacts/reports/contract-test-report.md includes Contract evidence
+- [ ] .harness/artifacts/reports/qa-report.md includes Test evidence
+- [ ] .harness/artifacts/reports/security-review.md includes Security evidence
 - [ ] No report is still placeholder-only
 
 ## Finding policy
@@ -771,13 +771,13 @@ func genFrontendTasksPlaceholder(d TemplateData) string {
 
 ## Project: %s
 
-> **PLACEHOLDER** — This file will be generated from contracts/openapi.yaml.
+> **PLACEHOLDER** — This file will be generated from .harness/artifacts/contracts/openapi.yaml.
 > Run: shipwright contract generate-tasks
 > Or if the Technical Lead agent is active, it will generate this from the contract.
 
 ## Contract-First Rules
 
-- All tasks MUST reference endpoints from contracts/openapi.yaml
+- All tasks MUST reference endpoints from .harness/artifacts/contracts/openapi.yaml
 - Mock mode is MANDATORY — every data-fetching task must have mock + HTTP mode
 - Mocks MUST derive from contract response schemas
 - HTTP adapter MUST be separate from mock adapter
@@ -797,13 +797,13 @@ func genBackendTasksPlaceholder(d TemplateData) string {
 
 ## Project: %s
 
-> **PLACEHOLDER** — This file will be generated from contracts/openapi.yaml.
+> **PLACEHOLDER** — This file will be generated from .harness/artifacts/contracts/openapi.yaml.
 > Run: shipwright contract generate-tasks
 > Or if the Technical Lead agent is active, it will generate this from the contract.
 
 ## Contract-First Rules
 
-- All tasks MUST implement endpoints from contracts/openapi.yaml EXACTLY
+- All tasks MUST implement endpoints from .harness/artifacts/contracts/openapi.yaml EXACTLY
 - API MUST match contract: path, method, request schema, response schema
 - Error responses MUST match contract format (400, 401, 500 minimum)
 - NEVER break the contract without a change request

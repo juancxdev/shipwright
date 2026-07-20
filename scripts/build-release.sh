@@ -4,10 +4,10 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="${DIST_DIR:-$ROOT_DIR/dist}"
 VERSION="${VERSION:-$(git -C "$ROOT_DIR" describe --tags --always --dirty 2>/dev/null || echo dev)}"
-REPO="${SHIPWRIGHT_REPO:-${LOOM_REPO:-juancxdev/shipwright}}"
+REPO="${SHIPWRIGHT_REPO:-juancxdev/shipwright}"
 
 mkdir -p "$DIST_DIR"
-rm -f "$DIST_DIR"/shipwright-* "$DIST_DIR"/loom-* "$DIST_DIR"/checksums.txt "$DIST_DIR"/latest.json
+rm -f "$DIST_DIR"/shipwright-* "$DIST_DIR"/checksums.txt "$DIST_DIR"/latest.json
 
 build_one() {
   local goos="$1"

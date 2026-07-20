@@ -21,6 +21,7 @@ type ProjectProfile struct {
 	ExistingProject   bool              `json:"existing_project"`
 	Languages         []string          `json:"languages"`
 	Stacks            []StackSignal     `json:"stacks"`
+	PlannedStacks     []StackSignal     `json:"planned_stacks,omitempty"`
 	PackageManagers   []string          `json:"package_managers,omitempty"`
 	Commands          ProjectCommands   `json:"commands"`
 	TDD               TDDCapability     `json:"tdd"`
@@ -122,6 +123,7 @@ func CalibrateProject(projectName string) (*ProjectProfile, error) {
 	profile.ExistingArtifacts = sortedUnique(profile.ExistingArtifacts)
 	profile.FilesScanned = sortedUnique(profile.FilesScanned)
 	profile.Stacks = uniqueStacks(profile.Stacks)
+	profile.PlannedStacks = uniqueStacks(profile.PlannedStacks)
 	profile.Repository.CI = sortedUnique(profile.Repository.CI)
 	profile.Structure.MonorepoHints = sortedUnique(profile.Structure.MonorepoHints)
 	profile.TDD = inferTDDCapability(profile)
@@ -170,6 +172,13 @@ func RenderProjectProfileMarkdown(profile *ProjectProfile) string {
 			sb.WriteString(fmt.Sprintf("- Language: `%s`\n", lang))
 		}
 		for _, stack := range profile.Stacks {
+			sb.WriteString(fmt.Sprintf("- %s `%s` — %s\n", stack.Kind, stack.Name, stack.Evidence))
+		}
+	}
+
+	if len(profile.PlannedStacks) > 0 {
+		sb.WriteString("\n## Planned stack\n\n")
+		for _, stack := range profile.PlannedStacks {
 			sb.WriteString(fmt.Sprintf("- %s `%s` — %s\n", stack.Kind, stack.Name, stack.Evidence))
 		}
 	}
@@ -353,26 +362,61 @@ func detectNodeFrameworks(profile *ProjectProfile, pkg packageJSON) {
 		deps[k] = v
 	}
 	frameworks := map[string]string{
-		"next":             "Next.js",
-		"react":            "React",
-		"vue":              "Vue",
-		"@angular/core":    "Angular",
-		"svelte":           "Svelte",
-		"vite":             "Vite",
-		"express":          "Express",
-		"@nestjs/core":     "NestJS",
-		"fastify":          "Fastify",
-		"vitest":           "Vitest",
-		"jest":             "Jest",
-		"@playwright/test": "Playwright",
+		"next":                  "Next.js",
+		"react":                 "React",
+		"vue":                   "Vue",
+		"@angular/core":         "Angular",
+		"svelte":                "Svelte",
+		"astro":                 "Astro",
+		"vite":                  "Vite",
+		"express":               "Express",
+		"@nestjs/core":          "NestJS",
+		"fastify":               "Fastify",
+		"vitest":                "Vitest",
+		"jest":                  "Jest",
+		"@playwright/test":      "Playwright",
+		"playwright":            "Playwright",
+		"tailwindcss":           "Tailwind CSS",
+		"@tailwindcss/vite":     "Tailwind CSS",
+		"@supabase/supabase-js": "Supabase",
+		"@supabase/ssr":         "Supabase",
+		"prisma":                "Prisma",
+		"@prisma/client":        "Prisma",
+		"drizzle-orm":           "Drizzle ORM",
+		"drizzle-kit":           "Drizzle ORM",
+		"zod":                   "Zod",
+		"react-hook-form":       "React Hook Form",
 	}
 	for dep, name := range frameworks {
 		if _, ok := deps[dep]; ok {
 			kind := "framework"
-			if name == "Vitest" || name == "Jest" || name == "Playwright" {
+			switch name {
+			case "Vitest", "Jest", "Playwright":
 				kind = "test-tool"
+			case "Tailwind CSS", "Zod", "React Hook Form":
+				kind = "library"
+			case "Supabase", "Prisma", "Drizzle ORM":
+				kind = "data"
 			}
 			profile.Stacks = append(profile.Stacks, StackSignal{Name: name, Kind: kind, Evidence: "package.json dependency " + dep})
+		}
+	}
+	for _, marker := range []struct{ file, name, kind string }{
+		{"astro.config.mjs", "Astro", "framework"},
+		{"astro.config.ts", "Astro", "framework"},
+		{"astro.config.js", "Astro", "framework"},
+		{"tailwind.config.js", "Tailwind CSS", "library"},
+		{"tailwind.config.ts", "Tailwind CSS", "library"},
+		{"tailwind.config.cjs", "Tailwind CSS", "library"},
+		{"components.json", "shadcn/ui", "library"},
+		{"prisma/schema.prisma", "Prisma", "data"},
+		{"drizzle.config.ts", "Drizzle ORM", "data"},
+		{"playwright.config.ts", "Playwright", "test-tool"},
+		{"playwright.config.js", "Playwright", "test-tool"},
+	} {
+		if pathExists(marker.file) {
+			profile.FilesScanned = append(profile.FilesScanned, marker.file)
+			profile.Stacks = append(profile.Stacks, StackSignal{Name: marker.name, Kind: marker.kind, Evidence: marker.file})
 		}
 	}
 }
@@ -481,7 +525,7 @@ func detectDart(profile *ProjectProfile) {
 
 func detectExistingArtifacts(profile *ProjectProfile) {
 	for _, artifact := range []string{
-		"README.md", "docs", "contracts/openapi.yaml", "contracts/openapi.yml", "openapi.yaml", "openapi.yml", ".opencode/opencode.json", "AGENTS.md",
+		"README.md", "docs", ".harness/artifacts/contracts/openapi.yaml", ".harness/artifacts/contracts/openapi.yml", "openapi.yaml", "openapi.yml", ".opencode/opencode.json", "AGENTS.md",
 	} {
 		if pathExists(artifact) || dirExists(artifact) {
 			profile.ExistingArtifacts = append(profile.ExistingArtifacts, artifact)

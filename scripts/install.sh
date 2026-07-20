@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO="${SHIPWRIGHT_REPO:-${LOOM_REPO:-juancxdev/shipwright}}"
-VERSION="${SHIPWRIGHT_VERSION:-${LOOM_VERSION:-latest}}"
-INSTALL_DIR="${SHIPWRIGHT_INSTALL_DIR:-${LOOM_INSTALL_DIR:-$HOME/.local/bin}}"
-BIN_NAME="${SHIPWRIGHT_BIN_NAME:-${LOOM_BIN_NAME:-shipwright}}"
+REPO="${SHIPWRIGHT_REPO:-juancxdev/shipwright}"
+VERSION="${SHIPWRIGHT_VERSION:-latest}"
+INSTALL_DIR="${SHIPWRIGHT_INSTALL_DIR:-$HOME/.local/bin}"
+BIN_NAME="${SHIPWRIGHT_BIN_NAME:-shipwright}"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 

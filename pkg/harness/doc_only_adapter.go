@@ -19,40 +19,40 @@ func (d *DocOnlyDesignFallback) StartDesign(state *State, request string) (*Desi
 	var files []string
 
 	brief := generateUXBrief(state, request)
-	if err := WriteFile("design/ux-brief.md", brief); err != nil {
+	if err := WriteFile(".harness/artifacts/design/ux-brief.md", brief); err != nil {
 		return nil, fmt.Errorf("cannot write ux-brief.md: %w", err)
 	}
-	files = append(files, "design/ux-brief.md")
+	files = append(files, ".harness/artifacts/design/ux-brief.md")
 
 	flows := generateUserFlows(state)
-	if err := WriteFile("design/user-flows.md", flows); err != nil {
+	if err := WriteFile(".harness/artifacts/design/user-flows.md", flows); err != nil {
 		return nil, fmt.Errorf("cannot write user-flows.md: %w", err)
 	}
-	files = append(files, "design/user-flows.md")
+	files = append(files, ".harness/artifacts/design/user-flows.md")
 
 	decisions := generateDesignDecisions(state)
-	if err := WriteFile("design/design-decisions.md", decisions); err != nil {
+	if err := WriteFile(".harness/artifacts/design/design-decisions.md", decisions); err != nil {
 		return nil, fmt.Errorf("cannot write design-decisions.md: %w", err)
 	}
-	files = append(files, "design/design-decisions.md")
+	files = append(files, ".harness/artifacts/design/design-decisions.md")
 
 	wireframes := generateWireframesDoc(state)
-	if err := WriteFile("design/wireframes.md", wireframes); err != nil {
+	if err := WriteFile(".harness/artifacts/design/wireframes.md", wireframes); err != nil {
 		return nil, fmt.Errorf("cannot write wireframes.md: %w", err)
 	}
-	files = append(files, "design/wireframes.md")
+	files = append(files, ".harness/artifacts/design/wireframes.md")
 
 	prototype := generatePrototypeDoc(state)
-	if err := WriteFile("design/prototype.md", prototype); err != nil {
+	if err := WriteFile(".harness/artifacts/design/prototype.md", prototype); err != nil {
 		return nil, fmt.Errorf("cannot write prototype.md: %w", err)
 	}
-	files = append(files, "design/prototype.md")
+	files = append(files, ".harness/artifacts/design/prototype.md")
 
 	responsiveQA := generateResponsiveQADoc(state)
-	if err := WriteFile("design/responsive-qa.md", responsiveQA); err != nil {
+	if err := WriteFile(".harness/artifacts/design/responsive-qa.md", responsiveQA); err != nil {
 		return nil, fmt.Errorf("cannot write responsive-qa.md: %w", err)
 	}
-	files = append(files, "design/responsive-qa.md")
+	files = append(files, ".harness/artifacts/design/responsive-qa.md")
 
 	if err := SaveDesignState(DesignModeDocOnly, true); err != nil {
 		return nil, fmt.Errorf("cannot save design state: %w", err)
@@ -74,13 +74,13 @@ func (d *DocOnlyDesignFallback) Status() (*DesignStatus, error) {
 		Adapter:         DesignModeDocOnly,
 		Mode:            mode,
 		Available:       false,
-		HasBrief:        ArtifactExists("design/ux-brief.md"),
-		HasFlows:        ArtifactExists("design/user-flows.md"),
-		HasDecisions:    ArtifactExists("design/design-decisions.md"),
-		HasPrototype:    ArtifactExists("design/prototype.md"),
-		HasWireframes:   ArtifactExists("design/wireframes.md"),
+		HasBrief:        ArtifactExists(".harness/artifacts/design/ux-brief.md"),
+		HasFlows:        ArtifactExists(".harness/artifacts/design/user-flows.md"),
+		HasDecisions:    ArtifactExists(".harness/artifacts/design/design-decisions.md"),
+		HasPrototype:    ArtifactExists(".harness/artifacts/design/prototype.md"),
+		HasWireframes:   ArtifactExists(".harness/artifacts/design/wireframes.md"),
 		HasTaskFile:     false,
-		HasResponsiveQA: ArtifactExists("design/responsive-qa.md"),
+		HasResponsiveQA: ArtifactExists(".harness/artifacts/design/responsive-qa.md"),
 	}, nil
 }
 
@@ -92,7 +92,7 @@ func generateUXBrief(state *State, request string) string {
 	sb.WriteString(fmt.Sprintf("**Request:** %s\n\n", request))
 
 	sb.WriteString("## Product context\n\n")
-	sb.WriteString("(Complete from product/context.md and product/scope.md)\n\n")
+	sb.WriteString("(Complete from .harness/artifacts/product/context.md and .harness/artifacts/product/scope.md)\n\n")
 
 	sb.WriteString("## Target users\n\n")
 	sb.WriteString("(Who will use this product? Define personas.)\n\n")

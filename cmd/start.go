@@ -32,7 +32,7 @@ func Start(args []string) {
 		Fail(fmt.Sprintf("error guardando estado: %s", err))
 	}
 
-	nextAction := "Product Owner discovery round required. Open OpenCode, run /shipwright-active-agent, let product-owner ask discovery questions in chat, then generate product/context.md, product/assumptions.md, product/open-questions.md and product/scope.md."
+	nextAction := "Product Owner discovery round required. Open OpenCode, run /shipwright-active-agent, let product-owner ask discovery questions in chat, then generate .harness/artifacts/product/context.md, .harness/artifacts/product/assumptions.md, .harness/artifacts/product/open-questions.md and .harness/artifacts/product/scope.md."
 	if err := harness.UpdateCurrent(state, nextAction); err != nil {
 		Fail(fmt.Sprintf("error actualizando progress: %s", err))
 	}

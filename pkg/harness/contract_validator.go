@@ -43,7 +43,7 @@ func GenerateFrontendTasks(spec *ContractSpec, projectName string) string {
 	sb.WriteString(fmt.Sprintf("**Contract endpoints:** %d\n\n", spec.EndpointCount))
 
 	sb.WriteString("## Contract-First Rules\n\n")
-	sb.WriteString("- All tasks MUST reference endpoints from contracts/openapi.yaml\n")
+	sb.WriteString("- All tasks MUST reference endpoints from .harness/artifacts/contracts/openapi.yaml\n")
 	sb.WriteString("- Mock mode is MANDATORY — every data-fetching task must have mock + HTTP mode\n")
 	sb.WriteString("- Mocks MUST derive from contract response schemas\n")
 	sb.WriteString("- HTTP adapter MUST be separate from mock adapter\n")
@@ -126,7 +126,7 @@ func GenerateBackendTasks(spec *ContractSpec, projectName string) string {
 	sb.WriteString(fmt.Sprintf("**Contract endpoints:** %d\n\n", spec.EndpointCount))
 
 	sb.WriteString("## Contract-First Rules\n\n")
-	sb.WriteString("- All tasks MUST implement endpoints from contracts/openapi.yaml EXACTLY\n")
+	sb.WriteString("- All tasks MUST implement endpoints from .harness/artifacts/contracts/openapi.yaml EXACTLY\n")
 	sb.WriteString("- API MUST match contract: path, method, request schema, response schema\n")
 	sb.WriteString("- Error responses MUST match contract format (400, 401, 500 minimum)\n")
 	sb.WriteString("- NEVER break the contract without a change request\n")
@@ -184,7 +184,7 @@ func GenerateBackendTasks(spec *ContractSpec, projectName string) string {
 	}
 
 	sb.WriteString(fmt.Sprintf("### %d. Contract compliance test\n\n", taskNum))
-	sb.WriteString("- [ ] Verify all endpoints match contracts/openapi.yaml\n")
+	sb.WriteString("- [ ] Verify all endpoints match .harness/artifacts/contracts/openapi.yaml\n")
 	sb.WriteString("- [ ] Verify all error responses are consistent\n")
 	sb.WriteString("- [ ] Verify all schemas match contract definitions\n")
 	sb.WriteString("- [ ] Run contract tests against live API\n\n")

@@ -52,7 +52,7 @@ El MVP ya debe incluir puertos de integración para Engram y OpenPencil, pero co
 
 ```txt
 Engram disponible -> guardar memoria histórica real
-Engram no disponible -> escribir fallback en progress/decisions.md
+Engram no disponible -> escribir fallback en .harness/artifacts/progress/decisions.md
 
 OpenPencil disponible -> crear/editar/probar diseño .pen
 OpenPencil no disponible -> crear documentos UX Markdown y marcar bloqueo opcional
@@ -75,12 +75,12 @@ MemoryPort
 
 | Evento | Engram type | Topic key sugerido |
 |---|---|---|
-| Alcance aprobado | decision | project/scope |
-| Tecnología elegida | decision | architecture/technology-stack |
-| Arquitectura definida | architecture | architecture/system |
-| Contrato API definido | architecture | architecture/api-contract |
-| Diseño UX aprobado | decision | design/ux-approval |
-| Riesgo crítico descubierto | discovery | project/risks |
+| Alcance aprobado | decision | .harness/artifacts/project/scope |
+| Tecnología elegida | decision | .harness/artifacts/architecture/technology-stack |
+| Arquitectura definida | architecture | .harness/artifacts/architecture/system |
+| Contrato API definido | architecture | .harness/artifacts/architecture/api-contract |
+| Diseño UX aprobado | decision | .harness/artifacts/design/ux-approval |
+| Riesgo crítico descubierto | discovery | .harness/artifacts/project/risks |
 | Bug resuelto | bugfix | bugfix/<area> |
 | Convención establecida | pattern | conventions/<area> |
 | Cierre de sesión | session_summary | session |
@@ -113,10 +113,10 @@ DesignPort
 UX_DECISION
   -> si requiere UI:
       verificar OpenPencil
-      crear design/ux-brief.md
-      crear/actualizar design/openpencil/app.pen
-      exportar wireframes a design/openpencil/exports/
-      crear design/design-approval.md
+      crear .harness/artifacts/design/ux-brief.md
+      crear/actualizar .harness/artifacts/design/openpencil/app.pen
+      exportar wireframes a .harness/artifacts/design/openpencil/exports/
+      crear .harness/artifacts/design/design-approval.md
       pedir aprobación humana
 ```
 
@@ -124,12 +124,12 @@ UX_DECISION
 
 Para avanzar de `UX_APPROVAL` a `TECHNICAL_DESIGN` se requiere:
 
-- `design/ux-brief.md`
-- `design/user-flows.md`
-- `design/design-decisions.md`
+- `.harness/artifacts/design/ux-brief.md`
+- `.harness/artifacts/design/user-flows.md`
+- `.harness/artifacts/design/design-decisions.md`
 - uno de:
-  - `design/openpencil/app.pen` + exports,
-  - `design/wireframes.md` si OpenPencil no está disponible,
+  - `.harness/artifacts/design/openpencil/app.pen` + exports,
+  - `.harness/artifacts/design/wireframes.md` si OpenPencil no está disponible,
 - `.harness/approvals/ux-design.json`
 
 ## Modo degradado
@@ -137,8 +137,8 @@ Para avanzar de `UX_APPROVAL` a `TECHNICAL_DESIGN` se requiere:
 Si OpenPencil no conecta:
 
 1. No se debe bloquear todo el proyecto automáticamente.
-2. El UX Designer debe crear `design/wireframes.md` y `design/prototype.md` en Markdown.
-3. El harness debe registrar en `progress/current.md`:
+2. El UX Designer debe crear `.harness/artifacts/design/wireframes.md` y `.harness/artifacts/design/prototype.md` en Markdown.
+3. El harness debe registrar en `.harness/artifacts/progress/current.md`:
 
 ```txt
 OpenPencil unavailable: design generated in doc-only mode.

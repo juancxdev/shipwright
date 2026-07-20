@@ -80,22 +80,22 @@ var transitions = []Transition{
 	{
 		From: StateIntake, To: StateDiscovery, Via: "start",
 		Trigger:           "Nueva petición registrada",
-		RequiredArtifacts: []string{"product/discovery.md"},
+		RequiredArtifacts: []string{".harness/artifacts/product/discovery.md"},
 	},
 	{
 		From: StateDiscovery, To: StateProductContextReady, Via: "next",
 		Trigger:           "PO completa discovery",
-		RequiredArtifacts: []string{"product/context.md", "product/assumptions.md", "product/open-questions.md"},
+		RequiredArtifacts: []string{".harness/artifacts/product/context.md", ".harness/artifacts/product/assumptions.md", ".harness/artifacts/product/open-questions.md"},
 	},
 	{
 		From: StateProductContextReady, To: StateTechnicalScopeDraft, Via: "next",
 		Trigger:           "TL analiza contexto",
-		RequiredArtifacts: []string{"architecture/technology-options.md"},
+		RequiredArtifacts: []string{".harness/artifacts/architecture/technology-options.md"},
 	},
 	{
 		From: StateTechnicalScopeDraft, To: StateScopeReview, Via: "next",
 		Trigger:           "PO prepara explicación de alcance",
-		RequiredArtifacts: []string{"product/scope.md"},
+		RequiredArtifacts: []string{".harness/artifacts/product/scope.md"},
 	},
 	{
 		From: StateScopeReview, To: StateScopeApproved, Via: "approve:" + GateScope,
@@ -109,17 +109,17 @@ var transitions = []Transition{
 	{
 		From: StateScopeApproved, To: StateProjectPlanning, Via: "next",
 		Trigger:           "PM genera plan",
-		RequiredArtifacts: []string{"project/project-charter.md", "project/project-plan.md", "project/risk-register.md"},
+		RequiredArtifacts: []string{".harness/artifacts/project/project-charter.md", ".harness/artifacts/project/project-plan.md", ".harness/artifacts/project/risk-register.md"},
 	},
 	{
 		From: StateProjectPlanning, To: StateUXDecision, Via: "next",
 		Trigger:           "Evaluar necesidad de UI",
-		RequiredArtifacts: []string{"project/delivery-plan.md"},
+		RequiredArtifacts: []string{".harness/artifacts/project/delivery-plan.md"},
 	},
 	{
 		From: StateUXDecision, To: StateUXDesign, Via: "next",
 		Trigger:           "Requiere UI — iniciar diseño",
-		RequiredArtifacts: []string{"design/ux-brief.md"},
+		RequiredArtifacts: []string{".harness/artifacts/design/ux-brief.md"},
 		Condition:         ConditionRequiresUI,
 	},
 	{
@@ -130,7 +130,7 @@ var transitions = []Transition{
 	{
 		From: StateUXDesign, To: StateUXApproval, Via: "next",
 		Trigger:           "Diseño listo para aprobación",
-		RequiredArtifacts: []string{"design/prototype.md", "design/user-flows.md", "design/responsive-qa.md"},
+		RequiredArtifacts: []string{".harness/artifacts/design/prototype.md", ".harness/artifacts/design/user-flows.md", ".harness/artifacts/design/responsive-qa.md"},
 	},
 	{
 		From: StateUXApproval, To: StateTechnicalDesign, Via: "approve:" + GateUXDesign,
@@ -145,15 +145,15 @@ var transitions = []Transition{
 		From: StateTechnicalDesign, To: StateBacklogReady, Via: "next",
 		Trigger: "TL crea arquitectura, contratos y backlog",
 		RequiredArtifacts: []string{
-			"architecture/system-architecture.md",
-			"contracts/openapi.yaml",
-			"backlog/epics.md",
-			"backlog/user-stories.md",
-			"backlog/frontend-tasks.md",
-			"backlog/backend-tasks.md",
-			"sdd/proposal.md",
-			"sdd/spec.md",
-			"sdd/tasks.md",
+			".harness/artifacts/architecture/system-architecture.md",
+			".harness/artifacts/contracts/openapi.yaml",
+			".harness/artifacts/backlog/epics.md",
+			".harness/artifacts/backlog/user-stories.md",
+			".harness/artifacts/backlog/frontend-tasks.md",
+			".harness/artifacts/backlog/backend-tasks.md",
+			".harness/artifacts/sdd/proposal.md",
+			".harness/artifacts/sdd/spec.md",
+			".harness/artifacts/sdd/tasks.md",
 		},
 	},
 	{
@@ -164,12 +164,12 @@ var transitions = []Transition{
 	{
 		From: StateImplementation, To: StateIntegration, Via: "next",
 		Trigger:           "FE/BE completan tareas",
-		RequiredArtifacts: []string{"progress/frontend.md", "progress/backend.md"},
+		RequiredArtifacts: []string{".harness/artifacts/progress/frontend.md", ".harness/artifacts/progress/backend.md"},
 	},
 	{
 		From: StateIntegration, To: StateQASecurityReview, Via: "next",
 		Trigger:           "Integración candidata lista",
-		RequiredArtifacts: []string{"reports/contract-test-report.md", "reports/review-checklist.md"},
+		RequiredArtifacts: []string{".harness/artifacts/reports/contract-test-report.md", ".harness/artifacts/reports/review-checklist.md"},
 	},
 	{
 		From: StateQASecurityReview, To: StateTechLeadReview, Via: "next",
@@ -193,7 +193,7 @@ var transitions = []Transition{
 		From: StateUserAcceptance, To: StateClosed, Via: "approve:" + GateFinalAcceptance,
 		Trigger:           "Usuario acepta entrega final",
 		RequiredApproval:  GateFinalAcceptance,
-		RequiredArtifacts: []string{"project/acceptance-report.md"},
+		RequiredArtifacts: []string{".harness/artifacts/project/acceptance-report.md"},
 	},
 	{
 		From: StateUserAcceptance, To: StateChangeRequest, Via: "request-change",
@@ -202,7 +202,7 @@ var transitions = []Transition{
 	{
 		From: StateChangeRequest, To: StateDiscovery, Via: "next",
 		Trigger:           "Cambio grande — nueva discovery parcial",
-		RequiredArtifacts: []string{"project/change-management.md"},
+		RequiredArtifacts: []string{".harness/artifacts/project/change-management.md"},
 	},
 }
 

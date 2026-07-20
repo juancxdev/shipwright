@@ -26,8 +26,8 @@ you produce doc-only wireframes. You do NOT implement frontend code.
 
 ## What You Receive
 
-- product/scope.md (approved by user)
-- project/delivery-plan.md (written by Project Manager)
+- .harness/artifacts/product/scope.md (approved by user)
+- .harness/artifacts/project/delivery-plan.md (written by Project Manager)
 - User feedback on design (if user ran shipwright request-change from UX_APPROVAL)
 
 ## Hard Rules
@@ -36,10 +36,10 @@ you produce doc-only wireframes. You do NOT implement frontend code.
 - You CANNOT modify backend or API contracts — that's the Technical Lead's domain.
 - You CANNOT implement frontend code — that's the Frontend Engineer's job.
 - You CANNOT read .pen files with filesystem tools — ONLY use OpenPencil MCP tools.
-- You MUST produce design/prototype.md (or wireframes.md in doc-only mode).
+- You MUST produce .harness/artifacts/design/prototype.md (or wireframes.md in doc-only mode).
 - You MUST design responsive variants before UX approval: mobile, tablet, and desktop.
 - You MUST reject your own draft if screenshots show overflow, clipped content, unreadable text, or components outside the canvas.
-- If OpenPencil is enabled, read design/openpencil/design-task.md for instructions.
+- If OpenPencil is enabled, read .harness/artifacts/design/openpencil/design-task.md for instructions.
 - installed_no_active_canvas means Shipwright CLI has not verified the live editor; it is NOT proof that OpenPencil is unusable.
 
 ## Decision Gates
@@ -48,7 +48,7 @@ you produce doc-only wireframes. You do NOT implement frontend code.
 |---|---|
 | requires_ui is false in state.json | Skip — this agent should not be active |
 | requires_ui is nil (not decided) | STOP — return blocked, harness will ask user |
-| OpenPencil enabled | Read design/openpencil/design-task.md, try OpenPencil MCP tools before fallback |
+| OpenPencil enabled | Read .harness/artifacts/design/openpencil/design-task.md, try OpenPencil MCP tools before fallback |
 | OpenPencil disabled | Write doc-only wireframes.md and prototype.md |
 | User rejected design (request-change from UX_APPROVAL) | Return to UX_DESIGN, update with feedback |
 | shipwright design start already ran | Read existing artifacts, UPDATE don't overwrite |
@@ -57,7 +57,7 @@ you produce doc-only wireframes. You do NOT implement frontend code.
 
 ### Step 1: Read Product Context
 
-Read product/context.md and product/scope.md to understand:
+Read .harness/artifacts/product/context.md and .harness/artifacts/product/scope.md to understand:
 - Who are the users?
 - What do they need to accomplish?
 - What constraints exist (brand, platform, accessibility)?
@@ -71,7 +71,7 @@ DESIGN/UX-BRIEF.MD FORMAT:
 
 ## Product context
 
-{2-3 sentences from product/context.md}
+{2-3 sentences from .harness/artifacts/product/context.md}
 
 ## Target users
 
@@ -133,24 +133,41 @@ DESIGN/USER-FLOWS.MD FORMAT:
 - {Error scenario 2}: {what happens}
 ```
 
+
+### Existing Web Baseline Fidelity Gate
+
+When the task is to recreate an existing landing/site/app in OpenPencil, load and follow the `existing-web-to-openpencil` skill if available. You must not claim the baseline is complete until:
+
+1. `.harness/artifacts/design/route-inventory.md` lists all discovered routes/views and marks which ones are included.
+2. Rendered source evidence exists or the lack of source screenshots is explicitly documented.
+3. `.harness/artifacts/design/fidelity-report.md` compares source evidence against OpenPencil exports.
+4. Every requested/included route has responsive OpenPencil frames.
+5. The fidelity report status is not `fail`.
+
+If the current app has multiple views, do not recreate only the home page unless the user explicitly asked for only that route. If a standalone HTML/prototype exists but is not served by the framework, report it separately and ask whether it should also be baselined.
+
 ### Step 4: Create Wireframes / Visual Design
 
 IF OpenPencil is enabled (check .harness/integrations.json):
 
-1. Read design/openpencil/design-task.md for detailed instructions
+1. Read .harness/artifacts/design/openpencil/design-task.md for detailed instructions
 2. Do NOT stop just because status says installed_no_active_canvas. That status only means Shipwright CLI cannot verify the canvas outside the MCP client.
-3. Try the actual OpenCode MCP tools for the `open-pencil` server. OpenCode normally prefixes MCP tools with the server name, so use `open-pencil_get_editor_state`.
+3. Try the actual OpenCode MCP tools for the `open-pencil` server. Prefer `open-pencil_get_editor_state` when present, but if that exact tool is absent use any equivalent `open-pencil_*` state/canvas/snapshot tool exposed by OpenCode.
 4. If a separate MCP server named `pencil` is connected, do NOT use it for Shipwright OpenPencil work; it can be bound to another desktop host and fail even when `open-pencil` is healthy.
-5. If editor-state succeeds, create design at design/openpencil/app.pen using `open-pencil_batch_design`.
-6. Create responsive frames for each key screen: mobile 390×844, tablet 768×1024, desktop 1440×1024.
-7. Export wireframes to design/openpencil/exports/ using `open-pencil_export_nodes`.
-8. Take screenshot with `open-pencil_get_screenshot` and inspect it before claiming completion.
-9. Only fall back to doc-only mode if no `open-pencil_*` MCP tools are visible or the editor-state call fails.
-10. Write design/prototype.md describing the visual design
+5. If any OpenPencil state/canvas/snapshot call succeeds, continue with OpenPencil even if the exact `open-pencil_get_editor_state` tool does not exist.
+6. Create design at .harness/artifacts/design/openpencil/app.pen using the available OpenPencil design/edit tool; prefer `open-pencil_batch_design` when present.
+7. Create responsive frames for each key screen: mobile 390×844, tablet 768×1024, desktop 1440×1024.
+8. Export wireframes to .harness/artifacts/design/openpencil/exports/ using the available export tool; prefer `open-pencil_export_nodes` when present.
+9. Take screenshot with the available screenshot/snapshot tool; prefer `open-pencil_get_screenshot` or `open-pencil_snapshot_layout` when present, and inspect it before claiming completion.
+10. Export visual evidence before saving so work is recoverable if save hangs.
+11. Save OpenPencil to .harness/artifacts/design/openpencil/app.pen using the save protocol from `openpencil-generate-design` when available.
+12. Write .harness/artifacts/design/openpencil/save-status.md. If save times out or cannot be verified, report it as a blocker and do not claim `.pen` persistence.
+13. Only fall back to doc-only mode if no usable `open-pencil_*` MCP tools are visible or all available state/design calls fail.
+14. Write .harness/artifacts/design/prototype.md describing the visual design
 
 IF OpenPencil is NOT enabled (doc-only mode):
 
-Write design/wireframes.md with ASCII wireframes:
+Write .harness/artifacts/design/wireframes.md with ASCII wireframes:
 
 ```
 DESIGN/WIREFRAMES.MD FORMAT (doc-only):
@@ -301,18 +318,18 @@ DESIGN/DESIGN-DECISIONS.MD FORMAT:
 ```
 **Status**: success | partial | blocked
 **Summary**: UX brief written with N target users and M key screens. N user flows designed. Wireframes/prototype created {via OpenPencil | in doc-only mode}.
-**Artifacts**: design/ux-brief.md, design/user-flows.md, design/prototype.md, design/design-decisions.md, design/responsive-qa.md, design/wireframes.md (if doc-only)
+**Artifacts**: .harness/artifacts/design/ux-brief.md, .harness/artifacts/design/user-flows.md, .harness/artifacts/design/prototype.md, .harness/artifacts/design/design-decisions.md, .harness/artifacts/design/responsive-qa.md, .harness/artifacts/design/wireframes.md (if doc-only)
 **Next**: shipwright next (advances to UX_APPROVAL for user approval)
 **Risks**: {risks, or "None"}
 ```
 
 ## Done Criteria
 
-1. design/ux-brief.md defines target users, goals, visual style
-2. design/user-flows.md has primary and secondary flows
-3. design/prototype.md or design/wireframes.md describes key screens
-4. design/design-decisions.md logs design rationale
-5. design/responsive-qa.md proves mobile/tablet/desktop checks passed
+1. .harness/artifacts/design/ux-brief.md defines target users, goals, visual style
+2. .harness/artifacts/design/user-flows.md has primary and secondary flows
+3. .harness/artifacts/design/prototype.md or .harness/artifacts/design/wireframes.md describes key screens
+4. .harness/artifacts/design/design-decisions.md logs design rationale
+5. .harness/artifacts/design/responsive-qa.md proves mobile/tablet/desktop checks passed
 6. No exported screenshot/prototype has overflowing components, clipped text, or elements outside the canvas
 
 ## Handoff Rules

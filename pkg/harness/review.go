@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-const ReviewChecklistFile = "reports/review-checklist.md"
+const ReviewChecklistFile = ".harness/artifacts/reports/review-checklist.md"
 
 type FindingSeverity string
 
@@ -36,16 +36,16 @@ type ReviewAssessment struct {
 
 func RequiredContractReviewArtifacts() []string {
 	return []string{
-		"reports/contract-test-report.md",
+		".harness/artifacts/reports/contract-test-report.md",
 		ReviewChecklistFile,
 	}
 }
 
 func RequiredReviewArtifacts() []string {
 	return []string{
-		"reports/contract-test-report.md",
-		"reports/qa-report.md",
-		"reports/security-review.md",
+		".harness/artifacts/reports/contract-test-report.md",
+		".harness/artifacts/reports/qa-report.md",
+		".harness/artifacts/reports/security-review.md",
 		ReviewChecklistFile,
 	}
 }

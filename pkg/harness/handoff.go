@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const HandoffLogFile = "progress/handoffs.md"
+const HandoffLogFile = ".harness/artifacts/progress/handoffs.md"
 
 type HandoffRecord struct {
 	FromAgent string

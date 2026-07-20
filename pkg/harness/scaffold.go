@@ -15,73 +15,73 @@ func ArtifactsForPhase(phase string, requiresUI *bool) []string {
 	switch phase {
 	case StateDiscovery:
 		return []string{
-			"product/context.md",
-			"product/assumptions.md",
-			"product/open-questions.md",
+			".harness/artifacts/product/context.md",
+			".harness/artifacts/product/assumptions.md",
+			".harness/artifacts/product/open-questions.md",
 		}
 
 	case StateProductContextReady:
 		return []string{
-			"architecture/technology-options.md",
+			".harness/artifacts/architecture/technology-options.md",
 		}
 
 	case StateTechnicalScopeDraft:
 		return []string{
-			"product/scope.md",
+			".harness/artifacts/product/scope.md",
 		}
 
 	case StateScopeApproved:
 		return []string{
-			"project/project-charter.md",
-			"project/project-plan.md",
-			"project/risk-register.md",
+			".harness/artifacts/project/project-charter.md",
+			".harness/artifacts/project/project-plan.md",
+			".harness/artifacts/project/risk-register.md",
 		}
 
 	case StateProjectPlanning:
 		return []string{
-			"project/delivery-plan.md",
+			".harness/artifacts/project/delivery-plan.md",
 		}
 
 	case StateTechnicalDesign:
 		return []string{
-			"architecture/system-architecture.md",
-			"backlog/epics.md",
-			"backlog/user-stories.md",
-			"backlog/frontend-tasks.md",
-			"backlog/backend-tasks.md",
-			"contracts/openapi.yaml",
-			"sdd/proposal.md",
-			"sdd/spec.md",
-			"sdd/tasks.md",
+			".harness/artifacts/architecture/system-architecture.md",
+			".harness/artifacts/backlog/epics.md",
+			".harness/artifacts/backlog/user-stories.md",
+			".harness/artifacts/backlog/frontend-tasks.md",
+			".harness/artifacts/backlog/backend-tasks.md",
+			".harness/artifacts/contracts/openapi.yaml",
+			".harness/artifacts/sdd/proposal.md",
+			".harness/artifacts/sdd/spec.md",
+			".harness/artifacts/sdd/tasks.md",
 		}
 
 	case StateImplementation:
 		return []string{
-			"progress/frontend.md",
-			"progress/backend.md",
+			".harness/artifacts/progress/frontend.md",
+			".harness/artifacts/progress/backend.md",
 		}
 
 	case StateIntegration:
 		return []string{
-			"reports/contract-test-report.md",
-			"reports/review-checklist.md",
+			".harness/artifacts/reports/contract-test-report.md",
+			".harness/artifacts/reports/review-checklist.md",
 		}
 
 	case StateQASecurityReview:
 		return []string{
-			"reports/qa-report.md",
-			"reports/security-review.md",
-			"reports/review-checklist.md",
+			".harness/artifacts/reports/qa-report.md",
+			".harness/artifacts/reports/security-review.md",
+			".harness/artifacts/reports/review-checklist.md",
 		}
 
 	case StateUserAcceptance:
 		return []string{
-			"project/acceptance-report.md",
+			".harness/artifacts/project/acceptance-report.md",
 		}
 
 	case StateChangeRequest:
 		return []string{
-			"project/change-management.md",
+			".harness/artifacts/project/change-management.md",
 		}
 
 	default:
@@ -134,32 +134,32 @@ func ScaffoldArtifact(s *State, path string) error {
 
 func ListScaffoldableArtifacts() []string {
 	return []string{
-		"product/context.md",
-		"product/assumptions.md",
-		"product/open-questions.md",
-		"product/scope.md",
-		"architecture/technology-options.md",
-		"architecture/system-architecture.md",
-		"project/project-charter.md",
-		"project/project-plan.md",
-		"project/risk-register.md",
-		"project/delivery-plan.md",
-		"project/change-management.md",
-		"project/acceptance-report.md",
-		"contracts/openapi.yaml",
-		"backlog/epics.md",
-		"backlog/user-stories.md",
-		"backlog/frontend-tasks.md",
-		"backlog/backend-tasks.md",
-		"sdd/proposal.md",
-		"sdd/spec.md",
-		"sdd/tasks.md",
-		"progress/frontend.md",
-		"progress/backend.md",
-		"reports/contract-test-report.md",
-		"reports/qa-report.md",
-		"reports/security-review.md",
-		"reports/review-checklist.md",
+		".harness/artifacts/product/context.md",
+		".harness/artifacts/product/assumptions.md",
+		".harness/artifacts/product/open-questions.md",
+		".harness/artifacts/product/scope.md",
+		".harness/artifacts/architecture/technology-options.md",
+		".harness/artifacts/architecture/system-architecture.md",
+		".harness/artifacts/project/project-charter.md",
+		".harness/artifacts/project/project-plan.md",
+		".harness/artifacts/project/risk-register.md",
+		".harness/artifacts/project/delivery-plan.md",
+		".harness/artifacts/project/change-management.md",
+		".harness/artifacts/project/acceptance-report.md",
+		".harness/artifacts/contracts/openapi.yaml",
+		".harness/artifacts/backlog/epics.md",
+		".harness/artifacts/backlog/user-stories.md",
+		".harness/artifacts/backlog/frontend-tasks.md",
+		".harness/artifacts/backlog/backend-tasks.md",
+		".harness/artifacts/sdd/proposal.md",
+		".harness/artifacts/sdd/spec.md",
+		".harness/artifacts/sdd/tasks.md",
+		".harness/artifacts/progress/frontend.md",
+		".harness/artifacts/progress/backend.md",
+		".harness/artifacts/reports/contract-test-report.md",
+		".harness/artifacts/reports/qa-report.md",
+		".harness/artifacts/reports/security-review.md",
+		".harness/artifacts/reports/review-checklist.md",
 	}
 }
 

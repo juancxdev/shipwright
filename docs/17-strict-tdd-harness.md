@@ -43,9 +43,9 @@ is blocked when:
 Strict mode accepts evidence in either role progress files or the central TDD report:
 
 ```txt
-progress/frontend.md
-progress/backend.md
-reports/tdd-report.md
+.harness/artifacts/progress/frontend.md
+.harness/artifacts/progress/backend.md
+.harness/artifacts/reports/tdd-report.md
 ```
 
 Evidence should include markers such as:

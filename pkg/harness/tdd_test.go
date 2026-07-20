@@ -35,8 +35,8 @@ func TestTDDBlockReasonBlocksStrictWithoutEvidence(t *testing.T) {
 	if err := SaveTDDPolicy(policy); err != nil {
 		t.Fatalf("SaveTDDPolicy: %v", err)
 	}
-	writeTestFile(t, "progress/frontend.md", "# Frontend progress\n\nImplemented screens.\n")
-	writeTestFile(t, "progress/backend.md", "# Backend progress\n\nImplemented API.\n")
+	writeTestFile(t, ".harness/artifacts/progress/frontend.md", "# Frontend progress\n\nImplemented screens.\n")
+	writeTestFile(t, ".harness/artifacts/progress/backend.md", "# Backend progress\n\nImplemented API.\n")
 
 	reason := TDDBlockReason()
 	if reason == "" {
@@ -56,8 +56,8 @@ func TestTDDBlockReasonAllowsStrictWithProgressEvidence(t *testing.T) {
 	if err := SaveTDDPolicy(policy); err != nil {
 		t.Fatalf("SaveTDDPolicy: %v", err)
 	}
-	writeTestFile(t, "progress/frontend.md", "# Frontend progress\n\n## TDD evidence:\nCommand: go test ./... PASS.\n")
-	writeTestFile(t, "progress/backend.md", "# Backend progress\n\n## Test evidence:\nCommand: go test ./... PASS.\n")
+	writeTestFile(t, ".harness/artifacts/progress/frontend.md", "# Frontend progress\n\n## TDD evidence:\nCommand: go test ./... PASS.\n")
+	writeTestFile(t, ".harness/artifacts/progress/backend.md", "# Backend progress\n\n## Test evidence:\nCommand: go test ./... PASS.\n")
 
 	if reason := TDDBlockReason(); reason != "" {
 		t.Fatalf("expected strict TDD to pass with evidence, got:\n%s", reason)
@@ -79,8 +79,8 @@ func TestAdvanceBlocksImplementationWithoutStrictTDDEvidence(t *testing.T) {
 	if err := SaveTDDPolicy(policy); err != nil {
 		t.Fatalf("SaveTDDPolicy: %v", err)
 	}
-	writeTestFile(t, "progress/frontend.md", "# Frontend progress\n\nImplemented UI.\n")
-	writeTestFile(t, "progress/backend.md", "# Backend progress\n\nImplemented API.\n")
+	writeTestFile(t, ".harness/artifacts/progress/frontend.md", "# Frontend progress\n\nImplemented UI.\n")
+	writeTestFile(t, ".harness/artifacts/progress/backend.md", "# Backend progress\n\nImplemented API.\n")
 
 	result := Advance(state)
 	if result.Transitioned {

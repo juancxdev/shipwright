@@ -83,3 +83,65 @@ Agents must:
 2. load full skill files only when the digest marks them relevant and extra detail is needed;
 3. record a fallback if a required skill is missing;
 4. refresh digests after adding or regenerating skills.
+
+
+## Skill assignments
+
+`shipwright skills refresh` also writes stack-aware assignments:
+
+```txt
+.harness/skill-assignments.json
+.harness/skill-assignments.md
+```
+
+Assignments use `.harness/project-profile.json` as their source of truth. Technology detection stays centralized in `CalibrateProject()` / `shipwright init`; assignment only maps calibrated stack signals and combos to Shipwright agents. Installed skills are linked through the local skill registry; missing recommendations are treated as explicit gaps.
+
+For greenfield work, `.harness/project-profile.json` can also contain `planned_stacks`. Shipwright derives these from Technical Lead artifacts (`.harness/artifacts/architecture/technology-options.md`, `.harness/artifacts/architecture/system-architecture.md`, `.harness/artifacts/project/delivery-plan.md`, `.harness/artifacts/sdd/design.md`, `.harness/artifacts/sdd/tasks.md`). `shipwright next` refreshes planned stack assignments automatically after technical-planning transitions, and `shipwright skills refresh|assign|digest` also re-read planned stack artifacts.
+
+## Curated UI/UX skill pack
+
+OpenCode bootstrap installs Shipwright-managed UI/UX skills into `.opencode/skills/`:
+
+- `frontend-design` — product-aware web UI design
+- `existing-web-to-openpencil` — existing web UI reverse engineering into OpenPencil
+- `canvas-generate-design` — Figma-like canvas screen generation rules
+- `openpencil-generate-design` — OpenPencil-specific MCP tool workflow
+- `accessibility` — WCAG-minded review rules
+- `responsive-layout-systems` — mobile/tablet/desktop layout rules
+- `design-system-tokens` — colors, typography, spacing, radius, elevation
+- `interaction-design-patterns` — flow states, feedback, errors, destructive actions
+- `openpencil-canvas-qa` — OpenPencil frame/export/overflow validation
+- `visual-handoff-to-frontend` — design-to-frontend implementation handoff
+
+When a detected or planned stack suggests UI/frontend work, assignments add these skills under `frontend-ui-quality` so designer, frontend, and QA roles get stronger interface guidance.
+
+The mapping is declarative. Skill pack manifests live in `pkg/harness/templates/project/harness/skill-packs/`; Go code loads these manifests and evaluates them against `.harness/project-profile.json`.
+
+## Optional provider import
+
+Shipwright does not invoke autoskills during `shipwright init`. If a user already ran autoskills or any compatible tool that writes `.agents/skills`, they can opt in:
+
+```bash
+shipwright skills providers
+shipwright skills import autoskills
+```
+
+`import autoskills` copies compatible skill directories into `.opencode/skills`, then refreshes skill registry, assignments, and digests.
+
+
+## Existing web to OpenPencil
+
+Shipwright includes the curated `existing-web-to-openpencil` skill for existing frontend projects. It is assigned through the `frontend-ui-quality` pack when the calibrated or planned stack suggests frontend/UI work, including Astro. The UI/UX Designer must inventory all discovered routes/views, inspect current routes/components/styles and rendered evidence, write `.harness/artifacts/design/route-inventory.md`, `.harness/artifacts/design/reverse-engineering.md`, `.harness/artifacts/design/visual-inventory.md`, and `.harness/artifacts/design/fidelity-report.md`, recreate the current UI in OpenPencil before redesigning, and compare exports against source evidence before claiming completion. If requested routes are missing or source evidence was unavailable, the fidelity report cannot pass.
+
+
+## Canvas generation skills
+
+Shipwright includes two Figma-inspired canvas skills:
+
+- `canvas-generate-design` — tool-agnostic rules for creating full screens/views with frames, components, tokens, responsive variants, exports, and fidelity gates.
+- `openpencil-generate-design` — OpenPencil-specific workflow for available `open-pencil_*` tools such as page/tree reads, render/update operations, exports, save handling, and QA evidence.
+
+These skills are intended to prevent primitive-only canvas drawings. Agents should build with reusable components, token inventories, clean hierarchy, responsive frames, and evidence before claiming a view is ready.
+
+
+OpenPencil save is a gate: agents must export visual evidence, attempt to save `.harness/artifacts/design/openpencil/app.pen`, retry once on timeout, write `.harness/artifacts/design/openpencil/save-status.md`, and only claim `.pen` persistence after verification. If save times out, exports are temporary evidence and the save failure is a blocker unless the user explicitly accepts export-only work.

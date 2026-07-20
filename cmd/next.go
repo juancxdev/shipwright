@@ -55,6 +55,15 @@ func Next(args []string) {
 		Fail(fmt.Sprintf("error guardando estado: %s", err))
 	}
 
+	if shouldRefreshPlannedStackAfterTransition(result.From, result.To) {
+		refresh, err := harness.RefreshPlannedStackSkillArtifacts()
+		if err != nil {
+			PrintInfo(fmt.Sprintf("warning: no se pudo recalibrar planned stack/skills: %s", err))
+		} else if refresh.ProfileUpdated {
+			PrintInfo(fmt.Sprintf("planned stack recalibrado (%d tecnologías); skill assignments actualizados", len(refresh.PlannedStacks)))
+		}
+	}
+
 	nextAction := computeNextAction(state)
 	if err := harness.UpdateCurrent(state, nextAction); err != nil {
 		Fail(fmt.Sprintf("error actualizando progress: %s", err))
@@ -99,4 +108,17 @@ func Next(args []string) {
 	fmt.Println()
 	fmt.Println("Next action:")
 	fmt.Println(nextAction)
+}
+
+func shouldRefreshPlannedStackAfterTransition(from, to string) bool {
+	switch from {
+	case harness.StateProductContextReady, harness.StateTechnicalScopeDraft, harness.StateTechnicalDesign:
+		return true
+	}
+	switch to {
+	case harness.StateScopeReview, harness.StateBacklogReady:
+		return true
+	default:
+		return false
+	}
 }

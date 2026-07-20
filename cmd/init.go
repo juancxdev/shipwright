@@ -69,7 +69,7 @@ func Init(args []string) {
 	if err := harness.InitProgress(); err != nil {
 		Fail(fmt.Sprintf("error inicializando progress: %s", err))
 	}
-	PrintSuccess("Progress log inicializado (progress/current.md, progress/history.md)")
+	PrintSuccess("Progress log inicializado (.harness/artifacts/progress/current.md, .harness/artifacts/progress/history.md)")
 
 	if err := harness.SaveProjectProfile(profile); err != nil {
 		Fail(fmt.Sprintf("error guardando project profile: %s", err))
@@ -96,6 +96,11 @@ func Init(args []string) {
 		Fail(fmt.Sprintf("error refrescando skill registry: %s", err))
 	}
 	PrintSuccess(fmt.Sprintf("Skill registry creado (.harness/skill-registry.json, %d skills)", len(registry.Skills)))
+	assignments, err := harness.RefreshSkillAssignmentsFromRegistry(registry)
+	if err != nil {
+		Fail(fmt.Sprintf("error generando skill assignments: %s", err))
+	}
+	PrintSuccess(fmt.Sprintf("Skill assignments creados (.harness/skill-assignments.json, %d tecnologías)", len(assignments.Technologies)))
 	digests, err := harness.RefreshSkillDigestsFromRegistry(registry)
 	if err != nil {
 		Fail(fmt.Sprintf("error generando skill digests: %s", err))
@@ -104,17 +109,17 @@ func Init(args []string) {
 
 	fmt.Println()
 	fmt.Println("Estructura creada:")
-	fmt.Println("  .harness/          — estado, project profile, TDD policy, skill registry, skill digests, agentes, approvals, integrations")
-	fmt.Println("  product/           — discovery, contexto, alcance")
-	fmt.Println("  project/           — planificación PMBOK-lite")
-	fmt.Println("  design/            — UX/UI (OpenPencil-ready)")
-	fmt.Println("  architecture/      — decisiones técnicas")
-	fmt.Println("  contracts/         — OpenAPI, eventos")
-	fmt.Println("  backlog/           — epics, stories, tasks")
-	fmt.Println("  sdd/               — specs, design, tasks")
-	fmt.Println("  knowledge/         — conocimiento reusable")
-	fmt.Println("  progress/          — current.md, history.md")
-	fmt.Println("  reports/           — QA, security, contract tests")
+	fmt.Println("  .harness/          — estado, project profile, TDD policy, skill registry, skill assignments, skill digests, agentes, approvals, integrations")
+	fmt.Println("  .harness/artifacts/product/           — discovery, contexto, alcance")
+	fmt.Println("  .harness/artifacts/project/           — planificación PMBOK-lite")
+	fmt.Println("  .harness/artifacts/design/            — UX/UI (OpenPencil-ready)")
+	fmt.Println("  .harness/artifacts/architecture/      — decisiones técnicas")
+	fmt.Println("  .harness/artifacts/contracts/         — OpenAPI, eventos")
+	fmt.Println("  .harness/artifacts/backlog/           — epics, stories, tasks")
+	fmt.Println("  .harness/artifacts/sdd/               — specs, design, tasks")
+	fmt.Println("  .harness/artifacts/knowledge/         — conocimiento reusable")
+	fmt.Println("  .harness/artifacts/progress/          — current.md, history.md")
+	fmt.Println("  .harness/artifacts/reports/           — QA, security, contract tests")
 	if executorName != "" {
 		fmt.Printf("  executor: %-9s — AI executor bootstrap generated\n", executorName)
 	}
@@ -124,6 +129,7 @@ func Init(args []string) {
 	if executorName == harness.ExecutorOpenCode {
 		fmt.Println("  o simplemente ejecutá: opencode")
 	}
+	printOptionalSkillImportHint(profile, assignments)
 }
 
 type initOptions struct {
@@ -183,5 +189,31 @@ func printProjectCalibrationSummary(profile *harness.ProjectProfile) {
 	fmt.Printf("  TDD mode:   %s\n", profile.TDD.RecommendedMode)
 	if len(profile.Warnings) > 0 {
 		fmt.Printf("  warnings:   %d\n", len(profile.Warnings))
+	}
+}
+
+func printOptionalSkillImportHint(profile *harness.ProjectProfile, assignments *harness.SkillAssignmentSet) {
+	fmt.Println()
+	fmt.Println("Skills opcionales:")
+	if profile != nil && (len(profile.Languages) > 0 || len(profile.Stacks) > 0) {
+		var detected []string
+		detected = append(detected, profile.Languages...)
+		for _, stack := range profile.Stacks {
+			detected = append(detected, stack.Name)
+		}
+		fmt.Printf("  tecnologías detectadas: %s\n", strings.Join(harness.SortedUniqueForDisplay(detected), ", "))
+	} else {
+		fmt.Println("  tecnologías detectadas: greenfield/no detectado todavía")
+	}
+	if assignments != nil && len(assignments.Skills) > 0 {
+		fmt.Printf("  recomendaciones actuales: %d skills\n", len(assignments.Skills))
+	}
+	fmt.Println("  Shipwright no ejecuta instaladores externos durante init.")
+	if harness.AutoSkillsAvailable() {
+		fmt.Println("  Se detectó .agents/skills. Podés importarlas con:")
+		fmt.Println("    shipwright skills import autoskills")
+	} else {
+		fmt.Println("  Si usás autoskills después, importá sus skills con:")
+		fmt.Println("    shipwright skills import autoskills")
 	}
 }

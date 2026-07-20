@@ -45,7 +45,7 @@ func memoryStatus(args []string) {
 	fmt.Println()
 
 	engramOn := integrations.IsEngramEnabled()
-	mode := "fallback (progress/decisions.md)"
+	mode := "fallback (.harness/artifacts/progress/decisions.md)"
 	if engramOn {
 		mode = "engram (.harness/memory-queue.json)"
 	}
@@ -124,7 +124,7 @@ func memoryDisable(args []string) {
 	}
 
 	PrintSuccess("Engram memory disabled.")
-	PrintInfo("Future memory events will be written to progress/decisions.md")
+	PrintInfo("Future memory events will be written to .harness/artifacts/progress/decisions.md")
 }
 
 func memoryFlush(args []string) {

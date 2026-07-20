@@ -27,7 +27,7 @@ Shipwright itself only requires the harness files and Go runtime while developin
 Engram and OpenPencil are optional integrations. If they are missing, Shipwright uses explicit fallbacks:
 
 ```txt
-Engram missing      -> progress/decisions.md
+Engram missing      -> .harness/artifacts/progress/decisions.md
 OpenPencil missing  -> design-doc-only
 ```
 

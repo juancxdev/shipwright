@@ -80,6 +80,16 @@ func TestOpenCodeExecutorGeneratesSupportedFiles(t *testing.T) {
 	assertFileContains(t, filepath.Join(".opencode", "opencode.json"), "\"open-pencil_*\"")
 	assertFileContains(t, filepath.Join(".harness", "bin", "shipwright"), "../shipwright")
 	assertFileContains(t, filepath.Join(".harness", "bin", "shipwright"), "SHIPWRIGHT_BIN")
+	if ArtifactExists(filepath.Join(".harness", "bin", "loom")) || ArtifactExists(filepath.Join(".harness", "bin", "loom.cmd")) {
+		t.Fatal("legacy loom wrappers should not be generated for unreleased Shipwright")
+	}
+	wrapper, err := os.ReadFile(filepath.Join(".harness", "bin", "shipwright"))
+	if err != nil {
+		t.Fatalf("read shipwright wrapper: %v", err)
+	}
+	if strings.Contains(string(wrapper), "LOOM_BIN") {
+		t.Fatal("shipwright wrapper should not reference LOOM_BIN")
+	}
 	if info, err := os.Stat(filepath.Join(".harness", "bin", "shipwright")); err != nil {
 		t.Fatalf("stat shipwright wrapper: %v", err)
 	} else if info.Mode()&0111 == 0 {
@@ -94,8 +104,16 @@ func TestOpenCodeExecutorGeneratesSupportedFiles(t *testing.T) {
 	assertFileContains(t, filepath.Join(".opencode", "agents", "ui-ux-designer.md"), "OpenPencil MCP validation")
 	assertFileContains(t, filepath.Join(".opencode", "skills", "ui-ux-designer", "SKILL.md"), "installed_no_active_canvas")
 	assertFileContains(t, filepath.Join(".opencode", "skills", "ui-ux-designer", "SKILL.md"), "Responsive & Accessibility QA")
+	assertFileContains(t, filepath.Join(".opencode", "skills", "ui-ux-designer", "SKILL.md"), "Existing Web Baseline Fidelity Gate")
+	assertFileContains(t, filepath.Join(".opencode", "skills", "existing-web-to-openpencil", "SKILL.md"), "fidelity-report.md")
+	assertFileContains(t, filepath.Join(".opencode", "skills", "canvas-generate-design", "SKILL.md"), "Build like a designer")
+	assertFileContains(t, filepath.Join(".opencode", "skills", "openpencil-generate-design", "SKILL.md"), "open-pencil_get_current_page")
+	assertFileContains(t, filepath.Join(".opencode", "skills", "openpencil-generate-design", "SKILL.md"), "save-status.md")
 	assertFileContains(t, filepath.Join(".opencode", "skills", "ui-ux-designer", "SKILL.md"), "No component extends outside its frame/canvas")
 	assertFileContains(t, filepath.Join(".opencode", "skills", "product-owner", "SKILL.md"), "name: product-owner")
+	assertFileContains(t, filepath.Join(".opencode", "skills", "frontend-design", "SKILL.md"), "name: frontend-design")
+	assertFileContains(t, filepath.Join(".opencode", "skills", "accessibility", "SKILL.md"), "Keyboard first")
+	assertFileContains(t, filepath.Join(".opencode", "skills", "responsive-layout-systems", "SKILL.md"), "390×844")
 
 	status, err := OpenCodeExecutorAdapter{}.Status()
 	if err != nil {

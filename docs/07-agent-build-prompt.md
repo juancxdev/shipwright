@@ -21,7 +21,7 @@ Reglas obligatorias:
 3. No agregues integraciones reales con OpenPencil, Engram, Jira, GitHub Issues ni CI todavía.
 4. Usá almacenamiento local con Markdown y JSON.
 5. El harness debe impedir avanzar de fase si faltan artefactos o approvals.
-6. Todo avance debe registrarse en progress/history.md.
+6. Todo avance debe registrarse en .harness/artifacts/progress/history.md.
 7. No declares nada como terminado sin evidencia.
 8. Si falta contexto, no inventes: registrá una pregunta o bloqueo.
 
@@ -43,16 +43,16 @@ Estructura esperada:
   gates.json
   templates/
 
-product/
-project/
-design/
-architecture/
-contracts/
-backlog/
-sdd/
-knowledge/
-progress/
-reports/
+.harness/artifacts/product/
+.harness/artifacts/project/
+.harness/artifacts/design/
+.harness/artifacts/architecture/
+.harness/artifacts/contracts/
+.harness/artifacts/backlog/
+.harness/artifacts/sdd/
+.harness/artifacts/knowledge/
+.harness/artifacts/progress/
+.harness/artifacts/reports/
 
 Criterios de aceptación:
 

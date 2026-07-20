@@ -21,7 +21,7 @@ const (
 )
 
 const MemoryQueueFile = ".harness/memory-queue.json"
-const DecisionsFile = "progress/decisions.md"
+const DecisionsFile = ".harness/artifacts/progress/decisions.md"
 
 type MemoryEvent struct {
 	ID        string `json:"id"`
@@ -143,50 +143,50 @@ func SaveGateMemory(ms *MemoryService, state *State, gate string) error {
 	case GateScope:
 		return ms.SaveDecision(
 			"Scope approved: "+state.ProjectName,
-			"project/scope",
+			".harness/artifacts/project/scope",
 			"User approved the functional scope for the project",
 			"Gate approval — scope review completed",
-			"product/scope.md, .harness/approvals/scope.json",
+			".harness/artifacts/product/scope.md, .harness/approvals/scope.json",
 			"",
 		)
 
 	case GateUXDesign:
 		return ms.SaveDecision(
 			"UX design approved: "+state.ProjectName,
-			"design/ux-approval",
+			".harness/artifacts/design/ux-approval",
 			"User approved the UX design for the project",
 			"Gate approval — UX design review completed",
-			"design/prototype.md, design/user-flows.md, .harness/approvals/ux-design.json",
+			".harness/artifacts/design/prototype.md, .harness/artifacts/design/user-flows.md, .harness/approvals/ux-design.json",
 			"",
 		)
 
 	case GateTechnicalPlan:
 		return ms.SaveArchitecture(
 			"Technical plan approved: "+state.ProjectName,
-			"architecture/system",
+			".harness/artifacts/architecture/system",
 			"User approved the technical plan including architecture and backlog",
 			"Gate approval — technical plan review completed, implementation can begin",
-			"architecture/system-architecture.md, backlog/epics.md, .harness/approvals/technical-plan.json",
+			".harness/artifacts/architecture/system-architecture.md, .harness/artifacts/backlog/epics.md, .harness/approvals/technical-plan.json",
 			"",
 		)
 
 	case GateTechLeadReview:
 		return ms.SaveDecision(
 			"Tech lead review approved: "+state.ProjectName,
-			"project/tech-lead-review",
+			".harness/artifacts/project/tech-lead-review",
 			"Tech lead approved the implementation after QA/security review",
 			"Gate approval — tech lead review passed, ready for user acceptance",
-			"reports/qa-report.md, reports/security-review.md, .harness/approvals/tech-lead.json",
+			".harness/artifacts/reports/qa-report.md, .harness/artifacts/reports/security-review.md, .harness/approvals/tech-lead.json",
 			"",
 		)
 
 	case GateFinalAcceptance:
 		return ms.SaveDecision(
 			"Final acceptance: "+state.ProjectName,
-			"project/acceptance",
+			".harness/artifacts/project/acceptance",
 			"User accepted the final delivery of the project",
 			"Gate approval — project closed with user acceptance",
-			"project/acceptance-report.md, .harness/approvals/final-acceptance.json",
+			".harness/artifacts/project/acceptance-report.md, .harness/approvals/final-acceptance.json",
 			"",
 		)
 
@@ -198,7 +198,7 @@ func SaveGateMemory(ms *MemoryService, state *State, gate string) error {
 func SaveChangeRequestMemory(ms *MemoryService, state *State, reason, crFile string) error {
 	return ms.SaveDiscovery(
 		"Change request: "+state.ProjectName,
-		"project/change-request",
+		".harness/artifacts/project/change-request",
 		"Change request created: "+reason,
 		"User requested a change during the delivery cycle",
 		crFile,
@@ -210,10 +210,10 @@ func SavePhaseTransitionMemory(ms *MemoryService, state *State, fromPhase, toPha
 	if toPhase == StateTechnicalDesign {
 		return ms.SaveArchitecture(
 			"Architecture phase entered: "+state.ProjectName,
-			"architecture/system",
+			".harness/artifacts/architecture/system",
 			"Project entered TECHNICAL_DESIGN phase — TL must create architecture, contracts and backlog",
 			"State machine transition from "+fromPhase+" to "+toPhase,
-			"architecture/, contracts/, backlog/",
+			".harness/artifacts/architecture/, .harness/artifacts/contracts/, .harness/artifacts/backlog/",
 			"",
 		)
 	}

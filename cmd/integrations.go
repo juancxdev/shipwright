@@ -164,7 +164,7 @@ func integrationsDisable(args []string) {
 		if err := integrations.Save(); err != nil {
 			Fail(fmt.Sprintf("cannot save: %s", err))
 		}
-		PrintSuccess("Engram disabled. Events will write to progress/decisions.md")
+		PrintSuccess("Engram disabled. Events will write to .harness/artifacts/progress/decisions.md")
 
 	case "openpencil":
 		if !integrations.IsOpenPencilEnabled() {
@@ -221,7 +221,7 @@ func integrationsDetect(args []string) {
 
 	opInstalled := openpencil.Installed
 	fmt.Println("OpenPencil:")
-	fmt.Printf("  App installed:  %s\n", boolYesNo(opInstalled))
+	fmt.Printf("  MCP available:  %s\n", boolYesNo(opInstalled))
 	fmt.Printf("  status:         %s\n", openpencil.Status)
 	if openpencil.Path != "" {
 		fmt.Printf("  mcp path:       %s\n", openpencil.Path)
@@ -230,11 +230,17 @@ func integrationsDetect(args []string) {
 		fmt.Printf("  reason:         %s\n", openpencil.Reason)
 	}
 	if opInstalled && openpencil.Active {
-		fmt.Printf("  Canvas active:   yes\n")
-		fmt.Printf("  → recommendation: enable with 'shipwright integrations enable openpencil'\n")
+		fmt.Printf("  Canvas verified: yes\n")
+		if !integrations.IsOpenPencilEnabled() {
+			fmt.Printf("  → recommendation: enable with 'shipwright integrations enable openpencil'\n")
+		}
 	} else if opInstalled {
-		fmt.Printf("  Canvas active:   no\n")
-		fmt.Printf("  → fallback: %s (canvas not active)\n", openpencil.Fallback)
+		fmt.Printf("  Canvas verified: no (CLI cannot verify live OpenPencil canvas)\n")
+		if !integrations.IsOpenPencilEnabled() {
+			fmt.Printf("  → recommendation: enable with 'shipwright integrations enable openpencil'\n")
+		}
+		fmt.Printf("  → next check: open OpenCode and run/ask: opencode mcp list; then use open-pencil_get_editor_state\n")
+		fmt.Printf("  → fallback only if OpenCode cannot see open-pencil_* MCP tools: %s\n", openpencil.Fallback)
 	} else {
 		fmt.Printf("  → fallback: %s\n", openpencil.Fallback)
 	}

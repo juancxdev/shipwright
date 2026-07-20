@@ -50,6 +50,35 @@ func TestCalibrateProjectDetectsNodeTypeScriptStack(t *testing.T) {
 	}
 }
 
+func TestCalibrateProjectDetectsAstroStack(t *testing.T) {
+	withTempWorkingDir(t)
+	writeProjectProfileTestFile(t, "package.json", `{
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build"
+  },
+  "dependencies": {
+    "astro": "latest"
+  },
+  "devDependencies": {
+    "typescript": "latest"
+  }
+}`)
+	writeProjectProfileTestFile(t, "astro.config.mjs", `import { defineConfig } from "astro/config";
+export default defineConfig({});
+`)
+	writeProjectProfileTestFile(t, "src/pages/index.astro", `<h1>Hello Astro</h1>`)
+
+	profile, err := CalibrateProject("astro-site")
+	if err != nil {
+		t.Fatalf("CalibrateProject: %v", err)
+	}
+
+	assertStack(t, profile.Stacks, "Astro")
+	assertCommand(t, profile.Commands.Dev, "npm run dev")
+	assertCommand(t, profile.Commands.Build, "npm run build")
+}
+
 func TestCalibrateProjectDetectsGoProject(t *testing.T) {
 	withTempWorkingDir(t)
 	writeProjectProfileTestFile(t, "go.mod", "module example.com/app\n\ngo 1.24\n")

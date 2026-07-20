@@ -97,6 +97,11 @@ func executorGenerate(args []string) {
 	PrintSuccess(result.Message)
 	if registry, err := harness.RefreshSkillRegistry(); err == nil {
 		PrintSuccess(fmt.Sprintf("Skill registry actualizado (%d skills)", len(registry.Skills)))
+		if assignments, err := harness.RefreshSkillAssignmentsFromRegistry(registry); err == nil {
+			PrintSuccess(fmt.Sprintf("Skill assignments actualizados (%d tecnologías)", len(assignments.Technologies)))
+		} else {
+			PrintInfo(fmt.Sprintf("skill assignments no actualizados: %s", err))
+		}
 		if digests, err := harness.RefreshSkillDigestsFromRegistry(registry); err == nil {
 			PrintSuccess(fmt.Sprintf("Skill digests actualizados (%d agentes)", len(digests.Digests)))
 		} else {

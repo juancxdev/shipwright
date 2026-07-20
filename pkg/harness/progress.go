@@ -3,17 +3,18 @@ package harness
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
 
 const (
-	CurrentFile = "progress/current.md"
-	HistoryFile = "progress/history.md"
+	CurrentFile = ".harness/artifacts/progress/current.md"
+	HistoryFile = ".harness/artifacts/progress/history.md"
 )
 
 func InitProgress() error {
-	if err := os.MkdirAll("progress", 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(CurrentFile), 0755); err != nil {
 		return err
 	}
 	current := fmt.Sprintf(`# Current Status

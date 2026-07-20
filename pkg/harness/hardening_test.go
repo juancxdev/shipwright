@@ -101,15 +101,15 @@ func TestUXDesignRequiresResponsiveQABeforeApproval(t *testing.T) {
 	chdirTemp(t)
 	state := NewState("Billing")
 	state.CurrentPhase = StateUXDesign
-	writeTestFile(t, "design/prototype.md", "prototype")
-	writeTestFile(t, "design/user-flows.md", "flows")
+	writeTestFile(t, ".harness/artifacts/design/prototype.md", "prototype")
+	writeTestFile(t, ".harness/artifacts/design/user-flows.md", "flows")
 
 	result := Advance(state)
 	if result.Transitioned {
 		t.Fatal("expected UX_DESIGN transition to be blocked without responsive QA")
 	}
-	if !containsString(result.MissingArtifacts, "design/responsive-qa.md") {
-		t.Fatalf("missing artifacts = %v, want design/responsive-qa.md", result.MissingArtifacts)
+	if !containsString(result.MissingArtifacts, ".harness/artifacts/design/responsive-qa.md") {
+		t.Fatalf("missing artifacts = %v, want .harness/artifacts/design/responsive-qa.md", result.MissingArtifacts)
 	}
 }
 
@@ -127,9 +127,9 @@ func TestTransitionAuditWrittenOnSuccessfulAdvance(t *testing.T) {
 	chdirTemp(t)
 	state := NewState("Billing")
 	state.CurrentPhase = StateDiscovery
-	writeTestFile(t, "product/context.md", "context")
-	writeTestFile(t, "product/assumptions.md", "assumptions")
-	writeTestFile(t, "product/open-questions.md", "none")
+	writeTestFile(t, ".harness/artifacts/product/context.md", "context")
+	writeTestFile(t, ".harness/artifacts/product/assumptions.md", "assumptions")
+	writeTestFile(t, ".harness/artifacts/product/open-questions.md", "none")
 
 	result := Advance(state)
 	if !result.Transitioned {
@@ -226,11 +226,11 @@ func TestDocOnlyDesignFallbackGeneratesResponsiveQA(t *testing.T) {
 	if err != nil {
 		t.Fatalf("StartDesign: %v", err)
 	}
-	if !containsString(result.FilesCreated, "design/responsive-qa.md") {
+	if !containsString(result.FilesCreated, ".harness/artifacts/design/responsive-qa.md") {
 		t.Fatalf("files = %v, want responsive QA artifact", result.FilesCreated)
 	}
-	assertFileContainsLocal(t, "design/responsive-qa.md", "Mobile 390x844")
-	assertFileContainsLocal(t, "design/responsive-qa.md", "No component extends outside")
+	assertFileContainsLocal(t, ".harness/artifacts/design/responsive-qa.md", "Mobile 390x844")
+	assertFileContainsLocal(t, ".harness/artifacts/design/responsive-qa.md", "No component extends outside")
 }
 
 func containsString(values []string, needle string) bool {

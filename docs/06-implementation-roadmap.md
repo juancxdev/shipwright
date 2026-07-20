@@ -51,11 +51,11 @@ Tareas:
 
 Tareas:
 
-- Generar `sdd/proposal.md` desde scope aprobado.
-- Generar `sdd/spec.md` desde proposal.
-- Generar `sdd/design.md` desde arquitectura.
-- Generar `sdd/tasks.md` desde backlog.
-- Generar `sdd/verification.md` desde QA criteria.
+- Generar `.harness/artifacts/sdd/proposal.md` desde scope aprobado.
+- Generar `.harness/artifacts/sdd/spec.md` desde proposal.
+- Generar `.harness/artifacts/sdd/design.md` desde arquitectura.
+- Generar `.harness/artifacts/sdd/tasks.md` desde backlog.
+- Generar `.harness/artifacts/sdd/verification.md` desde QA criteria.
 
 Inspiración: enfoque Gentle-AI donde SDD es opcional para trabajo sustancial, con artifacts persistibles y gates por fase.
 
@@ -64,7 +64,7 @@ Inspiración: enfoque Gentle-AI donde SDD es opcional para trabajo sustancial, c
 Tareas:
 
 - Detectar si OpenPencil MCP está disponible.
-- Permitir crear/actualizar diseño en `design/openpencil/`.
+- Permitir crear/actualizar diseño en `.harness/artifacts/design/openpencil/`.
 - Exportar wireframes/prototipos.
 - Bloquear backlog frontend final hasta aprobación UX cuando aplica.
 

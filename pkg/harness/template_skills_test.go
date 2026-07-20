@@ -22,3 +22,89 @@ func TestAgentSkillsLoadFromProjectTemplates(t *testing.T) {
 		t.Fatalf("shared agent common template was not loaded")
 	}
 }
+
+func TestCuratedSkillTemplatesLoaded(t *testing.T) {
+	frontend := GetCuratedSkill("frontend-design")
+	if frontend == nil {
+		t.Fatal("frontend-design curated skill not loaded")
+	}
+	if !strings.Contains(frontend.Content, "name: frontend-design") {
+		t.Fatalf("frontend-design template content was not loaded")
+	}
+	reverse := GetCuratedSkill("existing-web-to-openpencil")
+	if reverse == nil {
+		t.Fatal("existing-web-to-openpencil curated skill not loaded")
+	}
+	if !strings.Contains(reverse.Content, "name: existing-web-to-openpencil") || !strings.Contains(reverse.Content, "Astro-specific guidance") {
+		t.Fatalf("existing-web-to-openpencil template content was not loaded")
+	}
+	for _, required := range []string{
+		".harness/artifacts/design/route-inventory.md",
+		".harness/artifacts/design/fidelity-report.md",
+		"Do not claim a faithful baseline from code inspection alone",
+		"If any requested route/view was excluded without user approval, status is `fail`",
+	} {
+		if !strings.Contains(reverse.Content, required) {
+			t.Fatalf("existing-web-to-openpencil missing fidelity guard %q", required)
+		}
+	}
+	for _, skillName := range []string{"canvas-generate-design", "openpencil-generate-design"} {
+		skill := GetCuratedSkill(skillName)
+		if skill == nil {
+			t.Fatalf("%s curated skill not loaded", skillName)
+		}
+		if !strings.Contains(skill.Content, "name: "+skillName) {
+			t.Fatalf("%s template content was not loaded", skillName)
+		}
+	}
+	openpencil := GetCuratedSkill("openpencil-generate-design")
+	for _, required := range []string{
+		"## Save protocol",
+		".harness/artifacts/design/openpencil/app.pen",
+		".harness/artifacts/design/openpencil/save-status.md",
+		"Do not declare `.pen` persistence unless save verification passed",
+	} {
+		if !strings.Contains(openpencil.Content, required) {
+			t.Fatalf("openpencil-generate-design missing save guard %q", required)
+		}
+	}
+	if len(AllCuratedSkills()) < 10 {
+		t.Fatalf("expected curated lifecycle skills, got %d", len(AllCuratedSkills()))
+	}
+}
+
+func TestSkillPackTemplatesLoaded(t *testing.T) {
+	packs := AllSkillPacks()
+	if len(packs) == 0 {
+		t.Fatal("expected embedded skill packs")
+	}
+	found := false
+	for _, pack := range packs {
+		if pack.ID == "frontend-ui-quality" {
+			found = true
+			if len(pack.Skills) < 10 {
+				t.Fatalf("frontend-ui-quality should include UI/UX skills: %+v", pack.Skills)
+			}
+			for _, skillName := range []string{"existing-web-to-openpencil", "canvas-generate-design", "openpencil-generate-design"} {
+				if !stringSliceHas(pack.Skills, skillName) {
+					t.Fatalf("frontend-ui-quality should include %s: %+v", skillName, pack.Skills)
+				}
+			}
+			if !stringSliceHas(pack.When.Stacks, "Astro") {
+				t.Fatalf("frontend-ui-quality should match Astro: %+v", pack.When.Stacks)
+			}
+		}
+	}
+	if !found {
+		t.Fatalf("frontend-ui-quality pack not found: %+v", packs)
+	}
+}
+
+func stringSliceHas(values []string, want string) bool {
+	for _, value := range values {
+		if value == want {
+			return true
+		}
+	}
+	return false
+}

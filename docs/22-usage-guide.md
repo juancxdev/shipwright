@@ -70,16 +70,16 @@ This defaults to OpenCode and creates:
 ```txt
 .harness/
 .opencode/
-product/
-project/
-design/
-architecture/
-contracts/
-backlog/
-sdd/
-knowledge/
-progress/
-reports/
+.harness/artifacts/product/
+.harness/artifacts/project/
+.harness/artifacts/design/
+.harness/artifacts/architecture/
+.harness/artifacts/contracts/
+.harness/artifacts/backlog/
+.harness/artifacts/sdd/
+.harness/artifacts/knowledge/
+.harness/artifacts/progress/
+.harness/artifacts/reports/
 AGENTS.md
 ```
 
@@ -293,7 +293,7 @@ Rules:
 
 - frontend must keep mock mode and real API mode,
 - mocks must align with contract,
-- backend implements against `contracts/openapi.yaml`,
+- backend implements against `.harness/artifacts/contracts/openapi.yaml`,
 - contract changes require approval/change request.
 
 ## 12. TDD evidence gate
@@ -307,9 +307,9 @@ shipwright tdd status
 If mode is `strict`, Shipwright blocks implementation → integration until test evidence exists in:
 
 ```txt
-progress/frontend.md
-progress/backend.md
-reports/tdd-report.md
+.harness/artifacts/progress/frontend.md
+.harness/artifacts/progress/backend.md
+.harness/artifacts/reports/tdd-report.md
 ```
 
 Example evidence:

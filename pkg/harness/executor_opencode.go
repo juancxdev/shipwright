@@ -26,13 +26,6 @@ func (OpenCodeExecutorAdapter) Generate() (*ExecutorGenerateResult, error) {
 	if err := writeTrackedFile(filepath.Join(".harness", "bin", "shipwright.cmd"), opencodeShipwrightWrapperCMD(), result); err != nil {
 		return nil, err
 	}
-	// Legacy wrappers keep older generated OpenCode prompts working during the LOOM -> Shipwright rename.
-	if err := writeExecutableTrackedFile(filepath.Join(".harness", "bin", "loom"), opencodeShipwrightWrapperSH(), result); err != nil {
-		return nil, err
-	}
-	if err := writeTrackedFile(filepath.Join(".harness", "bin", "loom.cmd"), opencodeShipwrightWrapperCMD(), result); err != nil {
-		return nil, err
-	}
 	if err := writeTrackedFile(openCodeConfigPath(), opencodeJSON(), result); err != nil {
 		return nil, err
 	}
@@ -47,6 +40,11 @@ func (OpenCodeExecutorAdapter) Generate() (*ExecutorGenerateResult, error) {
 			return nil, err
 		}
 	}
+	for _, skill := range AllCuratedSkills() {
+		if err := writeTrackedFile(opencodeSkillPath(skill.Name), skill.Content, result); err != nil {
+			return nil, err
+		}
+	}
 	for _, command := range opencodeCommands() {
 		if err := writeTrackedFile(filepath.Join(".opencode", "commands", command.Filename), command.Content, result); err != nil {
 			return nil, err
@@ -57,9 +55,12 @@ func (OpenCodeExecutorAdapter) Generate() (*ExecutorGenerateResult, error) {
 }
 
 func (OpenCodeExecutorAdapter) Status() (*ExecutorStatus, error) {
-	files := []string{"AGENTS.md", filepath.Join(".harness", "bin", "shipwright"), filepath.Join(".harness", "bin", "shipwright.cmd"), filepath.Join(".harness", "bin", "loom"), filepath.Join(".harness", "bin", "loom.cmd"), openCodeConfigPath(), filepath.Join(".opencode", "skills", "_shared", "agent-common.md")}
+	files := []string{"AGENTS.md", filepath.Join(".harness", "bin", "shipwright"), filepath.Join(".harness", "bin", "shipwright.cmd"), openCodeConfigPath(), filepath.Join(".opencode", "skills", "_shared", "agent-common.md")}
 	for _, skill := range AllAgentSkills() {
 		files = append(files, opencodeAgentPath(skill.Name), opencodeSkillPath(skill.Name))
+	}
+	for _, skill := range AllCuratedSkills() {
+		files = append(files, opencodeSkillPath(skill.Name))
 	}
 	for _, command := range opencodeCommands() {
 		files = append(files, filepath.Join(".opencode", "commands", command.Filename))
@@ -173,23 +174,14 @@ set -eu
 if [ -n "${SHIPWRIGHT_BIN:-}" ] && [ -x "${SHIPWRIGHT_BIN}" ]; then
   exec "${SHIPWRIGHT_BIN}" "$@"
 fi
-if [ -n "${LOOM_BIN:-}" ] && [ -x "${LOOM_BIN}" ]; then
-  exec "${LOOM_BIN}" "$@"
-fi
 if [ -x "../shipwright" ]; then
   exec ../shipwright "$@"
 fi
 if [ -x "../shipwright.exe" ]; then
   exec ../shipwright.exe "$@"
 fi
-if [ -x "../loom" ]; then
-  exec ../loom "$@"
-fi
 if command -v shipwright >/dev/null 2>&1; then
   exec shipwright "$@"
-fi
-if command -v loom >/dev/null 2>&1; then
-  exec loom "$@"
 fi
 if command -v harness >/dev/null 2>&1; then
   exec harness "$@"
@@ -202,15 +194,10 @@ exit 127
 func opencodeShipwrightWrapperCMD() string {
 	return `@echo off
 if not "%SHIPWRIGHT_BIN%"=="" if exist "%SHIPWRIGHT_BIN%" "%SHIPWRIGHT_BIN%" %* & exit /b %errorlevel%
-if not "%LOOM_BIN%"=="" if exist "%LOOM_BIN%" "%LOOM_BIN%" %* & exit /b %errorlevel%
 if exist ..\shipwright.exe ..\shipwright.exe %* & exit /b %errorlevel%
 if exist ..\shipwright ..\shipwright %* & exit /b %errorlevel%
-if exist ..\loom.exe ..\loom.exe %* & exit /b %errorlevel%
-if exist ..\loom ..\loom %* & exit /b %errorlevel%
 where shipwright >nul 2>nul
 if %errorlevel%==0 shipwright %* & exit /b %errorlevel%
-where loom >nul 2>nul
-if %errorlevel%==0 loom %* & exit /b %errorlevel%
 where harness >nul 2>nul
 if %errorlevel%==0 harness %* & exit /b %errorlevel%
 echo Shipwright CLI not found. Install shipwright globally, set SHIPWRIGHT_BIN, or keep shipwright.exe one directory above this project. 1>&2
@@ -288,9 +275,10 @@ func opencodeAgentsMD() string {
 	sb.WriteString("- `.opencode/opencode.json` — project OpenCode config colocated with executor assets.\n")
 	sb.WriteString("- `.opencode/agents/*.md` — role-specific OpenCode agents.\n")
 	sb.WriteString("- `.opencode/commands/*.md` — slash commands for Shipwright workflows.\n")
-	sb.WriteString("- `.opencode/skills/*/SKILL.md` — reusable role instructions derived from Shipwright agents.\n")
+	sb.WriteString("- `.opencode/skills/*/SKILL.md` — reusable role and curated lifecycle skills derived from Shipwright.\n")
 	sb.WriteString("- `.harness/project-profile.md` — calibrated stack, commands, tests, structure, and TDD capability.\n")
-	sb.WriteString("- `.harness/tdd-policy.md` — strict/suggested/none TDD policy and evidence rules.\n\n")
+	sb.WriteString("- `.harness/tdd-policy.md` — strict/suggested/none TDD policy and evidence rules.\n")
+	sb.WriteString("- `.harness/skill-assignments.md` — detected/planned stack skill recommendations and missing gaps.\n\n")
 	sb.WriteString("Use OpenCode as executor, not as lifecycle authority. Shipwright remains the source of truth.\n\n")
 	sb.WriteString("## Shipwright Orchestrator Autopilot\n\n")
 	sb.WriteString("You are the default OpenCode agent for this project (`shipwright-orchestrator`). The user should be able to type a product request in natural language and have Shipwright begin the lifecycle automatically.\n\n")
@@ -299,9 +287,9 @@ func opencodeAgentsMD() string {
 	sb.WriteString("- Windows: `.harness/bin/shipwright.cmd <command>`\n\n")
 	sb.WriteString("Do not assume a global binary is installed; use the project-local wrapper.\n\n")
 	sb.WriteString("### On every user message\n\n")
-	sb.WriteString("1. Read `.harness/project-profile.md`, `.harness/tdd-policy.md`, `.harness/skill-registry.md`, and `.harness/skill-digests.md` if present; use detected commands, TDD capability, strict TDD policy, and role-specific skill digests instead of inventing stack assumptions.\n")
+	sb.WriteString("1. Read `.harness/project-profile.md`, `.harness/tdd-policy.md`, `.harness/skill-registry.md`, `.harness/skill-assignments.md`, and `.harness/skill-digests.md` if present; use detected commands, TDD capability, strict TDD policy, and role-specific skill assignments/digests instead of inventing stack assumptions.\n")
 	sb.WriteString("2. Run `.harness/bin/shipwright status` to read the current lifecycle phase.\n")
-	sb.WriteString("3. If phase is `INTAKE` and the user message is a product/build request, run `.harness/bin/shipwright start \"<verbatim user request>\"`.\n")
+	sb.WriteString("3. If phase is `INTAKE` and the user message is a .harness/artifacts/product/build request, run `.harness/bin/shipwright start \"<verbatim user request>\"`.\n")
 	sb.WriteString("4. Run `.harness/bin/shipwright agents active` to identify the active role.\n")
 	sb.WriteString("5. Delegate role work using the matching Shipwright subagent (`product-owner`, `technical-lead`, `ui-ux-designer`, etc.). Use OpenCode's task/subagent capability when available; otherwise follow that role's `.opencode/skills/<role>/SKILL.md` exactly.\n")
 	sb.WriteString("6. Return the role output to the user conversationally. If the active role needs user answers, ask the questions in chat; do not ask the user to manually fill files.\n")
@@ -309,7 +297,7 @@ func opencodeAgentsMD() string {
 	sb.WriteString("8. For non-approval internal transitions, run `.harness/bin/shipwright next` yourself when required artifacts/evidence exist. Do not ask the user to run `next`.\n")
 	sb.WriteString("9. If Product Owner has produced context, assumptions, open questions, and scope, advance through safe internal phases until `SCOPE_REVIEW`, then present the scope to the user.\n")
 	sb.WriteString("10. At approval gates, explain the artifact and ask the user to approve or request changes. Never self-approve. If the user says approval intent like `aprobar scope`, run the matching `.harness/bin/shipwright approve <gate>` yourself.\n")
-	sb.WriteString("11. Before moving from IMPLEMENTATION to INTEGRATION, run `.harness/bin/shipwright tdd status`; if mode is `strict`, ensure frontend/backend progress or `reports/tdd-report.md` contains executed test evidence.\n\n")
+	sb.WriteString("11. Before moving from IMPLEMENTATION to INTEGRATION, run `.harness/bin/shipwright tdd status`; if mode is `strict`, ensure frontend/backend progress or `.harness/artifacts/reports/tdd-report.md` contains executed test evidence.\n\n")
 	sb.WriteString("### Approval UX\n\n")
 	sb.WriteString("Do not tell the user to execute raw approval commands unless they explicitly ask for CLI instructions. Instead, ask in natural language. Examples:\n\n")
 	sb.WriteString("- `¿Aprobás este alcance o querés cambios?`\n")
@@ -319,12 +307,12 @@ func opencodeAgentsMD() string {
 	sb.WriteString("### DISCOVERY behavior\n\n")
 	sb.WriteString("When active agent is `product-owner`, the Product Owner must ask 3-7 concrete discovery questions in the chat before writing final context/scope if critical information is missing. This should feel like a real PO interview, not a file checklist.\n")
 	sb.WriteString("If the user's first request is already specific enough, still ask only the minimum useful questions needed to avoid wrong scope; do not ask technical stack questions in discovery unless the user brought them up.\n")
-	sb.WriteString("For a billing/invoicing MVP, ask about users, invoice lifecycle, product/customer fields, draft vs issued states, permissions, reporting, and explicit out-of-scope legal/tax requirements.\n\n")
+	sb.WriteString("For a billing/invoicing MVP, ask about users, invoice lifecycle, .harness/artifacts/product/customer fields, draft vs issued states, permissions, reporting, and explicit out-of-scope legal/tax requirements.\n\n")
 	sb.WriteString("### OpenPencil MCP behavior\n\n")
 	sb.WriteString("When the active role is `ui-ux-designer` and OpenPencil is enabled/configured, treat `installed_no_active_canvas` as **unverified**, not as failure. Shipwright cannot validate an active OpenPencil canvas from plain CLI detection; only the MCP client can.\n")
 	sb.WriteString("Before falling back to doc-only design, the UI/UX Designer must try the actual OpenCode MCP tools for the `open-pencil` server. OpenCode registers MCP tools with the server name as prefix, so expected tool names should appear as `open-pencil_*`.\n")
 	sb.WriteString("If both `pencil` and `open-pencil` MCP servers are connected, do **not** use the `pencil` server for Shipwright. In some environments `pencil` belongs to another desktop host (for example Antigravity) and can fail even when `open-pencil` is healthy.\n")
-	sb.WriteString("The validation order is: use `open-pencil_get_editor_state` from the `open-pencil` server; if it succeeds, continue with OpenPencil even if `.harness/bin/shipwright status` says `installed_no_active_canvas`; if no `open-pencil_*` tools are visible or the call fails, report MCP not connected and only then use doc-only fallback.\n\n")
+	sb.WriteString("The validation order is: use an available state/canvas/snapshot tool from the `open-pencil` server. Prefer `open-pencil_get_editor_state` when present, but accept equivalent `open-pencil_*` tools such as get-state/get-canvas/snapshot-layout. If any state/design call succeeds, continue with OpenPencil even if `.harness/bin/shipwright status` says `installed_no_active_canvas`. Only use doc-only fallback if no usable `open-pencil_*` tools are visible or all available state/design calls fail.\n\n")
 	sb.WriteString("### Safety\n\n")
 	sb.WriteString("- Never skip Shipwright gates.\n")
 	sb.WriteString("- Never implement code during Product Owner or planning phases.\n")
@@ -347,7 +335,7 @@ func opencodeAgentMarkdown(skill AgentSkill) string {
 	sb.WriteString(fmt.Sprintf("# Shipwright %s Agent\n\n", skill.Name))
 	sb.WriteString("You are executing inside a Shipwright-managed project. Shipwright controls lifecycle, phase gates, approvals, contracts, and evidence.\n\n")
 	sb.WriteString("## Before acting\n\n")
-	sb.WriteString("1. Read or request `.harness/project-profile.md`, `.harness/tdd-policy.md`, `.harness/skill-registry.md`, and `.harness/skill-digests.md` to understand detected stack, commands, TDD mode, strict evidence policy, and available reusable skills.\n")
+	sb.WriteString("1. Read or request `.harness/project-profile.md`, `.harness/tdd-policy.md`, `.harness/skill-registry.md`, `.harness/skill-assignments.md`, and `.harness/skill-digests.md` to understand detected stack, commands, TDD mode, strict evidence policy, and available reusable skills.\n")
 	sb.WriteString("2. Run or request `.harness/bin/shipwright status`.\n")
 	sb.WriteString("3. Run or request `.harness/bin/shipwright agents active`.\n")
 	sb.WriteString(fmt.Sprintf("4. Load and follow `.opencode/skills/%s/SKILL.md`.\n", skill.Name))
@@ -357,8 +345,8 @@ func opencodeAgentMarkdown(skill AgentSkill) string {
 		sb.WriteString("If `.harness/integrations.json` enables OpenPencil or `.opencode/opencode.json` contains `mcp.open-pencil`, do not treat `installed_no_active_canvas` as terminal. First try the actual OpenCode MCP tools for `open-pencil`.\n\n")
 		sb.WriteString("- Preferred tool pattern: `open-pencil_*` (OpenCode registers MCP tools with server-name prefixes).\n")
 		sb.WriteString("- If a separate `pencil` MCP server is connected, do not use it for Shipwright OpenPencil work; it may be bound to another desktop host.\n")
-		sb.WriteString("- First validation call: `open-pencil_get_editor_state`.\n")
-		sb.WriteString("- Only fall back to doc-only mode if no `open-pencil_*` MCP tool is available or the editor-state call fails.\n\n")
+		sb.WriteString("- First validation call: prefer `open-pencil_get_editor_state`, but use any equivalent available `open-pencil_*` state/canvas/snapshot tool if that exact name is absent.\n")
+		sb.WriteString("- Only fall back to doc-only mode if no usable `open-pencil_*` MCP tool is available or all state/design calls fail.\n\n")
 	}
 	sb.WriteString("## Role source\n\n")
 	sb.WriteString(fmt.Sprintf("Full role instructions live at `.opencode/skills/%s/SKILL.md` and `.harness/agents/%s.md`.\n", skill.Name, skill.Name))

@@ -62,15 +62,15 @@ Ejemplo:
 MVP: carpetas Markdown/JSON dentro del repo.
 
 ```txt
-product/
-project/
-design/
-architecture/
-contracts/
-backlog/
-sdd/
-progress/
-knowledge/
+.harness/artifacts/product/
+.harness/artifacts/project/
+.harness/artifacts/design/
+.harness/artifacts/architecture/
+.harness/artifacts/contracts/
+.harness/artifacts/backlog/
+.harness/artifacts/sdd/
+.harness/artifacts/progress/
+.harness/artifacts/knowledge/
 ```
 
 ### 4. Agent Registry
@@ -96,11 +96,11 @@ Ejemplo:
 
 ```txt
 BACKLOG_READY requires:
-- product/scope.md exists
-- project/project-plan.md exists
-- architecture/system-architecture.md exists
-- contracts/openapi.yaml exists when API exists
-- design/design-approval.md exists when UI is required
+- .harness/artifacts/product/scope.md exists
+- .harness/artifacts/project/project-plan.md exists
+- .harness/artifacts/architecture/system-architecture.md exists
+- .harness/artifacts/contracts/openapi.yaml exists when API exists
+- .harness/artifacts/design/design-approval.md exists when UI is required
 ```
 
 ### 6. Progress Log
@@ -108,10 +108,10 @@ BACKLOG_READY requires:
 Registra eventos del ciclo.
 
 ```txt
-progress/current.md
-progress/history.md
-progress/reviews.md
-progress/decisions.md
+.harness/artifacts/progress/current.md
+.harness/artifacts/progress/history.md
+.harness/artifacts/progress/reviews.md
+.harness/artifacts/progress/decisions.md
 ```
 
 ### 7. Integration Ports
@@ -152,11 +152,11 @@ integrations/
 |---|---|---|
 | Estado actual | `.harness/state.json` | SQLite |
 | Documentos del proyecto | Markdown | Markdown + DB index |
-| Memoria histórica | `progress/decisions.md` | Engram |
-| Knowledge reusable | `knowledge/*.md` | OKF |
+| Memoria histórica | `.harness/artifacts/progress/decisions.md` | Engram |
+| Knowledge reusable | `.harness/artifacts/knowledge/*.md` | OKF |
 | Backlog | Markdown | Jira/Linear/GitHub Issues |
 | Diseño UI/UX | Markdown + exports | OpenPencil |
-| Evidencias | `reports/` | CI artifacts |
+| Evidencias | `.harness/artifacts/reports/` | CI artifacts |
 
 ## Regla crítica
 

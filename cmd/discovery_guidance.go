@@ -14,17 +14,17 @@ func printDiscoveryChatGuidance() {
 	fmt.Println("O mandale este prompt al agente product-owner:")
 	fmt.Println()
 	fmt.Println("  Actuá como product-owner de Shipwright.")
-	fmt.Println("  Leé product/discovery.md y la petición inicial.")
+	fmt.Println("  Leé .harness/artifacts/product/discovery.md y la petición inicial.")
 	fmt.Println("  Haceme 3-7 preguntas de discovery en el chat antes de escribir contexto/scope.")
 	fmt.Println("  Preguntá sobre usuarios, reglas de negocio, límites del MVP, flujo de facturas, estados y criterios de éxito.")
 	fmt.Println("  No elijas arquitectura ni implementes código.")
-	fmt.Println("  Registrá las preguntas en product/open-questions.md y esperá mis respuestas si hay dudas críticas.")
+	fmt.Println("  Registrá las preguntas en .harness/artifacts/product/open-questions.md y esperá mis respuestas si hay dudas críticas.")
 	fmt.Println()
 	fmt.Println("Cuando el PO ya tenga respuestas suficientes, debe generar:")
-	fmt.Println("  product/context.md")
-	fmt.Println("  product/assumptions.md")
-	fmt.Println("  product/open-questions.md")
-	fmt.Println("  product/scope.md")
+	fmt.Println("  .harness/artifacts/product/context.md")
+	fmt.Println("  .harness/artifacts/product/assumptions.md")
+	fmt.Println("  .harness/artifacts/product/open-questions.md")
+	fmt.Println("  .harness/artifacts/product/scope.md")
 	fmt.Println()
 	fmt.Println("Después ejecutá: shipwright next")
 }
@@ -41,7 +41,7 @@ Recommended flow:
   2. Run: /shipwright-active-agent
   3. Let product-owner ask discovery questions in chat.
   4. Answer the questions.
-  5. product-owner writes product/context.md, product/assumptions.md, product/open-questions.md and product/scope.md.
+  5. product-owner writes .harness/artifacts/product/context.md, .harness/artifacts/product/assumptions.md, .harness/artifacts/product/open-questions.md and .harness/artifacts/product/scope.md.
   6. Run: shipwright next`, joinIndented(missing))
 }
 
