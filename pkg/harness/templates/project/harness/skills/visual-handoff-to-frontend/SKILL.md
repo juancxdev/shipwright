@@ -20,11 +20,13 @@ Use this skill when moving from approved design to frontend tasks, mocks, compon
 3. Identify reusable components before implementation starts.
 4. Include accessibility requirements in the task, not as a later review surprise.
 5. Every UI task should reference its source design artifact.
+6. When design/code mapping is available, every reusable UI task should reference a `DCC-*` mapping ID from `.harness/artifacts/design/code-component-map.md`.
 
 ## Handoff Checklist
 
 - Screens and routes.
 - Component inventory.
+- Design ↔ code component map: `.harness/artifacts/design/code-component-map.md` when components exist.
 - Props/data needed per component.
 - Empty/loading/error states.
 - Responsive behavior per breakpoint.
@@ -33,4 +35,4 @@ Use this skill when moving from approved design to frontend tasks, mocks, compon
 
 ## Output
 
-Update `.harness/artifacts/backlog/frontend-tasks.md`, `.harness/artifacts/design/design-decisions.md`, and relevant SDD tasks.
+Update `.harness/artifacts/backlog/frontend-tasks.md`, `.harness/artifacts/design/design-decisions.md`, `.harness/artifacts/design/code-component-map.md` when applicable, and relevant SDD tasks.

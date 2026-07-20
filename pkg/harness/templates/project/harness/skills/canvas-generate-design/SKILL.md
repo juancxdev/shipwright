@@ -18,6 +18,17 @@ Prefer in this order:
 3. Reusable local components created in the canvas.
 4. Primitives only when no component/token exists.
 
+## Figma-inspired canvas discipline
+
+Apply this discipline to OpenPencil, Figma, or any Figma-like canvas:
+
+1. **Inspect first** — before writing nodes, inspect the current canvas/page, existing frames, components, variables/tokens, styles, and naming conventions when the tool supports it. Match the file; do not impose a new convention blindly.
+2. **Component-first** — for buttons, cards, nav items, form fields, badges, pricing cards, repeated sections, and icons, reuse or create components/instances before duplicating primitives. A primitives-only screen is acceptable only for explicit low-fidelity wireframes or documented tool limitation.
+3. **Token-first** — extract colors, typography, spacing, radius, shadows, and breakpoints from code/design artifacts before hardcoding values. Preserve original CSS variable names or token names where available.
+4. **Incremental construction** — create wrapper frames first, then build one section or component family at a time. Validate after each major section before continuing.
+5. **Readback required** — every create/update step must return or record affected frame/node IDs when the tool exposes IDs. Use those IDs for validation, exports, fixes, and handoff.
+6. **Evidence beats intent** — exported/screenshot evidence is the authority. If exports differ from the source screenshot or route, fix the canvas before saying the design is ready.
+
 ## Required artifacts
 
 Create or update:
@@ -54,8 +65,14 @@ Inspect available sources:
 - `.harness/skill-assignments.md`
 - Code tokens: CSS variables, Tailwind config, theme files, design tokens JSON, component libraries.
 - Canvas components/variables/styles when the MCP tool supports them.
+- Existing canvas frames/screens that already use the project's design language.
 
 Write `.harness/artifacts/design/token-inventory.md` and `.harness/artifacts/design/component-inventory.md` before building large screens.
+
+Token inventory must include source evidence: CSS variable, Tailwind/theme path, existing canvas variable/style, or explicit approximation.
+Component inventory must include source mapping: canvas component/instance or source component path, props/variants/states, and whether it was reused or recreated.
+
+If the canvas already has components/styles, inspect those first. Only create new local components/tokens when no equivalent exists or when the user asked for a new visual system.
 
 ### 3. Plan frames and variants
 
@@ -75,6 +92,7 @@ Do not create only desktop unless the user explicitly requests desktop-only.
 For each view:
 
 - Create a top-level frame named `{View} / {Viewport}`.
+- Create the page/view wrapper before section children; do not create many top-level orphan sections and try to reparent later.
 - Use nested frames/groups that reflect semantic sections: header, hero, feature grid, pricing, footer, etc.
 - Use auto-layout-like structure when the tool supports it.
 - Keep hierarchy clean: avoid hundreds of unrelated primitives at page root.
@@ -82,6 +100,7 @@ For each view:
 - Use components for repeated UI.
 - Use variables/tokens for color, type, spacing, radius, and effects.
 - Keep section order and responsive behavior explicit.
+- After each major section, inspect/read back bounds and hierarchy when possible; fix overflow, off-canvas nodes, clipped text, or wrong stacking before adding the next section.
 
 ### 5. Validate canvas quality
 
@@ -98,9 +117,11 @@ Before claiming completion:
 When recreating an existing UI:
 
 - Compare source evidence against canvas export.
+- Compare route coverage, viewport coverage, section order, content/copy, imagery/icons, typography, colors, spacing rhythm, and responsive behavior.
 - Missing route/view means fail.
 - Missing section means fail.
 - Material layout/content mismatch means fail.
+- Primitive-only approximations of component-rich UI mean fail unless explicitly marked as low-fidelity.
 - No rendered evidence means conditional-pass at best.
 - Do not proceed to redesign while fidelity status is fail.
 

@@ -136,34 +136,45 @@ DESIGN/USER-FLOWS.MD FORMAT:
 
 ### Existing Web Baseline Fidelity Gate
 
-When the task is to recreate an existing landing/site/app in OpenPencil, load and follow the `existing-web-to-openpencil` skill if available. You must not claim the baseline is complete until:
+When the task is to recreate an existing landing/site/app in OpenPencil, load and follow the `existing-web-to-openpencil`, `canvas-generate-design`, and `openpencil-generate-design` skills if available. You must not claim the baseline is complete until:
 
 1. `.harness/artifacts/design/route-inventory.md` lists all discovered routes/views and marks which ones are included.
 2. Rendered source evidence exists or the lack of source screenshots is explicitly documented.
-3. `.harness/artifacts/design/fidelity-report.md` compares source evidence against OpenPencil exports.
-4. Every requested/included route has responsive OpenPencil frames.
-5. The fidelity report status is not `fail`.
+3. `.harness/artifacts/design/visual-inventory.md` lists the rendered section order, typography, colors, spacing rhythm, images/icons, and responsive behavior.
+4. `.harness/artifacts/design/component-inventory.md` and `.harness/artifacts/design/token-inventory.md` exist for any component-rich UI baseline.
+5. `.harness/artifacts/design/code-component-map.md` exists when the existing UI has reusable code/design components.
+6. `.harness/artifacts/design/fidelity-report.md` compares source evidence against OpenPencil exports.
+7. Every requested/included route has responsive OpenPencil frames.
+8. The fidelity report status is not `fail`.
 
 If the current app has multiple views, do not recreate only the home page unless the user explicitly asked for only that route. If a standalone HTML/prototype exists but is not served by the framework, report it separately and ask whether it should also be baselined.
+
+Figma-like canvas discipline applies to OpenPencil: inspect the canvas first, create wrapper frames, build section-by-section, record frame/node IDs when available, export every target frame, visually compare exports to source screenshots, and fix mismatches before redesign. A screen made only of loose primitives is not acceptable for a production baseline unless marked low-fidelity and approved.
+
+When reusable UI components exist or are created, also load and follow `design-code-component-map` if available. Produce `.harness/artifacts/design/code-component-map.md` so frontend tasks can trace each reusable design element to an existing or required source component.
 
 ### Step 4: Create Wireframes / Visual Design
 
 IF OpenPencil is enabled (check .harness/integrations.json):
 
 1. Read .harness/artifacts/design/openpencil/design-task.md for detailed instructions
-2. Do NOT stop just because status says installed_no_active_canvas. That status only means Shipwright CLI cannot verify the canvas outside the MCP client.
-3. Try the actual OpenCode MCP tools for the `open-pencil` server. Prefer `open-pencil_get_editor_state` when present, but if that exact tool is absent use any equivalent `open-pencil_*` state/canvas/snapshot tool exposed by OpenCode.
-4. If a separate MCP server named `pencil` is connected, do NOT use it for Shipwright OpenPencil work; it can be bound to another desktop host and fail even when `open-pencil` is healthy.
-5. If any OpenPencil state/canvas/snapshot call succeeds, continue with OpenPencil even if the exact `open-pencil_get_editor_state` tool does not exist.
-6. Create design at .harness/artifacts/design/openpencil/app.pen using the available OpenPencil design/edit tool; prefer `open-pencil_batch_design` when present.
-7. Create responsive frames for each key screen: mobile 390×844, tablet 768×1024, desktop 1440×1024.
-8. Export wireframes to .harness/artifacts/design/openpencil/exports/ using the available export tool; prefer `open-pencil_export_nodes` when present.
-9. Take screenshot with the available screenshot/snapshot tool; prefer `open-pencil_get_screenshot` or `open-pencil_snapshot_layout` when present, and inspect it before claiming completion.
-10. Export visual evidence before saving so work is recoverable if save hangs.
-11. Save OpenPencil to .harness/artifacts/design/openpencil/app.pen using the save protocol from `openpencil-generate-design` when available.
-12. Write .harness/artifacts/design/openpencil/save-status.md. If save times out or cannot be verified, report it as a blocker and do not claim `.pen` persistence.
-13. Only fall back to doc-only mode if no usable `open-pencil_*` MCP tools are visible or all available state/design calls fail.
-14. Write .harness/artifacts/design/prototype.md describing the visual design
+2. Read and follow `canvas-generate-design` and `openpencil-generate-design` when available. For existing UI, also follow `existing-web-to-openpencil`.
+3. Do NOT stop just because status says installed_no_active_canvas. That status only means Shipwright CLI cannot verify the canvas outside the MCP client.
+4. Try the actual OpenCode MCP tools for the `open-pencil` server. Prefer `open-pencil_get_editor_state` when present, but if that exact tool is absent use any equivalent `open-pencil_*` state/canvas/snapshot tool exposed by OpenCode.
+5. If a separate MCP server named `pencil` is connected, do NOT use it for Shipwright OpenPencil work; it can be bound to another desktop host and fail even when `open-pencil` is healthy.
+6. If any OpenPencil state/canvas/snapshot call succeeds, continue with OpenPencil even if the exact `open-pencil_get_editor_state` tool does not exist.
+7. Inspect existing canvas/page tree, page bounds, components, variables, and styles when tools are available before creating nodes.
+8. Create design at .harness/artifacts/design/openpencil/app.pen using the available OpenPencil design/edit tool; prefer `open-pencil_batch_design` when present.
+9. Create wrapper frames first, then build major sections incrementally. Record affected frame/node IDs when tools return them.
+10. Create responsive frames for each key screen: mobile 390×844, tablet 768×1024, desktop 1440×1024.
+11. Export wireframes to .harness/artifacts/design/openpencil/exports/ using the available export tool; prefer `open-pencil_export_nodes` when present.
+12. Take screenshot with the available screenshot/snapshot tool; prefer `open-pencil_get_screenshot` or `open-pencil_snapshot_layout` when present, and inspect it before claiming completion.
+13. For existing UI baselines, compare every OpenPencil export against the matching source screenshot/route evidence and fix mismatches before redesign.
+14. Export visual evidence before saving so work is recoverable if save hangs.
+15. Save OpenPencil to .harness/artifacts/design/openpencil/app.pen using the save protocol from `openpencil-generate-design` when available.
+16. Write .harness/artifacts/design/openpencil/save-status.md. If save times out or cannot be verified, report it as a blocker and do not claim `.pen` persistence.
+17. Only fall back to doc-only mode if no usable `open-pencil_*` MCP tools are visible or all available state/design calls fail.
+18. Write .harness/artifacts/design/prototype.md describing the visual design
 
 IF OpenPencil is NOT enabled (doc-only mode):
 
@@ -331,6 +342,9 @@ DESIGN/DESIGN-DECISIONS.MD FORMAT:
 4. .harness/artifacts/design/design-decisions.md logs design rationale
 5. .harness/artifacts/design/responsive-qa.md proves mobile/tablet/desktop checks passed
 6. No exported screenshot/prototype has overflowing components, clipped text, or elements outside the canvas
+7. For existing UI baselines, fidelity-report.md proves route/viewport/section coverage and export comparison against source evidence
+8. For component-rich UI, code-component-map.md maps reusable design elements to source components or explicit missing-code tasks
+9. OpenPencil save-status.md exists when OpenPencil was used and does not falsely claim persistence on timeout
 
 ## Handoff Rules
 

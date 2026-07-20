@@ -43,12 +43,14 @@ func TestCuratedSkillTemplatesLoaded(t *testing.T) {
 		".harness/artifacts/design/fidelity-report.md",
 		"Do not claim a faithful baseline from code inspection alone",
 		"If any requested route/view was excluded without user approval, status is `fail`",
+		"Section matrix per route/viewport",
+		"If OpenPencil exports were not manually or visually inspected against source screenshots, status cannot be `pass`",
 	} {
 		if !strings.Contains(reverse.Content, required) {
 			t.Fatalf("existing-web-to-openpencil missing fidelity guard %q", required)
 		}
 	}
-	for _, skillName := range []string{"canvas-generate-design", "openpencil-generate-design"} {
+	for _, skillName := range []string{"canvas-generate-design", "openpencil-generate-design", "design-code-component-map"} {
 		skill := GetCuratedSkill(skillName)
 		if skill == nil {
 			t.Fatalf("%s curated skill not loaded", skillName)
@@ -63,9 +65,36 @@ func TestCuratedSkillTemplatesLoaded(t *testing.T) {
 		".harness/artifacts/design/openpencil/app.pen",
 		".harness/artifacts/design/openpencil/save-status.md",
 		"Do not declare `.pen` persistence unless save verification passed",
+		"Inspect the current page/canvas before drawing",
+		"read back page tree/node bounds",
+		"primitive-only result must be documented as low-fidelity",
 	} {
 		if !strings.Contains(openpencil.Content, required) {
 			t.Fatalf("openpencil-generate-design missing save guard %q", required)
+		}
+	}
+	canvas := GetCuratedSkill("canvas-generate-design")
+	for _, required := range []string{
+		"Figma-inspired canvas discipline",
+		"Component-first",
+		"Token-first",
+		"Readback required",
+		"Primitive-only approximations of component-rich UI mean fail",
+	} {
+		if !strings.Contains(canvas.Content, required) {
+			t.Fatalf("canvas-generate-design missing canvas discipline %q", required)
+		}
+	}
+	designCodeMap := GetCuratedSkill("design-code-component-map")
+	for _, required := range []string{
+		"Design ↔ Code Component Map",
+		".harness/artifacts/design/code-component-map.md",
+		"DCC-001",
+		"missing-code",
+		"Official Figma Code Connect mode",
+	} {
+		if !strings.Contains(designCodeMap.Content, required) {
+			t.Fatalf("design-code-component-map missing mapping rule %q", required)
 		}
 	}
 	if len(AllCuratedSkills()) < 10 {
@@ -85,7 +114,7 @@ func TestSkillPackTemplatesLoaded(t *testing.T) {
 			if len(pack.Skills) < 10 {
 				t.Fatalf("frontend-ui-quality should include UI/UX skills: %+v", pack.Skills)
 			}
-			for _, skillName := range []string{"existing-web-to-openpencil", "canvas-generate-design", "openpencil-generate-design"} {
+			for _, skillName := range []string{"existing-web-to-openpencil", "canvas-generate-design", "openpencil-generate-design", "design-code-component-map"} {
 				if !stringSliceHas(pack.Skills, skillName) {
 					t.Fatalf("frontend-ui-quality should include %s: %+v", skillName, pack.Skills)
 				}

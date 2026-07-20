@@ -44,6 +44,7 @@
     "design-system-tokens",
     "interaction-design-patterns",
     "openpencil-canvas-qa",
+    "design-code-component-map",
     "visual-handoff-to-frontend"
   ],
   "agents": [

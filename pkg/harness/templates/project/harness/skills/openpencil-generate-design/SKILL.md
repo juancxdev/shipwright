@@ -59,13 +59,17 @@ Prefer available tools such as:
 ## Required OpenPencil workflow
 
 1. Verify connection with a read-only tool such as `open-pencil_get_current_page` or `open-pencil_get_page_tree`.
-2. If the page is empty and the task is to create a baseline, create frames only after route/source inventory is complete.
-3. Create frames for each required view/viewport.
-4. Use layout/grouping tools to keep section hierarchy clean.
-5. Use components for repeated elements when practical.
-6. Export each completed frame to `.harness/artifacts/design/openpencil/exports/`.
-7. Save the OpenPencil document using the save protocol below.
-8. If save still times out or fails after the protocol, do not claim `.pen` persistence. Report the save failure as a blocker and keep exports plus recovery metadata as temporary evidence.
+2. Inspect the current page/canvas before drawing: pages, page tree, existing frames, selection, bounds, components, variables, and reusable nodes when those tools exist.
+3. If the page is empty and the task is to create a baseline, create frames only after route/source inventory is complete.
+4. Create a wrapper frame for each required view/viewport before section nodes.
+5. Build incrementally: one view/viewport or one major section at a time.
+6. After every major create/update call, read back page tree/node bounds and record affected node/frame IDs in `.harness/artifacts/design/openpencil/design-task.md`.
+7. Use layout/grouping tools to keep section hierarchy clean.
+8. Use components/instances for repeated elements when practical; a primitive-only result must be documented as low-fidelity or tool-limited.
+9. Export each completed frame to `.harness/artifacts/design/openpencil/exports/`.
+10. Inspect exports against source evidence or design intent. Fix visible mismatches before continuing.
+11. Save the OpenPencil document using the save protocol below.
+12. If save still times out or fails after the protocol, do not claim `.pen` persistence. Report the save failure as a blocker and keep exports plus recovery metadata as temporary evidence.
 
 ## Save protocol
 
@@ -121,6 +125,9 @@ For full-page landings, allow taller frames. Do not compress content just to fit
 - Do not declare done if page bounds are 0×0 after creation.
 - Do not declare done if exported images do not exist.
 - Do not declare done if a requested route/view has no frame.
+- Do not declare done if frame/node IDs were not recorded when tools returned IDs.
+- Do not declare done if the exported frame visibly diverges from the source screenshot for an existing UI baseline.
+- Do not declare done if repeated UI is represented only as unrelated primitives without documenting why components/instances could not be used.
 - Do not declare done if save failed without reporting it.
 - Do not declare `.pen` persistence unless save verification passed.
 - Do not proceed to redesign approval while save status is `failed` unless the user explicitly accepts export-only evidence.

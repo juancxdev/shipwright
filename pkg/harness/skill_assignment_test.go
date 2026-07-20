@@ -143,6 +143,11 @@ name: openpencil-generate-design
 description: Generate OpenPencil canvas views.
 ---
 `)
+	writeTestFile(t, "skills/design-code-component-map/SKILL.md", `---
+name: design-code-component-map
+description: Map design components to code components.
+---
+`)
 	registry, err := BuildSkillRegistry()
 	if err != nil {
 		t.Fatalf("BuildSkillRegistry: %v", err)
@@ -167,6 +172,12 @@ description: Generate OpenPencil canvas views.
 	}
 	if !assignmentHasSkillForAgent(set, "openpencil-generate-design", "ui-ux-designer") {
 		t.Fatalf("expected openpencil-generate-design assigned to ui-ux-designer: %+v", set.Skills)
+	}
+	if !assignmentHasSkillForAgent(set, "design-code-component-map", "ui-ux-designer") {
+		t.Fatalf("expected design-code-component-map assigned to ui-ux-designer: %+v", set.Skills)
+	}
+	if !assignmentHasSkillForAgent(set, "design-code-component-map", "frontend-engineer") {
+		t.Fatalf("expected design-code-component-map assigned to frontend-engineer: %+v", set.Skills)
 	}
 	if !assignmentHasSkillForAgent(set, "accessibility", "qa-security-reviewer") {
 		t.Fatalf("expected accessibility assigned to QA: %+v", set.Skills)

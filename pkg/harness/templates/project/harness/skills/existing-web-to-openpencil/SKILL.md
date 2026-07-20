@@ -95,6 +95,17 @@ Use the strongest available source of truth:
 
 For each included route, capture or reference source evidence for desktop and mobile at minimum; tablet is recommended. Store source screenshots under `.harness/artifacts/design/source-screenshots/` when possible.
 
+Source evidence must record:
+
+- Exact route/URL and viewport size.
+- Screenshot path or supplied screenshot reference.
+- Page height and visible/scrollable sections.
+- Section list in rendered order.
+- Assets/images/icons observed in the rendered page.
+- Any state that could not be captured.
+
+If the route renders differently from static source files, trust the rendered route and document the code/source mismatch.
+
 ### 3. Build the visual inventory
 
 Capture:
@@ -121,6 +132,9 @@ Create OpenPencil frames that represent the current state for every included rou
 - Use real content from the rendered/source page; do not replace important copy with generic lorem ipsum.
 - Preserve section order, visual hierarchy, spacing rhythm, colors, imagery, and responsive behavior before improving anything.
 - Do not omit sections because they are long; create taller frames instead.
+- Create wrapper frames first, then recreate sections one by one in the same order as the rendered evidence.
+- Prefer components/instances/tokens for repeated UI, but keep fidelity to the source page above beautification.
+- After each frame export, compare it to the matching source screenshot before moving to the next route/viewport.
 - Mark approximations explicitly in `.harness/artifacts/design/reverse-engineering.md` and `.harness/artifacts/design/fidelity-report.md`.
 
 ### 5. Use OpenPencil correctly
@@ -144,12 +158,14 @@ Before claiming the baseline is ready, compare source evidence against OpenPenci
 Write `.harness/artifacts/design/fidelity-report.md` with:
 
 - Coverage matrix: route × viewport × source evidence × OpenPencil frame × export.
+- Section matrix per route/viewport: source section order vs OpenPencil section order.
 - Missing routes/views.
 - Missing or reordered sections.
 - Text/content mismatches.
 - Color/typography/spacing mismatches.
 - Image/icon/asset mismatches.
 - Responsive mismatches.
+- Canvas structure quality: component reuse, token reuse, excessive primitives, frame hierarchy.
 - Final status: `pass`, `conditional-pass`, or `fail`.
 
 Rules:
@@ -158,6 +174,7 @@ Rules:
 - If any requested route/view was excluded without user approval, status is `fail`.
 - If rendered source evidence was unavailable, status cannot be `pass`; use `conditional-pass` at best and explain why.
 - If the baseline is materially different from the current page, do not proceed to redesign.
+- If OpenPencil exports were not manually or visually inspected against source screenshots, status cannot be `pass`.
 
 ### 7. Design modification pass
 

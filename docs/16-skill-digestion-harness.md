@@ -111,6 +111,7 @@ OpenCode bootstrap installs Shipwright-managed UI/UX skills into `.opencode/skil
 - `design-system-tokens` — colors, typography, spacing, radius, elevation
 - `interaction-design-patterns` — flow states, feedback, errors, destructive actions
 - `openpencil-canvas-qa` — OpenPencil frame/export/overflow validation
+- `design-code-component-map` — Figma Code Connect-inspired design ↔ code component traceability
 - `visual-handoff-to-frontend` — design-to-frontend implementation handoff
 
 When a detected or planned stack suggests UI/frontend work, assignments add these skills under `frontend-ui-quality` so designer, frontend, and QA roles get stronger interface guidance.
@@ -133,6 +134,17 @@ shipwright skills import autoskills
 
 Shipwright includes the curated `existing-web-to-openpencil` skill for existing frontend projects. It is assigned through the `frontend-ui-quality` pack when the calibrated or planned stack suggests frontend/UI work, including Astro. The UI/UX Designer must inventory all discovered routes/views, inspect current routes/components/styles and rendered evidence, write `.harness/artifacts/design/route-inventory.md`, `.harness/artifacts/design/reverse-engineering.md`, `.harness/artifacts/design/visual-inventory.md`, and `.harness/artifacts/design/fidelity-report.md`, recreate the current UI in OpenPencil before redesigning, and compare exports against source evidence before claiming completion. If requested routes are missing or source evidence was unavailable, the fidelity report cannot pass.
 
+The baseline flow is intentionally evidence-first:
+
+1. route inventory,
+2. rendered screenshots/evidence per route and viewport,
+3. visual inventory of sections/tokens/components/assets,
+4. OpenPencil frame creation,
+5. export/readback validation,
+6. fidelity report.
+
+An existing UI baseline must not be treated as complete when sections are missing, route coverage is partial, the OpenPencil export visibly diverges from the source route, or no source screenshot/rendered evidence was inspected.
+
 
 ## Canvas generation skills
 
@@ -143,5 +155,23 @@ Shipwright includes two Figma-inspired canvas skills:
 
 These skills are intended to prevent primitive-only canvas drawings. Agents should build with reusable components, token inventories, clean hierarchy, responsive frames, and evidence before claiming a view is ready.
 
+The workflow is inspired by Figma design-system skills but adapted to OpenPencil:
+
+- inspect the current canvas/page before drawing;
+- reuse or create components/instances for repeated UI;
+- extract tokens from code, CSS variables, themes, Tailwind config, or existing canvas styles;
+- create wrapper frames first and build section-by-section;
+- record frame/node IDs when tools expose them;
+- validate with page tree/bounds plus exports/screenshots after major steps;
+- fix mismatches before proceeding to redesign or approval.
+
 
 OpenPencil save is a gate: agents must export visual evidence, attempt to save `.harness/artifacts/design/openpencil/app.pen`, retry once on timeout, write `.harness/artifacts/design/openpencil/save-status.md`, and only claim `.pen` persistence after verification. If save times out, exports are temporary evidence and the save failure is a blocker unless the user explicitly accepts export-only work.
+
+## Design ↔ code component mapping
+
+Shipwright includes `design-code-component-map`, inspired by Figma Code Connect but portable across OpenPencil and other canvas tools. The skill writes `.harness/artifacts/design/code-component-map.md` and, when practical, `.harness/artifacts/design/code-component-map.json`.
+
+The goal is traceability, not decoration: each reusable design element should map to an existing source component, a missing-code task, a missing-design task, or an explicit ambiguous candidate requiring user confirmation. Frontend tasks should reference stable `DCC-*` mapping IDs so implementation does not recreate components blindly.
+
+Official Figma Code Connect remains Figma-specific and should only be used when the user explicitly works in Figma with the required MCP tools, published library components, permissions, and plan support. Otherwise Shipwright uses its local mapping artifact.
