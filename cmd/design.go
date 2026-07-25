@@ -70,18 +70,18 @@ func designStart(args []string) {
 		_ = memService.SaveDiscovery(
 			"Design started in doc-only mode: "+state.ProjectName,
 			".harness/artifacts/design/ux-approval",
-			"Design phase started with doc-only fallback (OpenPencil unavailable)",
-			"OpenPencil not available — generated text-based wireframes and prototype",
+			"Design phase started with doc-only fallback",
+			"Primary design provider unavailable — generated text-based wireframes and prototype",
 			".harness/artifacts/design/wireframes.md, .harness/artifacts/design/prototype.md, .harness/artifacts/design/responsive-qa.md",
-			"OpenPencil can be enabled later with 'shipwright integrations enable openpencil'",
+			"Set STITCH_API_KEY and enable Stitch for high-fidelity design",
 		)
 	} else {
 		_ = memService.SaveDecision(
-			"Design started with OpenPencil: "+state.ProjectName,
+			"Design started with "+result.Adapter+": "+state.ProjectName,
 			".harness/artifacts/design/ux-approval",
-			"Design phase started with OpenPencil adapter",
-			"OpenPencil available — design task created for AI agent",
-			".harness/artifacts/design/openpencil/design-task.md, .harness/artifacts/design/openpencil/app.pen",
+			"Design phase started with "+result.Adapter+" adapter",
+			"Design task created for AI agent",
+			result.TaskFile,
 			"",
 		)
 	}
@@ -98,10 +98,21 @@ func designStart(args []string) {
 		fmt.Println()
 		fmt.Println("Next steps for AI agent:")
 		fmt.Printf("  1. Read %s\n", result.TaskFile)
-		fmt.Println("  2. Use open-pencil_* MCP tools to create responsive mobile/tablet/desktop frames")
-		fmt.Println("  3. Export wireframes to .harness/artifacts/design/openpencil/exports/")
-		fmt.Println("  4. Inspect screenshots for overflow/clipping and create .harness/artifacts/design/responsive-qa.md")
-		fmt.Println("  5. Create .harness/artifacts/design/prototype.md describing the visual design")
+		if result.Adapter == harness.DesignModeStitch {
+			fmt.Println("  2. Use Google Stitch SDK/MCP to generate responsive mobile/tablet/desktop screens")
+			fmt.Println("  3. Export screenshots to .harness/artifacts/design/stitch/exports/")
+			fmt.Println("  4. Export HTML to .harness/artifacts/design/stitch/html/ when available")
+			fmt.Println("  5. Create prototype.md, responsive-qa.md, stitch-report.md, and code-component-map.md")
+		} else if result.Adapter == harness.DesignModeOpenDesign {
+			fmt.Println("  2. Use OpenDesign MCP tools as artifact tools: open-design_get_active_context, open-design_list_projects, open-design_create_artifact")
+			fmt.Println("  3. Generate .harness/artifacts/design/opendesign/<entry>.html plus <entry>.html.artifact.json")
+			fmt.Println("  4. Publish/create the artifact through OpenDesign MCP when available")
+			fmt.Println("  5. Create prototype.md, responsive-qa.md, opendesign-report.md, fidelity-report.md, and code-component-map.md when needed")
+		} else {
+			fmt.Println("  2. Use the selected design provider to create responsive mobile/tablet/desktop evidence")
+			fmt.Println("  3. Inspect screenshots for overflow/clipping and create .harness/artifacts/design/responsive-qa.md")
+			fmt.Println("  4. Create .harness/artifacts/design/prototype.md describing the visual design")
+		}
 		fmt.Println("  6. Run: shipwright design status")
 	} else {
 		fmt.Println()
@@ -147,7 +158,14 @@ func designStatus(args []string) {
 	printArtifactStatus(".harness/artifacts/design/responsive-qa.md", status.HasResponsiveQA)
 
 	if status.HasTaskFile {
-		printArtifactStatus(harness.DesignTaskFile, true)
+		switch status.Adapter {
+		case harness.DesignModeStitch:
+			printArtifactStatus(harness.DesignStitchTaskFile, true)
+		case harness.DesignModeOpenDesign:
+			printArtifactStatus(harness.DesignOpenDesignTaskFile, true)
+		default:
+			printArtifactStatus(harness.DesignTaskFile, true)
+		}
 	}
 
 	fmt.Println()

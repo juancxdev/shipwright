@@ -37,6 +37,8 @@
   "skills": [
     "frontend-design",
     "existing-web-to-openpencil",
+    "stitch-generate-design",
+    "opendesign-generate-artifact",
     "canvas-generate-design",
     "openpencil-generate-design",
     "accessibility",

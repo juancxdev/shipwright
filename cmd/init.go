@@ -60,6 +60,17 @@ func Init(args []string) {
 	}
 	PrintSuccess("Integrations state creado (.harness/integrations.json)")
 
+	if initOptions.IntegrationWizard && shouldRunInitIntegrationWizard() {
+		if err := runInitIntegrationWizard(portableConfig, integrations); err != nil {
+			Fail(fmt.Sprintf("error configurando integraciones: %s", err))
+		}
+		PrintSuccess("Integraciones calibradas (.harness/integrations.json)")
+	} else if initOptions.IntegrationWizard {
+		PrintInfo("Integration wizard omitido (entorno no interactivo o CI).")
+	} else {
+		PrintInfo("Integration wizard omitido por flag.")
+	}
+
 	state := harness.NewState(projectName)
 	if err := state.Save(); err != nil {
 		Fail(fmt.Sprintf("error guardando state.json: %s", err))
@@ -112,7 +123,7 @@ func Init(args []string) {
 	fmt.Println("  .harness/          — estado, project profile, TDD policy, skill registry, skill assignments, skill digests, agentes, approvals, integrations")
 	fmt.Println("  .harness/artifacts/product/           — discovery, contexto, alcance")
 	fmt.Println("  .harness/artifacts/project/           — planificación PMBOK-lite")
-	fmt.Println("  .harness/artifacts/design/            — UX/UI (OpenPencil-ready)")
+	fmt.Println("  .harness/artifacts/design/            — UX/UI (Stitch-first, OpenPencil optional)")
 	fmt.Println("  .harness/artifacts/architecture/      — decisiones técnicas")
 	fmt.Println("  .harness/artifacts/contracts/         — OpenAPI, eventos")
 	fmt.Println("  .harness/artifacts/backlog/           — epics, stories, tasks")
@@ -133,16 +144,18 @@ func Init(args []string) {
 }
 
 type initOptions struct {
-	Executor       string
-	OpenCodeModels openCodeModelFlagParseResult
+	Executor          string
+	OpenCodeModels    openCodeModelFlagParseResult
+	IntegrationWizard bool
 }
 
 const defaultInitExecutor = harness.ExecutorOpenCode
 
 func parseInitOptions(args []string) initOptions {
 	options := initOptions{
-		Executor:       defaultInitExecutor,
-		OpenCodeModels: parseOpenCodeModelFlags(args),
+		Executor:          defaultInitExecutor,
+		OpenCodeModels:    parseOpenCodeModelFlags(args),
+		IntegrationWizard: true,
 	}
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
@@ -156,6 +169,9 @@ func parseInitOptions(args []string) initOptions {
 		}
 		if len(arg) > len("--ai=") && arg[:len("--ai=")] == "--ai=" {
 			options.Executor = arg[len("--ai="):]
+		}
+		if arg == "--no-interactive" || arg == "--no-integrations-wizard" {
+			options.IntegrationWizard = false
 		}
 	}
 	return options

@@ -103,20 +103,72 @@ For greenfield work, `.harness/project-profile.json` can also contain `planned_s
 OpenCode bootstrap installs Shipwright-managed UI/UX skills into `.opencode/skills/`:
 
 - `frontend-design` — product-aware web UI design
-- `existing-web-to-openpencil` — existing web UI reverse engineering into OpenPencil
-- `canvas-generate-design` — Figma-like canvas screen generation rules
-- `openpencil-generate-design` — OpenPencil-specific MCP tool workflow
+- `stitch-generate-design` — Google Stitch high-fidelity UI generation, variants, screenshots, HTML exports, and DESIGN.md workflow
+- `existing-web-to-openpencil` — legacy name, but now used as the evidence-first existing web baseline workflow across Stitch/OpenPencil/canvas providers
+- `canvas-generate-design` — Figma-like canvas/screen generation rules
+- `openpencil-generate-design` — optional OpenPencil-specific MCP workflow when explicitly requested
 - `accessibility` — WCAG-minded review rules
 - `responsive-layout-systems` — mobile/tablet/desktop layout rules
 - `design-system-tokens` — colors, typography, spacing, radius, elevation
 - `interaction-design-patterns` — flow states, feedback, errors, destructive actions
-- `openpencil-canvas-qa` — OpenPencil frame/export/overflow validation
+- `openpencil-canvas-qa` — optional OpenPencil frame/export/overflow validation
 - `design-code-component-map` — Figma Code Connect-inspired design ↔ code component traceability
 - `visual-handoff-to-frontend` — design-to-frontend implementation handoff
 
 When a detected or planned stack suggests UI/frontend work, assignments add these skills under `frontend-ui-quality` so designer, frontend, and QA roles get stronger interface guidance.
 
 The mapping is declarative. Skill pack manifests live in `pkg/harness/templates/project/harness/skill-packs/`; Go code loads these manifests and evaluates them against `.harness/project-profile.json`.
+
+## Stitch-first design provider
+
+Shipwright now treats Google Stitch as the primary high-fidelity design provider. OpenPencil remains optional and should be used only when the user explicitly asks for it or disables Stitch.
+
+Stitch artifacts live under:
+
+```txt
+.harness/artifacts/design/stitch/
+  DESIGN.md
+  design-task.md
+  stitch-report.md
+  exports/
+  html/
+  screens/
+```
+
+The UI/UX Designer must use Stitch credentials (`STITCH_API_KEY`, or `STITCH_ACCESS_TOKEN` + `GOOGLE_CLOUD_PROJECT`) to generate responsive screens, screenshot evidence, HTML exports when available, and `stitch-report.md`. Generated HTML is design evidence and implementation reference; it is not production frontend code until the Frontend Engineer accepts it.
+
+Existing UI baselines are still evidence-first:
+
+1. route inventory,
+2. rendered screenshots/evidence per route and viewport,
+3. visual inventory of sections/tokens/components/assets,
+4. Stitch screen generation,
+5. screenshot/HTML export validation,
+6. fidelity report.
+
+A Stitch design must not pass when sections are missing, route coverage is partial, screenshots materially diverge from the source route, or no source screenshot/rendered evidence was inspected.
+
+## Canvas generation skills
+
+Shipwright includes Figma-inspired canvas/design skills:
+
+- `stitch-generate-design` — Stitch-specific high-fidelity generation workflow.
+- `canvas-generate-design` — tool-agnostic rules for creating full screens/views with frames, components, tokens, responsive variants, exports, and fidelity gates.
+- `openpencil-generate-design` — optional OpenPencil-specific workflow for available `open-pencil_*` tools.
+
+These skills are intended to prevent primitive-only or pretty-but-wrong designs. Agents should build with reusable components, token inventories, clean hierarchy, responsive screens, and evidence before claiming a view is ready.
+
+The workflow is inspired by Figma design-system skills but adapted to Stitch-first Shipwright:
+
+- inspect existing app/design evidence before generation;
+- reuse or create components/instances for repeated UI;
+- extract tokens from code, CSS variables, themes, Tailwind config, or design-system artifacts;
+- generate responsive mobile/tablet/desktop outputs;
+- export screenshots and HTML evidence;
+- validate exports against source screenshots after major steps;
+- fix mismatches before proceeding to redesign or approval.
+
+OpenPencil save remains a gate only when OpenPencil is explicitly used: agents must export visual evidence, attempt to save `.harness/artifacts/design/openpencil/app.pen`, retry once on timeout, write `.harness/artifacts/design/openpencil/save-status.md`, and only claim `.pen` persistence after verification.
 
 ## Optional provider import
 

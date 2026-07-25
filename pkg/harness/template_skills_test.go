@@ -50,7 +50,7 @@ func TestCuratedSkillTemplatesLoaded(t *testing.T) {
 			t.Fatalf("existing-web-to-openpencil missing fidelity guard %q", required)
 		}
 	}
-	for _, skillName := range []string{"canvas-generate-design", "openpencil-generate-design", "design-code-component-map"} {
+	for _, skillName := range []string{"stitch-generate-design", "opendesign-generate-artifact", "canvas-generate-design", "openpencil-generate-design", "design-code-component-map"} {
 		skill := GetCuratedSkill(skillName)
 		if skill == nil {
 			t.Fatalf("%s curated skill not loaded", skillName)
@@ -59,6 +59,29 @@ func TestCuratedSkillTemplatesLoaded(t *testing.T) {
 			t.Fatalf("%s template content was not loaded", skillName)
 		}
 	}
+	stitch := GetCuratedSkill("stitch-generate-design")
+	for _, required := range []string{
+		"STITCH_API_KEY",
+		".harness/artifacts/design/stitch/stitch-report.md",
+		"export HTML",
+		"Do not claim Stitch design is complete",
+	} {
+		if !strings.Contains(stitch.Content, required) {
+			t.Fatalf("stitch-generate-design missing Stitch rule %q", required)
+		}
+	}
+	opendesign := GetCuratedSkill("opendesign-generate-artifact")
+	for _, required := range []string{
+		"open-design_create_artifact",
+		"ARTIFACT_MANIFEST_REQUIRED",
+		"<entry>.artifact.json",
+		"OpenDesign is an **artifact provider**",
+	} {
+		if !strings.Contains(opendesign.Content, required) {
+			t.Fatalf("opendesign-generate-artifact missing OpenDesign rule %q", required)
+		}
+	}
+
 	openpencil := GetCuratedSkill("openpencil-generate-design")
 	for _, required := range []string{
 		"## Save protocol",
@@ -114,7 +137,7 @@ func TestSkillPackTemplatesLoaded(t *testing.T) {
 			if len(pack.Skills) < 10 {
 				t.Fatalf("frontend-ui-quality should include UI/UX skills: %+v", pack.Skills)
 			}
-			for _, skillName := range []string{"existing-web-to-openpencil", "canvas-generate-design", "openpencil-generate-design", "design-code-component-map"} {
+			for _, skillName := range []string{"stitch-generate-design", "opendesign-generate-artifact", "existing-web-to-openpencil", "canvas-generate-design", "openpencil-generate-design", "design-code-component-map"} {
 				if !stringSliceHas(pack.Skills, skillName) {
 					t.Fatalf("frontend-ui-quality should include %s: %+v", skillName, pack.Skills)
 				}

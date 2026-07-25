@@ -207,6 +207,39 @@ func TestDetectOpenPencilAcrossPlatforms(t *testing.T) {
 	}
 }
 
+func TestDetectStitchFromCredentials(t *testing.T) {
+	originalDir, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	tempDir := t.TempDir()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.Chdir(originalDir) })
+
+	tests := []struct {
+		name       string
+		env        map[string]string
+		wantStatus string
+		available  bool
+	}{
+		{name: "api key", env: map[string]string{"STITCH_API_KEY": "secret"}, wantStatus: DetectionAvailable, available: true},
+		{name: "oauth token and project", env: map[string]string{"STITCH_ACCESS_TOKEN": "token", "GOOGLE_CLOUD_PROJECT": "project"}, wantStatus: DetectionAvailable, available: true},
+		{name: "token without project", env: map[string]string{"STITCH_ACCESS_TOKEN": "token"}, wantStatus: DetectionConfiguredUnverified, available: false},
+		{name: "missing", env: nil, wantStatus: DetectionNotInstalled, available: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := DetectStitch(fakeProbe{goos: "linux", env: tt.env})
+			if got.Status != tt.wantStatus || got.Available != tt.available {
+				t.Fatalf("DetectStitch = %+v, want status=%s available=%v", got, tt.wantStatus, tt.available)
+			}
+		})
+	}
+}
+
 func TestApplyDetectionStoresPortableMetadata(t *testing.T) {
 	integrations := DefaultIntegrations()
 	engram := DetectEngram(fakeProbe{goos: "linux", goarch: "arm64", paths: map[string]string{"engram": "/usr/bin/engram"}})
@@ -264,5 +297,48 @@ func TestDetectOpenPencilMCPCommandFromPath(t *testing.T) {
 	}
 	if result.Status != DetectionInstalledNoCanvas {
 		t.Fatalf("status = %s", result.Status)
+	}
+}
+
+func TestDetectOpenDesignWithConfiguredCommandAndIPC(t *testing.T) {
+	command := "/opt/homebrew/bin/node"
+	cli := "/tools/open-design/apps/daemon/dist/cli.js"
+	ipc := "/tmp/open-design/ipc/default/daemon.sock"
+	cfg := DefaultPortableConfig()
+	cfg.Integrations.OpenDesign.MCPCommand = command
+	cfg.Integrations.OpenDesign.MCPArgs = []string{cli, "mcp"}
+	cfg.Integrations.OpenDesign.DataDir = "/tools/open-design/.od"
+	cfg.Integrations.OpenDesign.IPCPath = ipc
+
+	got := DetectOpenDesignWithConfig(fakeProbe{
+		goos: "darwin",
+		statMap: map[string]fakeFileInfo{
+			command: {name: "node"},
+			ipc:     {name: "daemon.sock"},
+		},
+	}, cfg)
+
+	if got.Status != DetectionAvailable || !got.Available || !got.Active {
+		t.Fatalf("DetectOpenDesignWithConfig = %+v, want available active", got)
+	}
+	if got.Path != command {
+		t.Fatalf("path = %s, want %s", got.Path, command)
+	}
+}
+
+func TestDetectOpenDesignConfiguredButSocketMissing(t *testing.T) {
+	command := "/opt/homebrew/bin/node"
+	cfg := DefaultPortableConfig()
+	cfg.Integrations.OpenDesign.MCPCommand = command
+	cfg.Integrations.OpenDesign.MCPArgs = []string{"/tools/open-design/apps/daemon/dist/cli.js", "mcp"}
+	cfg.Integrations.OpenDesign.IPCPath = "/tmp/open-design/ipc/default/daemon.sock"
+
+	got := DetectOpenDesignWithConfig(fakeProbe{
+		goos:    "darwin",
+		statMap: map[string]fakeFileInfo{command: {name: "node"}},
+	}, cfg)
+
+	if got.Status != DetectionConfiguredUnverified || got.Available || !got.Installed {
+		t.Fatalf("DetectOpenDesignWithConfig = %+v, want configured_unverified installed", got)
 	}
 }

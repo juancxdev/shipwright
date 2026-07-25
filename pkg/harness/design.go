@@ -7,16 +7,26 @@ import (
 )
 
 const (
+	DesignModeStitch     = "stitch"
+	DesignModeOpenDesign = "opendesign"
 	DesignModeOpenPencil = "openpencil"
 	DesignModeDocOnly    = "doc-only"
 )
 
 const (
-	DesignDir           = ".harness/artifacts/design"
-	DesignOpenPencilDir = ".harness/artifacts/design/openpencil"
-	DesignExportsDir    = ".harness/artifacts/design/openpencil/exports"
-	DesignTaskFile      = ".harness/artifacts/design/openpencil/design-task.md"
-	DesignStateFile     = ".harness/design-state.json"
+	DesignDir                = ".harness/artifacts/design"
+	DesignStitchDir          = ".harness/artifacts/design/stitch"
+	DesignStitchScreensDir   = ".harness/artifacts/design/stitch/screens"
+	DesignStitchExportsDir   = ".harness/artifacts/design/stitch/exports"
+	DesignStitchHTMLDir      = ".harness/artifacts/design/stitch/html"
+	DesignStitchTaskFile     = ".harness/artifacts/design/stitch/design-task.md"
+	DesignStitchDesignMDFile = ".harness/artifacts/design/stitch/DESIGN.md"
+	DesignOpenDesignDir      = ".harness/artifacts/design/opendesign"
+	DesignOpenDesignTaskFile = ".harness/artifacts/design/opendesign/design-task.md"
+	DesignOpenPencilDir      = ".harness/artifacts/design/openpencil"
+	DesignExportsDir         = ".harness/artifacts/design/openpencil/exports"
+	DesignTaskFile           = ".harness/artifacts/design/openpencil/design-task.md"
+	DesignStateFile          = ".harness/design-state.json"
 )
 
 type DesignResult struct {
@@ -52,20 +62,31 @@ type DesignPort interface {
 type DesignService struct {
 	primary      DesignPort
 	fallback     DesignPort
+	stitchOn     bool
+	opendesignOn bool
 	openpencilOn bool
 }
 
 func NewDesignService(integrations *Integrations) *DesignService {
+	stitchOn := integrations == nil || integrations.Stitch.Enabled
+	odOn := integrations != nil && integrations.OpenDesign.Enabled
 	opOn := integrations != nil && integrations.OpenPencil.Enabled
 
 	svc := &DesignService{
 		fallback:     NewDocOnlyDesignFallback(),
+		stitchOn:     stitchOn,
+		opendesignOn: odOn,
 		openpencilOn: opOn,
 	}
 
-	if opOn {
+	switch {
+	case stitchOn:
+		svc.primary = NewStitchDesignAdapter()
+	case odOn:
+		svc.primary = NewOpenDesignAdapter()
+	case opOn:
 		svc.primary = NewOpenPencilDesignAdapter()
-	} else {
+	default:
 		svc.primary = svc.fallback
 	}
 
@@ -73,15 +94,15 @@ func NewDesignService(integrations *Integrations) *DesignService {
 }
 
 func (ds *DesignService) StartDesign(state *State, request string) (*DesignResult, error) {
-	if ds.openpencilOn {
+	if ds.primary != ds.fallback {
 		result, err := ds.primary.StartDesign(state, request)
 		if err != nil {
 			result, fbErr := ds.fallback.StartDesign(state, request)
 			if fbErr != nil {
-				return nil, fmt.Errorf("openpencil failed: %w; fallback also failed: %v", err, fbErr)
+				return nil, fmt.Errorf("%s failed: %w; fallback also failed: %v", ds.primary.AdapterName(), err, fbErr)
 			}
 			result.FallbackUsed = true
-			result.Message = fmt.Sprintf("OpenPencil unavailable: design generated in doc-only mode. (error: %s)", err)
+			result.Message = fmt.Sprintf("%s unavailable: design generated in doc-only mode. (error: %s)", ds.primary.AdapterName(), err)
 			return result, nil
 		}
 		return result, nil
@@ -91,17 +112,19 @@ func (ds *DesignService) StartDesign(state *State, request string) (*DesignResul
 }
 
 func (ds *DesignService) Status() (*DesignStatus, error) {
-	if ds.openpencilOn {
-		return ds.primary.Status()
-	}
-	return ds.fallback.Status()
+	return ds.primary.Status()
 }
 
 func (ds *DesignService) AdapterName() string {
-	if ds.openpencilOn {
-		return DesignModeOpenPencil
-	}
-	return DesignModeDocOnly
+	return ds.primary.AdapterName()
+}
+
+func (ds *DesignService) IsStitchEnabled() bool {
+	return ds.stitchOn
+}
+
+func (ds *DesignService) IsOpenDesignEnabled() bool {
+	return ds.opendesignOn
 }
 
 func (ds *DesignService) IsOpenPencilEnabled() bool {

@@ -19,6 +19,8 @@ type DoctorReport struct {
 	ConfigExists     bool                    `json:"config_exists"`
 	ConfigLoaded     bool                    `json:"config_loaded"`
 	Engram           DetectionResult         `json:"engram"`
+	Stitch           DetectionResult         `json:"stitch"`
+	OpenDesign       DetectionResult         `json:"opendesign"`
 	OpenPencil       DetectionResult         `json:"openpencil"`
 	EngramHealth     HealthResult            `json:"engram_health"`
 	OpenPencilHealth HealthResult            `json:"openpencil_health"`
@@ -106,10 +108,14 @@ func RunDoctorWithHealth(probe SystemProbe, healthProbe HealthProbe) (*DoctorRep
 	})
 
 	report.Engram = DetectEngramWithConfig(probe, cfg)
+	report.Stitch = DetectStitchWithConfig(probe, cfg)
+	report.OpenDesign = DetectOpenDesignWithConfig(probe, cfg)
 	report.OpenPencil = DetectOpenPencilWithConfig(probe, cfg)
 	report.EngramHealth = CheckEngramHealth(healthProbe, cfg, report.Engram)
 	report.OpenPencilHealth = CheckOpenPencilHealth(healthProbe, cfg, report.OpenPencil)
 	report.evaluateEngram(cfg)
+	report.evaluateStitch(cfg)
+	report.evaluateOpenDesign(cfg)
 	report.evaluateOpenPencil(cfg)
 	report.evaluateHealth()
 	report.Summary = summarizeDoctorChecks(report.Checks)
@@ -207,6 +213,63 @@ func (r *DoctorReport) evaluateEngram(cfg *PortableConfig) {
 	})
 }
 
+func (r *DoctorReport) evaluateStitch(cfg *PortableConfig) {
+	if r.Stitch.Available {
+		r.addCheck(DoctorCheck{
+			ID:       "stitch.available",
+			Title:    "Stitch available",
+			Severity: DoctorSeverityOK,
+			Status:   "available",
+			Detail:   r.Stitch.Reason,
+		})
+		return
+	}
+
+	severity := DoctorSeverityInfo
+	if r.Stitch.Configured {
+		severity = DoctorSeverityWarning
+	}
+	action := "Set STITCH_API_KEY, or STITCH_ACCESS_TOKEN + GOOGLE_CLOUD_PROJECT. Shipwright can still use doc-only fallback."
+	r.addCheck(DoctorCheck{
+		ID:       "stitch.available",
+		Title:    "Stitch available",
+		Severity: severity,
+		Status:   r.Stitch.Status,
+		Detail:   r.Stitch.Reason,
+		Action:   action,
+	})
+}
+
+func (r *DoctorReport) evaluateOpenDesign(cfg *PortableConfig) {
+	if r.OpenDesign.Available {
+		r.addCheck(DoctorCheck{
+			ID:       "opendesign.available",
+			Title:    "OpenDesign available",
+			Severity: DoctorSeverityOK,
+			Status:   "available",
+			Detail:   r.OpenDesign.Reason,
+		})
+		return
+	}
+
+	severity := DoctorSeverityInfo
+	if r.OpenDesign.Configured {
+		severity = DoctorSeverityWarning
+	}
+	action := "Configure with 'shipwright integrations configure opendesign ...' if you want OpenDesign as a local design MCP provider."
+	if r.OpenDesign.Configured {
+		action = "Start the OpenDesign daemon/app and verify OD_SIDECAR_IPC_PATH, then regenerate OpenCode executor files."
+	}
+	r.addCheck(DoctorCheck{
+		ID:       "opendesign.available",
+		Title:    "OpenDesign available",
+		Severity: severity,
+		Status:   r.OpenDesign.Status,
+		Detail:   r.OpenDesign.Reason,
+		Action:   action,
+	})
+}
+
 func (r *DoctorReport) evaluateOpenPencil(cfg *PortableConfig) {
 	if r.OpenPencil.Available && r.OpenPencil.Active {
 		r.addCheck(DoctorCheck{
@@ -223,7 +286,7 @@ func (r *DoctorReport) evaluateOpenPencil(cfg *PortableConfig) {
 		r.addCheck(DoctorCheck{
 			ID:       "openpencil.canvas",
 			Title:    "OpenPencil canvas active",
-			Severity: DoctorSeverityWarning,
+			Severity: DoctorSeverityInfo,
 			Status:   r.OpenPencil.Status,
 			Detail:   r.OpenPencil.Reason,
 			Action:   "Open OpenPencil and activate a canvas, or continue with fallback: " + r.OpenPencil.Fallback + ".",
@@ -233,7 +296,7 @@ func (r *DoctorReport) evaluateOpenPencil(cfg *PortableConfig) {
 
 	severity := DoctorSeverityInfo
 	if r.OpenPencil.Configured {
-		severity = DoctorSeverityWarning
+		severity = DoctorSeverityInfo
 	}
 	action := "Shipwright will use design fallback: " + r.OpenPencil.Fallback + "."
 	if r.OpenPencil.Configured {

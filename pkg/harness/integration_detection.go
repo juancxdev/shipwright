@@ -331,3 +331,205 @@ func openPencilMCPServerCandidates(probe SystemProbe, platform PlatformInfo, cfg
 	}
 	return candidates
 }
+
+func DetectStitch(probe SystemProbe) DetectionResult {
+	return DetectStitchWithConfig(probe, nil)
+}
+
+func DetectStitchWithConfig(probe SystemProbe, cfg *PortableConfig) DetectionResult {
+	if probe == nil {
+		probe = RealSystemProbe{}
+	}
+	platform := DetectPlatform(probe)
+	fallback := "design-doc-only"
+	apiKeyEnv := "STITCH_API_KEY"
+	accessTokenEnv := "STITCH_ACCESS_TOKEN"
+	projectEnv := "GOOGLE_CLOUD_PROJECT"
+	if cfg != nil {
+		if strings.TrimSpace(cfg.Integrations.Stitch.Fallback) != "" {
+			fallback = cfg.Integrations.Stitch.Fallback
+		}
+		if strings.TrimSpace(cfg.Integrations.Stitch.APIKeyEnv) != "" {
+			apiKeyEnv = strings.TrimSpace(cfg.Integrations.Stitch.APIKeyEnv)
+		}
+		if strings.TrimSpace(cfg.Integrations.Stitch.AccessTokenEnv) != "" {
+			accessTokenEnv = strings.TrimSpace(cfg.Integrations.Stitch.AccessTokenEnv)
+		}
+		if strings.TrimSpace(cfg.Integrations.Stitch.ProjectEnv) != "" {
+			projectEnv = strings.TrimSpace(cfg.Integrations.Stitch.ProjectEnv)
+		}
+	}
+
+	apiKey := strings.TrimSpace(probe.Getenv(apiKeyEnv))
+	accessToken := strings.TrimSpace(probe.Getenv(accessTokenEnv))
+	project := strings.TrimSpace(probe.Getenv(projectEnv))
+	if apiKey == "" {
+		apiKey = LocalSecretValue(apiKeyEnv)
+	}
+	if accessToken == "" {
+		accessToken = LocalSecretValue(accessTokenEnv)
+	}
+	if project == "" {
+		project = LocalSecretValue(projectEnv)
+	}
+	if apiKey != "" || (accessToken != "" && project != "") {
+		return DetectionResult{
+			Name:       "stitch",
+			Platform:   platform,
+			Installed:  true,
+			Configured: true,
+			Available:  true,
+			Active:     true,
+			Status:     DetectionAvailable,
+			Reason:     "Stitch credentials found in environment or .harness/secrets.local.env",
+			Fallback:   fallback,
+		}
+	}
+
+	if accessToken != "" && project == "" {
+		return DetectionResult{
+			Name:       "stitch",
+			Platform:   platform,
+			Installed:  true,
+			Configured: true,
+			Status:     DetectionConfiguredUnverified,
+			Reason:     accessTokenEnv + " is set but " + projectEnv + " is missing",
+			Fallback:   fallback,
+		}
+	}
+
+	return DetectionResult{
+		Name:     "stitch",
+		Platform: platform,
+		Status:   DetectionNotInstalled,
+		Reason:   "Stitch credentials not found; set STITCH_API_KEY or STITCH_ACCESS_TOKEN + GOOGLE_CLOUD_PROJECT",
+		Fallback: fallback,
+	}
+}
+
+func DetectOpenDesign(probe SystemProbe) DetectionResult {
+	return DetectOpenDesignWithConfig(probe, nil)
+}
+
+func DetectOpenDesignWithConfig(probe SystemProbe, cfg *PortableConfig) DetectionResult {
+	if probe == nil {
+		probe = RealSystemProbe{}
+	}
+	platform := DetectPlatform(probe)
+	fallback := "design-doc-only"
+	command := strings.TrimSpace(probe.Getenv("OPENDESIGN_MCP_COMMAND"))
+	dataDir := firstNonEmpty(
+		strings.TrimSpace(probe.Getenv("OPENDESIGN_DATA_DIR")),
+		strings.TrimSpace(probe.Getenv("OD_DATA_DIR")),
+	)
+	ipcPath := firstNonEmpty(
+		strings.TrimSpace(probe.Getenv("OPENDESIGN_SIDECAR_IPC_PATH")),
+		strings.TrimSpace(probe.Getenv("OD_SIDECAR_IPC_PATH")),
+	)
+	if cfg != nil {
+		if strings.TrimSpace(cfg.Integrations.OpenDesign.Fallback) != "" {
+			fallback = cfg.Integrations.OpenDesign.Fallback
+		}
+		if strings.TrimSpace(cfg.Integrations.OpenDesign.MCPCommand) != "" {
+			command = strings.TrimSpace(cfg.Integrations.OpenDesign.MCPCommand)
+		}
+		if strings.TrimSpace(cfg.Integrations.OpenDesign.DataDir) != "" {
+			dataDir = strings.TrimSpace(cfg.Integrations.OpenDesign.DataDir)
+		}
+		if strings.TrimSpace(cfg.Integrations.OpenDesign.IPCPath) != "" {
+			ipcPath = strings.TrimSpace(cfg.Integrations.OpenDesign.IPCPath)
+		}
+	}
+	if command == "" {
+		return DetectionResult{
+			Name:     "opendesign",
+			Platform: platform,
+			Status:   DetectionNotInstalled,
+			Reason:   "OpenDesign MCP command not configured; run 'shipwright integrations configure opendesign'.",
+			Fallback: fallback,
+		}
+	}
+
+	resolved := command
+	if strings.ContainsAny(command, `/\\`) {
+		info, err := probe.Stat(command)
+		if err != nil {
+			return DetectionResult{
+				Name:       "opendesign",
+				Platform:   platform,
+				Configured: true,
+				Status:     DetectionNotInstalled,
+				Path:       command,
+				PathKind:   DetectionPathBinary,
+				Reason:     "OpenDesign MCP command path not found",
+				Fallback:   fallback,
+			}
+		}
+		if info.IsDir() {
+			return DetectionResult{
+				Name:       "opendesign",
+				Platform:   platform,
+				Configured: true,
+				Status:     DetectionNotInstalled,
+				Path:       command,
+				PathKind:   DetectionPathBinary,
+				Reason:     "OpenDesign MCP command path is a directory",
+				Fallback:   fallback,
+			}
+		}
+	} else if path, err := probe.LookPath(command); err == nil && strings.TrimSpace(path) != "" {
+		resolved = path
+	} else {
+		return DetectionResult{
+			Name:       "opendesign",
+			Platform:   platform,
+			Configured: true,
+			Status:     DetectionNotInstalled,
+			Path:       command,
+			PathKind:   DetectionPathBinary,
+			Reason:     "OpenDesign MCP command not found in PATH",
+			Fallback:   fallback,
+		}
+	}
+
+	status := DetectionConfiguredUnverified
+	available := false
+	active := false
+	reason := "OpenDesign MCP command configured; sidecar IPC not verified. Start OpenDesign daemon/app, then verify with OpenCode MCP tools."
+	if ipcPath != "" {
+		if info, err := probe.Stat(ipcPath); err == nil && !info.IsDir() {
+			status = DetectionAvailable
+			available = true
+			active = true
+			reason = "OpenDesign MCP command and sidecar IPC path are available"
+		} else {
+			reason = "OpenDesign MCP command configured, but sidecar IPC path is not available yet"
+		}
+	}
+	if dataDir == "" {
+		reason += "; OD_DATA_DIR is not configured"
+	}
+
+	return DetectionResult{
+		Name:       "opendesign",
+		Platform:   platform,
+		Installed:  true,
+		Configured: true,
+		Available:  available,
+		Active:     active,
+		Path:       resolved,
+		PathKind:   DetectionPathBinary,
+		Status:     status,
+		Reason:     reason,
+		Fallback:   fallback,
+	}
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, value := range values {
+		if strings.TrimSpace(value) != "" {
+			return strings.TrimSpace(value)
+		}
+	}
+	return ""
+}

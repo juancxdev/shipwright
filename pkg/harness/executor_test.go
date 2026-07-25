@@ -45,6 +45,10 @@ func TestOpenCodeExecutorGeneratesSupportedFiles(t *testing.T) {
 		filepath.Join(".harness", "bin", "shipwright"),
 		filepath.Join(".harness", "bin", "shipwright.cmd"),
 		filepath.Join(".opencode", "opencode.json"),
+		filepath.Join(".opencode", "mcp", "package.json"),
+		filepath.Join(".opencode", "mcp", "stitch-proxy.mjs"),
+		filepath.Join(".opencode", "mcp", "README.md"),
+		filepath.Join(".opencode", "mcp", ".gitignore"),
 		filepath.Join(".opencode", "agents", "product-owner.md"),
 		filepath.Join(".opencode", "commands", "shipwright-status.md"),
 		filepath.Join(".opencode", "skills", "product-owner", "SKILL.md"),
@@ -72,14 +76,23 @@ func TestOpenCodeExecutorGeneratesSupportedFiles(t *testing.T) {
 	assertFileContains(t, filepath.Join(".opencode", "opencode.json"), "\"shipwright-status\"")
 	assertFileContains(t, filepath.Join(".opencode", "opencode.json"), "{file:../AGENTS.md}")
 	assertFileContains(t, filepath.Join(".opencode", "opencode.json"), "{file:./agents/product-owner.md}")
+	assertFileContains(t, filepath.Join(".opencode", "opencode.json"), "\"stitch_*\"")
+	assertFileContains(t, filepath.Join(".opencode", "mcp", "package.json"), "@google/stitch-sdk")
+	assertFileContains(t, filepath.Join(".opencode", "mcp", "stitch-proxy.mjs"), "StitchProxy")
+	assertFileContains(t, filepath.Join(".opencode", "mcp", "stitch-proxy.mjs"), ".harness")
+	assertFileContains(t, filepath.Join(".opencode", "mcp", "README.md"), "npm install --prefix .opencode/mcp")
 	assertFileContains(t, "AGENTS.md", "Shipwright Orchestrator Autopilot")
-	assertFileContains(t, "AGENTS.md", ".harness/bin/shipwright start")
+	assertFileContains(t, "AGENTS.md", "shipwright start")
 	assertFileContains(t, "AGENTS.md", "Do not ask the user to run `next`")
-	assertFileContains(t, "AGENTS.md", ".harness/bin/shipwright approve scope")
+	assertFileContains(t, "AGENTS.md", "shipwright approve scope")
 	assertFileContains(t, "AGENTS.md", "treat `installed_no_active_canvas` as **unverified**")
 	assertFileContains(t, filepath.Join(".opencode", "opencode.json"), "\"open-pencil_*\"")
+	assertFileContains(t, filepath.Join(".opencode", "opencode.json"), "\"open-design_list_projects\"")
+	assertFileContains(t, filepath.Join(".opencode", "opencode.json"), "\"open-design_create_artifact\"")
+	assertFileContains(t, filepath.Join(".opencode", "opencode.json"), "\"opendesign_*\"")
 	assertFileContains(t, filepath.Join(".harness", "bin", "shipwright"), "../shipwright")
 	assertFileContains(t, filepath.Join(".harness", "bin", "shipwright"), "SHIPWRIGHT_BIN")
+	assertFileContains(t, filepath.Join(".harness", "bin", "shipwright"), "shell aliases are not visible")
 	if ArtifactExists(filepath.Join(".harness", "bin", "loom")) || ArtifactExists(filepath.Join(".harness", "bin", "loom.cmd")) {
 		t.Fatal("legacy loom wrappers should not be generated for unreleased Shipwright")
 	}
@@ -101,12 +114,15 @@ func TestOpenCodeExecutorGeneratesSupportedFiles(t *testing.T) {
 	assertFileContains(t, filepath.Join(".opencode", "agents", "product-owner.md"), "mode: subagent")
 	assertFileContains(t, filepath.Join(".opencode", "agents", "product-owner.md"), "project-profile.md")
 	assertFileContains(t, filepath.Join(".opencode", "agents", "frontend-engineer.md"), "tdd-policy.md")
-	assertFileContains(t, filepath.Join(".opencode", "agents", "ui-ux-designer.md"), "OpenPencil MCP validation")
+	assertFileContains(t, filepath.Join(".opencode", "agents", "ui-ux-designer.md"), "Stitch")
 	assertFileContains(t, filepath.Join(".opencode", "skills", "ui-ux-designer", "SKILL.md"), "installed_no_active_canvas")
 	assertFileContains(t, filepath.Join(".opencode", "skills", "ui-ux-designer", "SKILL.md"), "Responsive & Accessibility QA")
 	assertFileContains(t, filepath.Join(".opencode", "skills", "ui-ux-designer", "SKILL.md"), "Existing Web Baseline Fidelity Gate")
 	assertFileContains(t, filepath.Join(".opencode", "skills", "existing-web-to-openpencil", "SKILL.md"), "fidelity-report.md")
 	assertFileContains(t, filepath.Join(".opencode", "skills", "existing-web-to-openpencil", "SKILL.md"), "Section matrix per route/viewport")
+	assertFileContains(t, filepath.Join(".opencode", "skills", "stitch-generate-design", "SKILL.md"), "Google Stitch")
+	assertFileContains(t, filepath.Join(".opencode", "skills", "stitch-generate-design", "SKILL.md"), "STITCH_API_KEY")
+	assertFileContains(t, filepath.Join(".opencode", "skills", "opendesign-generate-artifact", "SKILL.md"), "ARTIFACT_MANIFEST_REQUIRED")
 	assertFileContains(t, filepath.Join(".opencode", "skills", "canvas-generate-design", "SKILL.md"), "Build like a designer")
 	assertFileContains(t, filepath.Join(".opencode", "skills", "canvas-generate-design", "SKILL.md"), "Figma-inspired canvas discipline")
 	assertFileContains(t, filepath.Join(".opencode", "skills", "openpencil-generate-design", "SKILL.md"), "open-pencil_get_current_page")
@@ -167,6 +183,20 @@ func TestOpenCodeExecutorIncludesOpenPencilMCPWhenConfigured(t *testing.T) {
 	}
 }
 
+func TestOpenCodeExecutorIncludesStitchMCPWhenLocalSecretConfigured(t *testing.T) {
+	withTempWorkingDir(t)
+
+	if err := SaveLocalSecret("STITCH_API_KEY", "test-key"); err != nil {
+		t.Fatalf("SaveLocalSecret: %v", err)
+	}
+	cfg := DefaultPortableConfig()
+
+	json := opencodeJSONWithConfig(DefaultOpenCodeExecutorConfig(), cfg)
+	if !strings.Contains(json, "\"mcp\"") || !strings.Contains(json, "\"stitch\"") || !strings.Contains(json, ".opencode/mcp/stitch-proxy.mjs") {
+		t.Fatalf("opencode json missing stitch mcp config:\n%s", json)
+	}
+}
+
 func TestUnknownExecutorFails(t *testing.T) {
 	if _, err := GetExecutorAdapter("unknown"); err == nil {
 		t.Fatal("expected unknown executor error")
@@ -182,4 +212,34 @@ func assertFileContains(t *testing.T, path string, needle string) {
 	if !strings.Contains(string(data), needle) {
 		t.Fatalf("%s does not contain %q", path, needle)
 	}
+}
+
+func TestOpenCodeExecutorIncludesOpenDesignMCPWhenConfigured(t *testing.T) {
+	withTempWorkingDir(t)
+
+	command := filepath.Join(t.TempDir(), "node")
+	if err := os.WriteFile(command, []byte("#!/bin/sh\n"), 0755); err != nil {
+		t.Fatalf("write node: %v", err)
+	}
+	cfg := DefaultPortableConfig()
+	cfg.Integrations.OpenDesign.MCPCommand = command
+	cfg.Integrations.OpenDesign.MCPArgs = []string{"/tools/open-design/apps/daemon/dist/cli.js", "mcp"}
+	cfg.Integrations.OpenDesign.DataDir = "/tools/open-design/.od"
+	cfg.Integrations.OpenDesign.IPCPath = "/tmp/open-design/ipc/default/daemon.sock"
+	if err := cfg.Save(); err != nil {
+		t.Fatalf("save config: %v", err)
+	}
+
+	if _, err := GenerateExecutor(ExecutorOpenCode); err != nil {
+		t.Fatalf("GenerateExecutor: %v", err)
+	}
+
+	configPath := filepath.Join(".opencode", "opencode.json")
+	assertFileContains(t, configPath, "\"open-design\"")
+	assertFileContains(t, configPath, ".opencode/mcp/open-design.sh")
+	assertFileContains(t, configPath, "\"open-design_*\"")
+	wrapperPath := filepath.Join(".opencode", "mcp", "open-design.sh")
+	assertFileContains(t, wrapperPath, "OD_DATA_DIR")
+	assertFileContains(t, wrapperPath, "OD_SIDECAR_IPC_PATH")
+	assertFileContains(t, wrapperPath, "exec '")
 }

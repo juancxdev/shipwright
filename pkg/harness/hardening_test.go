@@ -199,7 +199,7 @@ func (f *fakeDesignPort) StartDesign(state *State, request string) (*DesignResul
 func (f *fakeDesignPort) Status() (*DesignStatus, error) { return f.status, nil }
 func (f *fakeDesignPort) AdapterName() string            { return f.name }
 
-func TestDesignServiceFallsBackWhenOpenPencilFails(t *testing.T) {
+func TestDesignServiceFallsBackWhenPrimaryDesignProviderFails(t *testing.T) {
 	chdirTemp(t)
 	state := NewState("Billing")
 	primary := &fakeDesignPort{name: DesignModeOpenPencil, err: errors.New("canvas unavailable")}
@@ -213,7 +213,7 @@ func TestDesignServiceFallsBackWhenOpenPencilFails(t *testing.T) {
 	if !result.FallbackUsed {
 		t.Fatal("expected fallback to be used")
 	}
-	if !strings.Contains(result.Message, "OpenPencil unavailable") {
+	if !strings.Contains(result.Message, "openpencil unavailable") {
 		t.Fatalf("unexpected fallback message: %s", result.Message)
 	}
 }
@@ -231,6 +231,26 @@ func TestDocOnlyDesignFallbackGeneratesResponsiveQA(t *testing.T) {
 	}
 	assertFileContainsLocal(t, ".harness/artifacts/design/responsive-qa.md", "Mobile 390x844")
 	assertFileContainsLocal(t, ".harness/artifacts/design/responsive-qa.md", "No component extends outside")
+}
+
+func TestStitchDesignAdapterGeneratesTaskAndEvidencePlaceholders(t *testing.T) {
+	chdirTemp(t)
+	state := NewState("Billing")
+
+	result, err := NewStitchDesignAdapter().StartDesign(state, "billing design")
+	if err != nil {
+		t.Fatalf("StartDesign: %v", err)
+	}
+	if result.Adapter != DesignModeStitch {
+		t.Fatalf("adapter = %s, want %s", result.Adapter, DesignModeStitch)
+	}
+	for _, file := range []string{DesignStitchTaskFile, DesignStitchDesignMDFile, ".harness/artifacts/design/prototype.md", ".harness/artifacts/design/responsive-qa.md"} {
+		if !ArtifactExists(file) {
+			t.Fatalf("expected %s", file)
+		}
+	}
+	assertFileContainsLocal(t, DesignStitchTaskFile, "STITCH_API_KEY")
+	assertFileContainsLocal(t, DesignStitchTaskFile, "Do not use OpenPencil unless the user explicitly asks")
 }
 
 func containsString(values []string, needle string) bool {
@@ -251,4 +271,19 @@ func assertFileContainsLocal(t *testing.T, path string, needle string) {
 	if !strings.Contains(string(data), needle) {
 		t.Fatalf("%s does not contain %q", path, needle)
 	}
+}
+
+func TestOpenDesignDesignAdapterCreatesArtifactTask(t *testing.T) {
+	withTempWorkingDir(t)
+	state := &State{ProjectName: "Design MVP"}
+	result, err := NewOpenDesignAdapter().StartDesign(state, "Create a landing baseline")
+	if err != nil {
+		t.Fatalf("StartDesign: %v", err)
+	}
+	if result.Adapter != DesignModeOpenDesign || result.TaskFile != DesignOpenDesignTaskFile {
+		t.Fatalf("result = %+v", result)
+	}
+	assertFileContainsLocal(t, DesignOpenDesignTaskFile, "open-design_create_artifact")
+	assertFileContainsLocal(t, DesignOpenDesignTaskFile, ".artifact.json")
+	assertFileContainsLocal(t, ".harness/artifacts/design/prototype.md", "OpenDesign")
 }

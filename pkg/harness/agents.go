@@ -328,8 +328,8 @@ Ready for technical-plan approval. User must run: shipwright approve technical-p
 	{
 		Name:        "ui-ux-designer",
 		Filename:    "ui-ux-designer.md",
-		Description: "Design UX and prototypes when the product has UI. Trigger: UX_DECISION through UX_APPROVAL phases. Can use OpenPencil MCP for visual design.",
-		Purpose:     "You are the UI/UX Designer agent. You design user experience and prototypes when the product has UI. You can use OpenPencil MCP tools for visual design — if unavailable, you produce doc-only wireframes.",
+		Description: "Design UX and prototypes when the product has UI. Trigger: UX_DECISION through UX_APPROVAL phases. Uses Stitch as primary high-fidelity provider; OpenDesign/OpenPencil are optional on explicit request.",
+		Purpose:     "You are the UI/UX Designer agent. You design user experience and prototypes when the product has UI. Use Google Stitch as primary high-fidelity provider; use OpenDesign or OpenPencil only on explicit request/config; otherwise use doc-only fallback.",
 		Inputs: []string{
 			".harness/artifacts/product/scope.md (approved)",
 			".harness/artifacts/project/delivery-plan.md",
@@ -350,7 +350,9 @@ Ready for technical-plan approval. User must run: shipwright approve technical-p
 			".harness/artifacts/design/prototype.md",
 			".harness/artifacts/design/design-decisions.md",
 			".harness/artifacts/design/responsive-qa.md",
+			".harness/artifacts/design/stitch/",
 			".harness/artifacts/design/openpencil/",
+			".harness/artifacts/design/opendesign/",
 		},
 		CanRead: []string{
 			".harness/artifacts/product/context.md",
@@ -373,7 +375,7 @@ Ready for technical-plan approval. User must run: shipwright approve technical-p
 			},
 			{
 				Title:       "Create wireframes or visual design",
-				Description: "If OpenPencil is enabled: read .harness/artifacts/design/openpencil/design-task.md and try the actual OpenCode MCP tools before fallback. Treat installed_no_active_canvas as unverified, not failed. Use the open-pencil MCP server and open-pencil_* tools; do not use a separate pencil MCP server because it may belong to another desktop host. Create responsive frames for mobile 390x844, tablet 768x1024, and desktop 1440x1024. Export wireframes to .harness/artifacts/design/openpencil/exports/, inspect screenshots for overflow/clipping, then write .harness/artifacts/design/prototype.md describing the visual design. If OpenPencil is NOT enabled or open-pencil MCP tools are unavailable: write responsive doc-only wireframes and .harness/artifacts/design/prototype.md. Mark as 'doc-only mode'.",
+				Description: "If Stitch is enabled: read .harness/artifacts/design/stitch/design-task.md and use Stitch SDK/MCP. If OpenDesign is selected: read .harness/artifacts/design/opendesign/design-task.md, create OpenDesign artifacts plus .artifact.json manifests, and use open-design_* MCP tools. Use OpenPencil only when explicitly requested. If no visual provider is available, write responsive doc-only wireframes and .harness/artifacts/design/prototype.md. Mark as 'doc-only mode'.",
 			},
 			{
 				Title:       "Run responsive QA",

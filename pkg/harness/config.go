@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"strconv"
+	"strings"
 )
 
 const PortableConfigFile = ".harness/config.json"
@@ -25,6 +26,8 @@ type PortableHealthConfig struct {
 
 type PortableIntegrationsConfig struct {
 	Engram     PortableEngramConfig     `json:"engram"`
+	Stitch     PortableStitchConfig     `json:"stitch"`
+	OpenDesign PortableOpenDesignConfig `json:"opendesign"`
 	OpenPencil PortableOpenPencilConfig `json:"openpencil"`
 }
 
@@ -44,6 +47,24 @@ type PortableEngramConfig struct {
 	BinaryPath string `json:"binary_path,omitempty"`
 	HealthURL  string `json:"health_url,omitempty"`
 	Fallback   string `json:"fallback"`
+}
+
+type PortableStitchConfig struct {
+	Mode           string `json:"mode"`
+	APIKeyEnv      string `json:"api_key_env,omitempty"`
+	AccessTokenEnv string `json:"access_token_env,omitempty"`
+	ProjectEnv     string `json:"project_env,omitempty"`
+	MCPURL         string `json:"mcp_url,omitempty"`
+	Fallback       string `json:"fallback"`
+}
+
+type PortableOpenDesignConfig struct {
+	Mode       string   `json:"mode"`
+	MCPCommand string   `json:"mcp_command,omitempty"`
+	MCPArgs    []string `json:"mcp_args,omitempty"`
+	DataDir    string   `json:"data_dir,omitempty"`
+	IPCPath    string   `json:"ipc_path,omitempty"`
+	Fallback   string   `json:"fallback"`
 }
 
 type PortableOpenPencilConfig struct {
@@ -66,6 +87,18 @@ func DefaultPortableConfig() *PortableConfig {
 				Mode:      "mcp",
 				HealthURL: "http://localhost:7437/health",
 				Fallback:  DecisionsFile,
+			},
+			Stitch: PortableStitchConfig{
+				Mode:           "sdk",
+				APIKeyEnv:      "STITCH_API_KEY",
+				AccessTokenEnv: "STITCH_ACCESS_TOKEN",
+				ProjectEnv:     "GOOGLE_CLOUD_PROJECT",
+				MCPURL:         DefaultStitchMCPEndpoint,
+				Fallback:       "design-doc-only",
+			},
+			OpenDesign: PortableOpenDesignConfig{
+				Mode:     "mcp",
+				Fallback: "design-doc-only",
 			},
 			OpenPencil: PortableOpenPencilConfig{
 				Mode:     "mcp",
@@ -169,6 +202,30 @@ func (cfg *PortableConfig) Normalize() {
 	if cfg.Integrations.Engram.Fallback == "" {
 		cfg.Integrations.Engram.Fallback = DecisionsFile
 	}
+	if cfg.Integrations.Stitch.Mode == "" {
+		cfg.Integrations.Stitch.Mode = "sdk"
+	}
+	if cfg.Integrations.Stitch.APIKeyEnv == "" {
+		cfg.Integrations.Stitch.APIKeyEnv = "STITCH_API_KEY"
+	}
+	if cfg.Integrations.Stitch.AccessTokenEnv == "" {
+		cfg.Integrations.Stitch.AccessTokenEnv = "STITCH_ACCESS_TOKEN"
+	}
+	if cfg.Integrations.Stitch.ProjectEnv == "" {
+		cfg.Integrations.Stitch.ProjectEnv = "GOOGLE_CLOUD_PROJECT"
+	}
+	if cfg.Integrations.Stitch.MCPURL == "" {
+		cfg.Integrations.Stitch.MCPURL = DefaultStitchMCPEndpoint
+	}
+	if cfg.Integrations.Stitch.Fallback == "" {
+		cfg.Integrations.Stitch.Fallback = "design-doc-only"
+	}
+	if cfg.Integrations.OpenDesign.Mode == "" {
+		cfg.Integrations.OpenDesign.Mode = "mcp"
+	}
+	if cfg.Integrations.OpenDesign.Fallback == "" {
+		cfg.Integrations.OpenDesign.Fallback = "design-doc-only"
+	}
 	if cfg.Integrations.OpenPencil.Mode == "" {
 		cfg.Integrations.OpenPencil.Mode = "mcp"
 	}
@@ -217,6 +274,44 @@ func (cfg *PortableConfig) Merge(override PortableIntegrationsConfig) {
 	}
 	if override.Engram.Fallback != "" {
 		cfg.Integrations.Engram.Fallback = override.Engram.Fallback
+	}
+
+	if override.Stitch.Mode != "" {
+		cfg.Integrations.Stitch.Mode = override.Stitch.Mode
+	}
+	if override.Stitch.APIKeyEnv != "" {
+		cfg.Integrations.Stitch.APIKeyEnv = override.Stitch.APIKeyEnv
+	}
+	if override.Stitch.AccessTokenEnv != "" {
+		cfg.Integrations.Stitch.AccessTokenEnv = override.Stitch.AccessTokenEnv
+	}
+	if override.Stitch.ProjectEnv != "" {
+		cfg.Integrations.Stitch.ProjectEnv = override.Stitch.ProjectEnv
+	}
+	if override.Stitch.MCPURL != "" {
+		cfg.Integrations.Stitch.MCPURL = override.Stitch.MCPURL
+	}
+	if override.Stitch.Fallback != "" {
+		cfg.Integrations.Stitch.Fallback = override.Stitch.Fallback
+	}
+
+	if override.OpenDesign.Mode != "" {
+		cfg.Integrations.OpenDesign.Mode = override.OpenDesign.Mode
+	}
+	if override.OpenDesign.MCPCommand != "" {
+		cfg.Integrations.OpenDesign.MCPCommand = override.OpenDesign.MCPCommand
+	}
+	if len(override.OpenDesign.MCPArgs) > 0 {
+		cfg.Integrations.OpenDesign.MCPArgs = append([]string{}, override.OpenDesign.MCPArgs...)
+	}
+	if override.OpenDesign.DataDir != "" {
+		cfg.Integrations.OpenDesign.DataDir = override.OpenDesign.DataDir
+	}
+	if override.OpenDesign.IPCPath != "" {
+		cfg.Integrations.OpenDesign.IPCPath = override.OpenDesign.IPCPath
+	}
+	if override.OpenDesign.Fallback != "" {
+		cfg.Integrations.OpenDesign.Fallback = override.OpenDesign.Fallback
 	}
 
 	if override.OpenPencil.Mode != "" {
@@ -271,6 +366,36 @@ func (cfg *PortableConfig) ApplyEnv(probe SystemProbe) {
 	if value := trimEnv(probe.Getenv("ENGRAM_HEALTH_URL")); value != "" {
 		cfg.Integrations.Engram.HealthURL = value
 	}
+	if value := trimEnv(probe.Getenv("SHIPWRIGHT_STITCH_API_KEY_ENV")); value != "" {
+		cfg.Integrations.Stitch.APIKeyEnv = value
+	}
+	if value := trimEnv(probe.Getenv("SHIPWRIGHT_STITCH_ACCESS_TOKEN_ENV")); value != "" {
+		cfg.Integrations.Stitch.AccessTokenEnv = value
+	}
+	if value := trimEnv(probe.Getenv("SHIPWRIGHT_STITCH_PROJECT_ENV")); value != "" {
+		cfg.Integrations.Stitch.ProjectEnv = value
+	}
+	if value := trimEnv(probe.Getenv("SHIPWRIGHT_STITCH_MCP_URL")); value != "" {
+		cfg.Integrations.Stitch.MCPURL = value
+	}
+	if value := trimEnv(probe.Getenv("OPENDESIGN_MCP_COMMAND")); value != "" {
+		cfg.Integrations.OpenDesign.MCPCommand = value
+	}
+	if value := trimEnv(probe.Getenv("OPENDESIGN_MCP_ARGS")); value != "" {
+		cfg.Integrations.OpenDesign.MCPArgs = parseEnvList(value)
+	}
+	if value := trimEnv(probe.Getenv("OPENDESIGN_DATA_DIR")); value != "" {
+		cfg.Integrations.OpenDesign.DataDir = value
+	}
+	if value := trimEnv(probe.Getenv("OD_DATA_DIR")); value != "" {
+		cfg.Integrations.OpenDesign.DataDir = value
+	}
+	if value := trimEnv(probe.Getenv("OPENDESIGN_SIDECAR_IPC_PATH")); value != "" {
+		cfg.Integrations.OpenDesign.IPCPath = value
+	}
+	if value := trimEnv(probe.Getenv("OD_SIDECAR_IPC_PATH")); value != "" {
+		cfg.Integrations.OpenDesign.IPCPath = value
+	}
 	if value := trimEnv(probe.Getenv("OPENPENCIL_APP_PATH")); value != "" {
 		cfg.Integrations.OpenPencil.AppPath = value
 	}
@@ -311,4 +436,24 @@ func trimEnv(value string) string {
 		value = value[:len(value)-1]
 	}
 	return value
+}
+
+func parseEnvList(value string) []string {
+	value = trimEnv(value)
+	if value == "" {
+		return nil
+	}
+	separator := ","
+	if strings.Contains(value, "|") {
+		separator = "|"
+	}
+	parts := strings.Split(value, separator)
+	result := make([]string, 0, len(parts))
+	for _, part := range parts {
+		part = trimEnv(part)
+		if part != "" {
+			result = append(result, part)
+		}
+	}
+	return result
 }

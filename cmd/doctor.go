@@ -116,7 +116,9 @@ func printDoctorReport(report *harness.DoctorReport) {
 	fmt.Println("Integrations:")
 	printDoctorDetection("Engram", report.Engram)
 	printDoctorHealth("Engram health", report.EngramHealth)
-	printDoctorDetection("OpenPencil", report.OpenPencil)
+	printDoctorDetection("Stitch", report.Stitch)
+	printDoctorDetection("OpenDesign (optional)", report.OpenDesign)
+	printDoctorDetection("OpenPencil (optional)", report.OpenPencil)
 	printDoctorHealth("OpenPencil health", report.OpenPencilHealth)
 	fmt.Println()
 

@@ -83,6 +83,10 @@ func RepairPortableConfig(cfg *PortableConfig) []string {
 		cfg.Integrations.Engram.Mode = ConfigModeMCP
 		actions = append(actions, "set integrations.engram.mode to mcp")
 	}
+	if strings.TrimSpace(cfg.Integrations.Stitch.Mode) == "" || !isSupportedConfigMode(cfg.Integrations.Stitch.Mode) {
+		cfg.Integrations.Stitch.Mode = ConfigModeSDK
+		actions = append(actions, "set integrations.stitch.mode to sdk")
+	}
 	if strings.TrimSpace(cfg.Integrations.OpenPencil.Mode) == "" || !isSupportedConfigMode(cfg.Integrations.OpenPencil.Mode) {
 		cfg.Integrations.OpenPencil.Mode = ConfigModeMCP
 		actions = append(actions, "set integrations.openpencil.mode to mcp")
@@ -90,6 +94,10 @@ func RepairPortableConfig(cfg *PortableConfig) []string {
 	if strings.TrimSpace(cfg.Integrations.Engram.Fallback) == "" {
 		cfg.Integrations.Engram.Fallback = DecisionsFile
 		actions = append(actions, "set integrations.engram.fallback")
+	}
+	if strings.TrimSpace(cfg.Integrations.Stitch.Fallback) == "" {
+		cfg.Integrations.Stitch.Fallback = "design-doc-only"
+		actions = append(actions, "set integrations.stitch.fallback")
 	}
 	if strings.TrimSpace(cfg.Integrations.OpenPencil.Fallback) == "" {
 		cfg.Integrations.OpenPencil.Fallback = "design-doc-only"
@@ -99,12 +107,21 @@ func RepairPortableConfig(cfg *PortableConfig) []string {
 		cfg.Integrations.Engram.HealthURL = "http://localhost:7437/health"
 		actions = append(actions, "reset integrations.engram.health_url to default")
 	}
+	if validateHTTPURL("integrations.stitch.mcp_url", cfg.Integrations.Stitch.MCPURL) != nil {
+		cfg.Integrations.Stitch.MCPURL = DefaultStitchMCPEndpoint
+		actions = append(actions, "reset integrations.stitch.mcp_url to default")
+	}
 	for osName, override := range cfg.PlatformOverrides {
 		changed := false
 		if strings.TrimSpace(override.Engram.Mode) != "" && !isSupportedConfigMode(override.Engram.Mode) {
 			override.Engram.Mode = ConfigModeMCP
 			changed = true
 			actions = append(actions, "set platform_overrides."+osName+".engram.mode to mcp")
+		}
+		if strings.TrimSpace(override.Stitch.Mode) != "" && !isSupportedConfigMode(override.Stitch.Mode) {
+			override.Stitch.Mode = ConfigModeSDK
+			changed = true
+			actions = append(actions, "set platform_overrides."+osName+".stitch.mode to sdk")
 		}
 		if strings.TrimSpace(override.OpenPencil.Mode) != "" && !isSupportedConfigMode(override.OpenPencil.Mode) {
 			override.OpenPencil.Mode = ConfigModeMCP
@@ -116,6 +133,11 @@ func RepairPortableConfig(cfg *PortableConfig) []string {
 			changed = true
 			actions = append(actions, "removed invalid platform_overrides."+osName+".engram.health_url")
 		}
+		if strings.TrimSpace(override.Stitch.MCPURL) != "" && validateHTTPURL("platform_overrides."+osName+".stitch.mcp_url", override.Stitch.MCPURL) != nil {
+			override.Stitch.MCPURL = ""
+			changed = true
+			actions = append(actions, "removed invalid platform_overrides."+osName+".stitch.mcp_url")
+		}
 		if changed {
 			cfg.PlatformOverrides[osName] = override
 		}
@@ -126,7 +148,7 @@ func RepairPortableConfig(cfg *PortableConfig) []string {
 
 func isSupportedConfigMode(mode string) bool {
 	mode = strings.TrimSpace(mode)
-	return mode == ConfigModeMCP || mode == ConfigModeDisabled
+	return mode == ConfigModeMCP || mode == ConfigModeSDK || mode == ConfigModeDisabled
 }
 
 func corruptConfigBackupPath() string {

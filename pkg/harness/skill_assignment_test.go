@@ -128,6 +128,11 @@ name: accessibility
 description: Accessibility skill for frontend and design QA.
 ---
 `)
+	writeTestFile(t, "skills/stitch-generate-design/SKILL.md", `---
+name: stitch-generate-design
+description: Generate design with Google Stitch.
+---
+`)
 	writeTestFile(t, "skills/existing-web-to-openpencil/SKILL.md", `---
 name: existing-web-to-openpencil
 description: Reverse-engineer web UI into OpenPencil.
@@ -163,6 +168,9 @@ description: Map design components to code components.
 	}
 	if !assignmentHasSkillForAgent(set, "frontend-design", "ui-ux-designer") {
 		t.Fatalf("expected frontend-design assigned to ui-ux-designer: %+v", set.Skills)
+	}
+	if !assignmentHasSkillForAgent(set, "stitch-generate-design", "ui-ux-designer") {
+		t.Fatalf("expected stitch-generate-design assigned to ui-ux-designer: %+v", set.Skills)
 	}
 	if !assignmentHasSkillForAgent(set, "existing-web-to-openpencil", "ui-ux-designer") {
 		t.Fatalf("expected existing-web-to-openpencil assigned to ui-ux-designer: %+v", set.Skills)

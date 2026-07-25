@@ -145,7 +145,28 @@ cd my-product
 shipwright init
 ```
 
-`shipwright init` defaults to OpenCode, calibrates the current repository, and generates:
+`shipwright init` defaults to OpenCode, calibrates the current repository, then clears the terminal and opens an optional interactive integration checklist in interactive terminals. Move with `↑/↓` or `j/k`, toggle with `Space`, and continue with `Enter`.
+
+```txt
+> [X] Engram      — memoria persistente y decisiones del proyecto
+  [X] Stitch      — diseño high-fidelity principal
+  [ ] OpenDesign  — diseño/canvas MCP local
+  [ ] OpenPencil  — canvas local opcional
+```
+
+If you enable Stitch and paste an API key, Shipwright stores it in:
+
+```txt
+.harness/secrets.local.env
+```
+
+That file is ignored by `.harness/.gitignore` and is intended only for your local machine. For scripts/CI, skip prompts:
+
+```bash
+shipwright init --no-interactive
+```
+
+`shipwright init` generates:
 
 - `AGENTS.md`
 - `.opencode/opencode.json`
@@ -176,11 +197,14 @@ The orchestrator should start the Shipwright lifecycle automatically.
 
 ```bash
 shipwright init                          # Bootstrap current folder for OpenCode
+shipwright init --no-interactive         # Bootstrap without prompts for scripts/CI
 shipwright status                        # Show current phase, gates, integrations, next action
 shipwright doctor                        # Diagnose config/integrations/fallbacks
-shipwright integrations detect           # Detect Engram/OpenPencil availability
+shipwright integrations detect           # Detect Engram/Stitch/OpenDesign/OpenPencil availability
 shipwright integrations enable engram    # Enable Engram memory integration
-shipwright integrations enable openpencil # Enable OpenPencil design integration
+shipwright integrations enable stitch    # Enable Stitch design integration
+shipwright integrations configure opendesign --help # Configure OpenDesign MCP for OpenCode
+shipwright integrations enable openpencil # Optional: enable OpenPencil only if explicitly needed
 shipwright executor status opencode      # Verify OpenCode files
 shipwright executor generate opencode    # Regenerate OpenCode executor files
 shipwright skills refresh                  # Refresh reusable skill index + assignments
@@ -320,6 +344,7 @@ For greenfield projects, Shipwright also watches Technical Lead artifacts such a
 Shipwright also installs a small local curated UI/UX skill pack into `.opencode/skills/` during OpenCode bootstrap:
 
 - `frontend-design`
+- `stitch-generate-design`
 - `existing-web-to-openpencil`
 - `canvas-generate-design`
 - `openpencil-generate-design`
@@ -328,15 +353,16 @@ Shipwright also installs a small local curated UI/UX skill pack into `.opencode/
 - `design-system-tokens`
 - `interaction-design-patterns`
 - `openpencil-canvas-qa`
+- `design-code-component-map`
 - `visual-handoff-to-frontend`
 
-These are generic lifecycle skills, not remote downloads. They give `ui-ux-designer`, `frontend-engineer`, and `qa-security-reviewer` stronger defaults for interface quality, Figma-like canvas generation, existing-web reverse engineering, responsive behavior, accessibility, OpenPencil QA, and design-to-frontend handoff.
+These are generic lifecycle skills, not remote downloads. They give `ui-ux-designer`, `frontend-engineer`, and `qa-security-reviewer` stronger defaults for interface quality, Stitch-first high-fidelity generation, Figma-like canvas discipline, existing-web reverse engineering, responsive behavior, accessibility, optional OpenPencil QA, design-code mapping, and design-to-frontend handoff.
 
+Stitch is the primary design provider. It uses `STITCH_API_KEY`, or `STITCH_ACCESS_TOKEN` + `GOOGLE_CLOUD_PROJECT`, and stores evidence under `.harness/artifacts/design/stitch/`: `DESIGN.md`, `design-task.md`, `stitch-report.md`, screenshot exports, and HTML exports when available.
 
+OpenPencil is optional. If explicitly used, save remains a gate: agents must export visual evidence, attempt to save `.harness/artifacts/design/openpencil/app.pen`, retry once on timeout, write `.harness/artifacts/design/openpencil/save-status.md`, and only claim `.pen` persistence after verification.
 
-OpenPencil save is a gate: agents must export visual evidence, attempt to save `.harness/artifacts/design/openpencil/app.pen`, retry once on timeout, write `.harness/artifacts/design/openpencil/save-status.md`, and only claim `.pen` persistence after verification. If save times out, exports are temporary evidence and the save failure is a blocker unless the user explicitly accepts export-only work.
-
-For existing web projects, including Astro sites, the `existing-web-to-openpencil` skill tells the UI/UX Designer to inventory all routes/views first; inspect routes, layouts, components, styles, rendered screenshots, and assets; write `.harness/artifacts/design/route-inventory.md`, `.harness/artifacts/design/reverse-engineering.md`, `.harness/artifacts/design/visual-inventory.md`, and `.harness/artifacts/design/fidelity-report.md`; recreate the current UI in OpenPencil; compare OpenPencil exports against source evidence; then apply requested design changes only after the baseline fidelity gate passes.
+For existing web projects, including Astro sites, the baseline workflow tells the UI/UX Designer to inventory all routes/views first; inspect routes, layouts, components, styles, rendered screenshots, and assets; write `.harness/artifacts/design/route-inventory.md`, `.harness/artifacts/design/reverse-engineering.md`, `.harness/artifacts/design/visual-inventory.md`, and `.harness/artifacts/design/fidelity-report.md`; generate the current UI with Stitch; compare Stitch exports against source evidence; then apply requested design changes only after the baseline fidelity gate passes.
 
 Skill pack rules live as declarative manifests in `pkg/harness/templates/project/harness/skill-packs/`. Shipwright does not execute external installers during `init`; if you already used autoskills or another provider that writes `.agents/skills`, import those skills explicitly:
 
@@ -373,11 +399,51 @@ If Engram is unavailable, Shipwright falls back to:
 .harness/artifacts/progress/decisions.md
 ```
 
-### OpenPencil design
+### Stitch design
 
-OpenPencil is used by the UI/UX Designer when the product needs an interface.
+Stitch is the primary high-fidelity design provider. The easiest path is the `shipwright init` wizard. Manual setup also works:
 
-Recommended MCP setup:
+```bash
+export STITCH_API_KEY="..."
+shipwright integrations detect
+shipwright integrations enable stitch
+shipwright executor generate opencode
+npm install --prefix .opencode/mcp
+```
+
+Alternative OAuth-style setup uses `STITCH_ACCESS_TOKEN` plus `GOOGLE_CLOUD_PROJECT`. You can also let the init wizard store `STITCH_API_KEY` in `.harness/secrets.local.env` for this project only.
+
+Shipwright generates a local OpenCode MCP proxy at `.opencode/mcp/stitch-proxy.mjs` using `@google/stitch-sdk`. After installing dependencies, restart OpenCode and verify:
+
+```bash
+opencode mcp list
+```
+
+You should see a connected server named `stitch`; the UI/UX Designer can then use `stitch_*` tools. Stitch evidence is written under `.harness/artifacts/design/stitch/`.
+
+### OpenDesign design MCP (optional)
+
+If you run OpenDesign locally, do not edit `.opencode/opencode.json` by hand. Configure it through Shipwright once, then regenerate OpenCode assets:
+
+```bash
+shipwright integrations configure opendesign \
+  --command "/opt/homebrew/Cellar/node@24/24.15.0/bin/node" \
+  --arg "/Users/developer/Documents/TOOLS/APPs/open-design/apps/daemon/dist/cli.js" \
+  --arg mcp \
+  --data-dir "/Users/developer/Documents/TOOLS/APPs/open-design/.od" \
+  --ipc-path "/tmp/open-design/ipc/default/daemon.sock"
+
+shipwright executor generate opencode
+opencode mcp list
+```
+
+Shipwright writes `.opencode/mcp/open-design.sh` and registers an `open-design` MCP server in `.opencode/opencode.json`. The UI/UX Designer can then use exact OpenDesign artifact tools such as `open-design_get_active_context`, `open-design_list_projects`, and `open-design_create_artifact` when OpenCode reports the server as connected.
+
+OpenDesign is treated as an artifact provider, not a Figma/OpenPencil canvas. Generated HTML artifacts must include a sidecar manifest named `<entry>.artifact.json`; otherwise OpenDesign can reject imports with `ARTIFACT_MANIFEST_REQUIRED`. Shipwright generates the `opendesign-generate-artifact` skill so the UI/UX Designer knows this contract.
+
+### OpenPencil design (optional)
+
+Use OpenPencil only when you explicitly want a local OpenPencil canvas. Recommended MCP setup:
 
 ```bash
 npm install -g @open-pencil/mcp

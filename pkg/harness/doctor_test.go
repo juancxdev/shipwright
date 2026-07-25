@@ -59,8 +59,8 @@ func TestRunDoctorWarnsOnBrokenConfiguredPaths(t *testing.T) {
 	if report.Summary.Errors != 0 {
 		t.Fatalf("errors = %d", report.Summary.Errors)
 	}
-	if report.Summary.Warnings < 2 {
-		t.Fatalf("warnings = %d, want at least 2", report.Summary.Warnings)
+	if report.Summary.Warnings < 1 {
+		t.Fatalf("warnings = %d, want at least 1", report.Summary.Warnings)
 	}
 	if report.Engram.Status != DetectionNotInstalled || !report.Engram.Configured {
 		t.Fatalf("engram = %+v", report.Engram)

@@ -8,7 +8,7 @@ import (
 const UsageText = `Shipwright — Agentic Software Delivery Harness
 
 Usage:
-  shipwright init [--ai opencode] [--reasoning-model <model>] [--fast-model <model>]
+  shipwright init [--ai opencode] [--reasoning-model <model>] [--fast-model <model>] [--no-interactive]
                                       Initialize harness structure in current directory
   shipwright start "<request>"       Start a new delivery cycle with a user request
   shipwright status                        Show current phase, approvals, and next action
@@ -44,6 +44,8 @@ Executor:
   init --ai opencode  Explicitly select OpenCode as AI executor
   init --executor opencode
                       Backward-compatible alias for --ai opencode
+  init --no-interactive
+                      Skip integration wizard for scripts/CI
   list                Show available executor adapters
   status [name]       Show generated executor files and missing pieces
   generate <name>     Generate executor bootstrap (generic|opencode)

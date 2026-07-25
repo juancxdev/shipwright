@@ -69,7 +69,9 @@ func Status(args []string) {
 		fmt.Println()
 		fmt.Println("Integrations:")
 		fmt.Printf("  engram:      %s (%s)\n", boolEnabled(integrations.Engram.Enabled), integrations.Engram.Status)
-		fmt.Printf("  openpencil:  %s (%s)\n", boolEnabled(integrations.OpenPencil.Enabled), integrations.OpenPencil.Status)
+		fmt.Printf("  stitch:      %s (%s)\n", boolEnabled(integrations.Stitch.Enabled), integrations.Stitch.Status)
+		fmt.Printf("  opendesign:  %s (%s) [optional]\n", boolEnabled(integrations.OpenDesign.Enabled), integrations.OpenDesign.Status)
+		fmt.Printf("  openpencil:  %s (%s) [optional]\n", boolEnabled(integrations.OpenPencil.Enabled), integrations.OpenPencil.Status)
 
 		fmt.Println()
 		fmt.Println("Memory:")
@@ -91,11 +93,17 @@ func Status(args []string) {
 		fmt.Println()
 		fmt.Println("Design:")
 		designMode := "doc-only"
-		if integrations.IsOpenPencilEnabled() {
+		if integrations.IsStitchEnabled() {
+			designMode = "stitch"
+		} else if integrations.IsOpenDesignEnabled() {
+			designMode = "opendesign"
+		} else if integrations.IsOpenPencilEnabled() {
 			designMode = "openpencil"
 		}
 		fmt.Printf("  adapter:     %s\n", designMode)
-		fmt.Printf("  openpencil:  %s (%s)\n", boolEnabled(integrations.OpenPencil.Enabled), integrations.OpenPencil.Status)
+		fmt.Printf("  stitch:      %s (%s)\n", boolEnabled(integrations.Stitch.Enabled), integrations.Stitch.Status)
+		fmt.Printf("  opendesign:  %s (%s) [optional]\n", boolEnabled(integrations.OpenDesign.Enabled), integrations.OpenDesign.Status)
+		fmt.Printf("  openpencil:  %s (%s) [optional]\n", boolEnabled(integrations.OpenPencil.Enabled), integrations.OpenPencil.Status)
 
 		dStatus, _ := harness.NewDesignService(integrations).Status()
 		if dStatus != nil {

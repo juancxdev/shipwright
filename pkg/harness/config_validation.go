@@ -13,6 +13,7 @@ const (
 
 const (
 	ConfigModeMCP      = "mcp"
+	ConfigModeSDK      = "sdk"
 	ConfigModeDisabled = "disabled"
 )
 
@@ -98,6 +99,8 @@ func validateConfigCore(cfg *PortableConfig) []ConfigValidationIssue {
 func validateIntegrationsConfig(prefix string, cfg PortableIntegrationsConfig, requireFallbacks bool) []ConfigValidationIssue {
 	var issues []ConfigValidationIssue
 	issues = append(issues, validateMode(prefix+".engram.mode", cfg.Engram.Mode)...)
+	issues = append(issues, validateMode(prefix+".stitch.mode", cfg.Stitch.Mode)...)
+	issues = append(issues, validateMode(prefix+".opendesign.mode", cfg.OpenDesign.Mode)...)
 	issues = append(issues, validateMode(prefix+".openpencil.mode", cfg.OpenPencil.Mode)...)
 	if requireFallbacks && strings.TrimSpace(cfg.Engram.Fallback) == "" {
 		issues = append(issues, ConfigValidationIssue{
@@ -106,6 +109,24 @@ func validateIntegrationsConfig(prefix string, cfg PortableIntegrationsConfig, r
 			Severity: ConfigIssueSeverityError,
 			Message:  "Engram fallback cannot be empty",
 			Action:   "Set fallback to .harness/artifacts/progress/decisions.md.",
+		})
+	}
+	if requireFallbacks && strings.TrimSpace(cfg.Stitch.Fallback) == "" {
+		issues = append(issues, ConfigValidationIssue{
+			ID:       "config.stitch.fallback.empty",
+			Path:     prefix + ".stitch.fallback",
+			Severity: ConfigIssueSeverityError,
+			Message:  "Stitch fallback cannot be empty",
+			Action:   "Set fallback to design-doc-only.",
+		})
+	}
+	if requireFallbacks && strings.TrimSpace(cfg.OpenDesign.Fallback) == "" {
+		issues = append(issues, ConfigValidationIssue{
+			ID:       "config.opendesign.fallback.empty",
+			Path:     prefix + ".opendesign.fallback",
+			Severity: ConfigIssueSeverityError,
+			Message:  "OpenDesign fallback cannot be empty",
+			Action:   "Set fallback to design-doc-only.",
 		})
 	}
 	if requireFallbacks && strings.TrimSpace(cfg.OpenPencil.Fallback) == "" {
@@ -122,7 +143,18 @@ func validateIntegrationsConfig(prefix string, cfg PortableIntegrationsConfig, r
 			issues = append(issues, *issue)
 		}
 	}
+	if strings.TrimSpace(cfg.Stitch.MCPURL) != "" {
+		if issue := validateHTTPURL(prefix+".stitch.mcp_url", cfg.Stitch.MCPURL); issue != nil {
+			issues = append(issues, *issue)
+		}
+	}
 	issues = append(issues, validatePathShape(prefix+".engram.binary_path", cfg.Engram.BinaryPath)...)
+	issues = append(issues, validateCommandShape(prefix+".opendesign.mcp_command", cfg.OpenDesign.MCPCommand)...)
+	for index, arg := range cfg.OpenDesign.MCPArgs {
+		issues = append(issues, validateCommandShape(fmt.Sprintf("%s.opendesign.mcp_args.%d", prefix, index), arg)...)
+	}
+	issues = append(issues, validatePathShape(prefix+".opendesign.data_dir", cfg.OpenDesign.DataDir)...)
+	issues = append(issues, validatePathShape(prefix+".opendesign.ipc_path", cfg.OpenDesign.IPCPath)...)
 	issues = append(issues, validatePathShape(prefix+".openpencil.app_path", cfg.OpenPencil.AppPath)...)
 	issues = append(issues, validatePathShape(prefix+".openpencil.mcp_server_path", cfg.OpenPencil.MCPServerPath)...)
 	issues = append(issues, validateCommandShape(prefix+".openpencil.mcp_command", cfg.OpenPencil.MCPCommand)...)
@@ -188,7 +220,7 @@ func validateOptionalModel(path, value string) []ConfigValidationIssue {
 
 func validateMode(path, mode string) []ConfigValidationIssue {
 	mode = strings.TrimSpace(mode)
-	if mode == "" || mode == ConfigModeMCP || mode == ConfigModeDisabled {
+	if mode == "" || mode == ConfigModeMCP || mode == ConfigModeSDK || mode == ConfigModeDisabled {
 		return nil
 	}
 	return []ConfigValidationIssue{{
@@ -196,7 +228,7 @@ func validateMode(path, mode string) []ConfigValidationIssue {
 		Path:     path,
 		Severity: ConfigIssueSeverityError,
 		Message:  fmt.Sprintf("unsupported mode %q", mode),
-		Action:   "Use 'mcp' or 'disabled'.",
+		Action:   "Use 'mcp', 'sdk', or 'disabled'.",
 	}}
 }
 
