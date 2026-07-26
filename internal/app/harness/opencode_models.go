@@ -15,6 +15,8 @@ func ApplyOpenCodeModelOverrides(cfg *PortableConfig, overrides OpenCodeModelOve
 	}
 	changed := false
 	cfg.Normalize()
+	fastOverride := trimEnv(overrides.FastModel)
+	defaultOverride := trimEnv(overrides.DefaultModel)
 	if value := trimEnv(overrides.DefaultModel); value != "" {
 		cfg.Executors.OpenCode.DefaultModel = value
 		changed = true
@@ -23,8 +25,12 @@ func ApplyOpenCodeModelOverrides(cfg *PortableConfig, overrides OpenCodeModelOve
 		cfg.Executors.OpenCode.ReasoningModel = value
 		changed = true
 	}
-	if value := trimEnv(overrides.FastModel); value != "" {
+	if value := fastOverride; value != "" {
 		cfg.Executors.OpenCode.FastModel = value
+		changed = true
+	}
+	if defaultOverride == "" && fastOverride != "" && isImplicitOpenCodeDefaultModel(cfg.Executors.OpenCode.DefaultModel) {
+		cfg.Executors.OpenCode.DefaultModel = fastOverride
 		changed = true
 	}
 	if len(overrides.AgentModels) > 0 {
@@ -43,6 +49,10 @@ func ApplyOpenCodeModelOverrides(cfg *PortableConfig, overrides OpenCodeModelOve
 	}
 	cfg.Normalize()
 	return changed
+}
+
+func isImplicitOpenCodeDefaultModel(model string) bool {
+	return trimEnv(model) == trimEnv(DefaultOpenCodeExecutorConfig().DefaultModel)
 }
 
 func ParseAgentModelOverrides(raw string) map[string]string {

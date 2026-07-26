@@ -86,6 +86,8 @@ func TestOpenCodeExecutorGeneratesSupportedFiles(t *testing.T) {
 	assertFileContains(t, "AGENTS.md", "Do not ask the user to run `next`")
 	assertFileContains(t, "AGENTS.md", "shipwright approve scope")
 	assertFileContains(t, "AGENTS.md", "treat `installed_no_active_canvas` as **unverified**")
+	assertFileContains(t, "AGENTS.md", "Provider/canvas work belongs ONLY to `ui-ux-designer`")
+	assertFileContains(t, "AGENTS.md", "Never delegate OpenDesign/Stitch/OpenPencil tasks to `frontend-engineer`")
 	assertFileContains(t, filepath.Join(".opencode", "opencode.json"), "\"open-pencil_*\"")
 	assertFileContains(t, filepath.Join(".opencode", "opencode.json"), "\"open-design_list_projects\"")
 	assertFileContains(t, filepath.Join(".opencode", "opencode.json"), "\"open-design_create_artifact\"")
@@ -114,7 +116,9 @@ func TestOpenCodeExecutorGeneratesSupportedFiles(t *testing.T) {
 	assertFileContains(t, filepath.Join(".opencode", "agents", "product-owner.md"), "mode: subagent")
 	assertFileContains(t, filepath.Join(".opencode", "agents", "product-owner.md"), "project-profile.md")
 	assertFileContains(t, filepath.Join(".opencode", "agents", "frontend-engineer.md"), "tdd-policy.md")
+	assertFileContains(t, filepath.Join(".opencode", "agents", "frontend-engineer.md"), "provider work must be handled by `ui-ux-designer`")
 	assertFileContains(t, filepath.Join(".opencode", "agents", "ui-ux-designer.md"), "Stitch")
+	assertFileContains(t, filepath.Join(".opencode", "agents", "ui-ux-designer.md"), "Do not delegate Stitch, OpenDesign, OpenPencil")
 	assertFileContains(t, filepath.Join(".opencode", "skills", "ui-ux-designer", "SKILL.md"), "installed_no_active_canvas")
 	assertFileContains(t, filepath.Join(".opencode", "skills", "ui-ux-designer", "SKILL.md"), "Responsive & Accessibility QA")
 	assertFileContains(t, filepath.Join(".opencode", "skills", "ui-ux-designer", "SKILL.md"), "Existing Web Baseline Fidelity Gate")
@@ -145,6 +149,29 @@ func TestOpenCodeExecutorGeneratesSupportedFiles(t *testing.T) {
 	}
 }
 
+func TestOpenCodeProviderToolsAreDesignerOnly(t *testing.T) {
+	designerTools := opencodeToolsForAgent("ui-ux-designer")
+	for _, key := range []string{"open-design_*", "opendesign_*", "open_design_*", "stitch_*", "open-pencil_*"} {
+		if designerTools[key] != true {
+			t.Fatalf("ui-ux-designer tool %s = %+v, want true", key, designerTools[key])
+		}
+	}
+
+	frontendTools := opencodeToolsForAgent("frontend-engineer")
+	for _, key := range []string{"open-design_*", "opendesign_*", "open_design_*", "stitch_*", "open-pencil_*"} {
+		if _, ok := frontendTools[key]; ok {
+			t.Fatalf("frontend-engineer must not receive provider tool %s", key)
+		}
+	}
+
+	frontendPermissionMap := opencodePermissionMapForAgent("frontend-engineer", opencodePermission{Edit: "allow", Bash: "ask"})
+	for _, key := range []string{"open-design_*", "opendesign_*", "open_design_*"} {
+		if _, ok := frontendPermissionMap[key]; ok {
+			t.Fatalf("frontend-engineer permission map must not allow provider tool %s", key)
+		}
+	}
+}
+
 func TestOpenCodeExecutorUsesConfiguredModels(t *testing.T) {
 	withTempWorkingDir(t)
 
@@ -165,6 +192,39 @@ func TestOpenCodeExecutorUsesConfiguredModels(t *testing.T) {
 	assertFileContains(t, configPath, "openai/gpt-5.5")
 	assertFileContains(t, configPath, "opencode-go/deepseek-v4-flash")
 	assertFileContains(t, configPath, "custom/product-owner-model")
+}
+
+func TestOpenCodeExecutorUsesFastForBalancedWhenDefaultImplicit(t *testing.T) {
+	withTempWorkingDir(t)
+
+	cfg := DefaultPortableConfig()
+	ApplyOpenCodeModelOverrides(cfg, OpenCodeModelOverrides{
+		FastModel:      "opencode-go/deepseek-v4-flash",
+		ReasoningModel: "opencode-go/deepseek-v4-flash",
+	})
+	if err := cfg.Save(); err != nil {
+		t.Fatalf("save config: %v", err)
+	}
+	if err := SaveModelPolicy(DefaultModelPolicy(cfg.Executors.OpenCode)); err != nil {
+		t.Fatalf("save model policy: %v", err)
+	}
+
+	if _, err := GenerateExecutor(ExecutorOpenCode); err != nil {
+		t.Fatalf("GenerateExecutor: %v", err)
+	}
+
+	configPath := filepath.Join(".opencode", "opencode.json")
+	for _, agent := range []string{"product-owner", "frontend-engineer", "backend-engineer", "technical-lead", "qa-security-reviewer", "shipwright-orchestrator"} {
+		assertFileContains(t, configPath, `"`+agent+`"`)
+	}
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		t.Fatalf("read %s: %v", configPath, err)
+	}
+	if strings.Contains(string(data), "anthropic/claude-sonnet-4-20250514") {
+		t.Fatal("OpenCode config should not contain implicit Anthropic default when fast/reasoning models were explicitly set")
+	}
+	assertFileContains(t, configPath, "opencode-go/deepseek-v4-flash")
 }
 
 func TestOpenCodeExecutorIncludesOpenPencilMCPWhenConfigured(t *testing.T) {

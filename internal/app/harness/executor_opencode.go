@@ -538,6 +538,11 @@ func opencodeAgentsMD() string {
 	sb.WriteString("9. If Product Owner has produced context, assumptions, open questions, and scope, advance through safe internal phases until `SCOPE_REVIEW`, then present the scope to the user.\n")
 	sb.WriteString("10. At approval gates, explain the artifact and ask the user to approve or request changes. Never self-approve. If the user says approval intent like `aprobar scope`, run the matching `shipwright approve <gate>` yourself.\n")
 	sb.WriteString("11. Before moving from IMPLEMENTATION to INTEGRATION, run ``shipwright tdd status`; if mode is `strict`, ensure frontend/backend progress or `.harness/artifacts/reports/tdd-report.md` contains executed test evidence.\n\n")
+	sb.WriteString("### Delegation boundaries\n\n")
+	sb.WriteString("- Provider/canvas work belongs ONLY to `ui-ux-designer`: Stitch, OpenDesign, OpenPencil, Figma-like canvas/artifact generation, design publishing, and design fidelity reports.\n")
+	sb.WriteString("- Never delegate OpenDesign/Stitch/OpenPencil tasks to `frontend-engineer`, even if the provider output is HTML/CSS/React-like. Frontend does not have provider MCP permissions by design.\n")
+	sb.WriteString("- `frontend-engineer` starts after UX/design approval and consumes approved artifacts only: `.harness/artifacts/design/prototype.md`, `.harness/artifacts/design/fidelity-report.md`, `.harness/artifacts/design/code-component-map.md`, screenshots, contracts, and frontend tasks.\n")
+	sb.WriteString("- If a frontend task requires missing design/provider output, route back to `ui-ux-designer` or `technical-lead`; do not ask Frontend to call provider MCP tools.\n\n")
 	sb.WriteString("### Approval UX\n\n")
 	sb.WriteString("Do not tell the user to execute raw approval commands unless they explicitly ask for CLI instructions. Instead, ask in natural language. Examples:\n\n")
 	sb.WriteString("- `¿Aprobás este alcance o querés cambios?`\n")
@@ -581,6 +586,8 @@ func opencodeAgentMarkdown(skill AgentSkill) string {
 	sb.WriteString(fmt.Sprintf("4. Load and follow `.opencode/skills/%s/SKILL.md`.\n", skill.Name))
 	sb.WriteString("5. Do not advance phases or approve gates unless the user explicitly asks you to run the matching Shipwright command.\n\n")
 	if skill.Name == "ui-ux-designer" {
+		sb.WriteString("## Provider ownership boundary\n\n")
+		sb.WriteString("You own all design-provider work. Do not delegate Stitch, OpenDesign, OpenPencil, or canvas/artifact publishing tasks to `frontend-engineer`; that role intentionally lacks provider MCP permissions. If implementation is needed, first publish/record approved design artifacts and hand off only the implementation-ready artifact paths, screenshots, component map, and constraints.\n\n")
 		sb.WriteString("## OpenDesign MCP validation\n\n")
 		sb.WriteString("If `.harness/integrations.json` enables OpenDesign or `.opencode/opencode.json` contains `mcp.open-design`, validate it as an artifact provider, not as a Figma/OpenPencil canvas. Try these actual OpenDesign MCP tools first: `open-design_list_projects`, `open-design_get_active_context`, `open-design_list_files`, and `open-design_create_artifact`. If OpenCode normalizes names, also check `opendesign_*` or `open_design_*`.\n")
 		sb.WriteString("OpenDesign creates project artifacts; it does not expose OpenPencil-style node/frame tools. When creating HTML artifacts, also create `<entry>.artifact.json` with version=1, kind=html, renderer=html, status=complete, exports=[html,pdf,zip], and primary=true.\n\n")
@@ -590,6 +597,10 @@ func opencodeAgentMarkdown(skill AgentSkill) string {
 		sb.WriteString("- If a separate `pencil` MCP server is connected, do not use it for Shipwright OpenPencil work; it may be bound to another desktop host.\n")
 		sb.WriteString("- First validation call: prefer `open-pencil_get_editor_state`, but use any equivalent available `open-pencil_*` state/canvas/snapshot tool if that exact name is absent.\n")
 		sb.WriteString("- Only fall back to doc-only mode if no usable `open-pencil_*` MCP tool is available or all state/design calls fail.\n\n")
+	}
+	if skill.Name == "frontend-engineer" {
+		sb.WriteString("## Provider boundary\n\n")
+		sb.WriteString("You must not use or request OpenDesign/Stitch/OpenPencil/Figma-like provider MCP tools. If assigned a design-provider task, stop and report it as a routing error: provider work must be handled by `ui-ux-designer`. Consume only approved design artifacts and implement frontend code from them.\n\n")
 	}
 	sb.WriteString("## Role source\n\n")
 	sb.WriteString(fmt.Sprintf("Full role instructions live at `.opencode/skills/%s/SKILL.md` and `.harness/agents/%s.md`.\n", skill.Name, skill.Name))

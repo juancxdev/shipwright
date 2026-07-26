@@ -92,6 +92,8 @@ func generateOpenDesignTask(state *State, request string) string {
 	var sb strings.Builder
 	sb.WriteString("# OpenDesign Artifact Task\n\n")
 	sb.WriteString("Use OpenDesign as an artifact design provider. Do not treat OpenDesign as OpenPencil/Figma canvas; it exposes project/file/artifact tools.\n\n")
+	sb.WriteString("## Role ownership\n\n")
+	sb.WriteString("This task must be executed by `ui-ux-designer` only. Do not delegate it to `frontend-engineer`; Frontend intentionally does not have OpenDesign/Stitch/OpenPencil provider MCP permissions. If another role receives this task, stop and report a routing error back to the orchestrator.\n\n")
 	sb.WriteString("## Request\n\n")
 	if request != "" {
 		sb.WriteString(request + "\n\n")
