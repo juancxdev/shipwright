@@ -17,26 +17,14 @@ func InitProgress() error {
 	if err := os.MkdirAll(filepath.Dir(CurrentFile), 0755); err != nil {
 		return err
 	}
-	current := fmt.Sprintf(`# Current Status
-
-**Phase:** INTAKE
-**Status:** ready
-**Project:** (not set)
-
-## Next action
-
-Run ` + "`shipwright start \"<your request>\"`" + ` to begin discovery.
-`)
+	current := mustRenderTemplate("templates/project/harness/runtime/progress-current-initial.md", nil)
 	if err := os.WriteFile(CurrentFile, []byte(current), 0644); err != nil {
 		return err
 	}
 
-	history := fmt.Sprintf(`# History
-
-| Timestamp | Event | Phase | Details |
-|---|---|---|---|
-| %s | init | INTAKE | Harness initialized |
-`, time.Now().UTC().Format(time.RFC3339))
+	history := mustRenderTemplate("templates/project/harness/runtime/progress-history-initial.md", RenderVars{
+		"timestamp": time.Now().UTC().Format(time.RFC3339),
+	})
 	return os.WriteFile(HistoryFile, []byte(history), 0644)
 }
 
@@ -59,21 +47,19 @@ func AppendHistory(event, phase, details string) error {
 }
 
 func UpdateCurrent(s *State, nextAction string) error {
-	var sb strings.Builder
-
-	sb.WriteString("# Current Status\n\n")
-	sb.WriteString(fmt.Sprintf("**Phase:** %s\n", s.CurrentPhase))
-	sb.WriteString(fmt.Sprintf("**Status:** %s\n", s.Status))
+	var projectLine string
 	if s.ProjectName != "" {
-		sb.WriteString(fmt.Sprintf("**Project:** %s\n", s.ProjectName))
+		projectLine = fmt.Sprintf("**Project:** %s\n", s.ProjectName)
 	}
+	var requestLine string
 	if s.InitialRequest != "" {
-		sb.WriteString(fmt.Sprintf("**Request:** %s\n", s.InitialRequest))
+		requestLine = fmt.Sprintf("**Request:** %s\n", s.InitialRequest)
 	}
+	var blockReasonLine string
 	if s.BlockReason != "" {
-		sb.WriteString(fmt.Sprintf("**Block reason:** %s\n", s.BlockReason))
+		blockReasonLine = fmt.Sprintf("**Block reason:** %s\n", s.BlockReason)
 	}
-	sb.WriteString("\n## Approvals\n\n")
+	var approvalsSection strings.Builder
 	gates := []struct {
 		key   string
 		label string
@@ -89,28 +75,40 @@ func UpdateCurrent(s *State, nextAction string) error {
 		if s.IsApproved(g.key) {
 			mark = "[x]"
 		}
-		sb.WriteString(fmt.Sprintf("- %s %s\n", mark, g.label))
+		approvalsSection.WriteString(fmt.Sprintf("- %s %s\n", mark, g.label))
 	}
 
+	var activeCRSection string
 	if s.ActiveChangeRequest != nil && *s.ActiveChangeRequest != "" {
-		sb.WriteString(fmt.Sprintf("\n**Active change request:** %s\n", *s.ActiveChangeRequest))
+		activeCRSection = fmt.Sprintf("\n**Active change request:** %s\n", *s.ActiveChangeRequest)
 	}
 
+	var requiresUISection string
 	if s.RequiresUI != nil {
 		ui := "no"
 		if *s.RequiresUI {
 			ui = "yes"
 		}
-		sb.WriteString(fmt.Sprintf("\n**Requires UI:** %s\n", ui))
+		requiresUISection = fmt.Sprintf("\n**Requires UI:** %s\n", ui)
 	}
 
+	var nextActionSection string
 	if nextAction != "" {
-		sb.WriteString("\n## Next action\n\n")
-		sb.WriteString(nextAction)
-		sb.WriteString("\n")
+		nextActionSection = "\n## Next action\n\n" + nextAction + "\n"
 	}
 
-	return os.WriteFile(CurrentFile, []byte(sb.String()), 0644)
+	content := mustRenderTemplate("templates/project/harness/runtime/progress-current.md", RenderVars{
+		"phase":               s.CurrentPhase,
+		"status":              s.Status,
+		"project_line":        projectLine,
+		"request_line":        requestLine,
+		"block_reason_line":   blockReasonLine,
+		"approvals_section":   approvalsSection.String(),
+		"active_cr_section":   activeCRSection,
+		"requires_ui_section": requiresUISection,
+		"next_action_section": nextActionSection,
+	})
+	return os.WriteFile(CurrentFile, []byte(content), 0644)
 }
 
 func escapePipe(s string) string {

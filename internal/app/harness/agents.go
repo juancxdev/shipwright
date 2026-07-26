@@ -1,22 +1,22 @@
 package harness
 
-import agentdomain "shipwright/internal/agents/domain"
+import agentsapp "shipwright/internal/agents/application"
 
-type AgentStep = agentdomain.AgentStep
-type Agent = agentdomain.Agent
+type AgentStep = agentsapp.AgentStep
+type Agent = agentsapp.Agent
 
 func GetAgent(name string) *Agent {
-	return agentdomain.GetAgent(name)
+	return agentsapp.GetAgent(name)
 }
 
 func AllAgents() []Agent {
-	return agentdomain.AllAgents()
+	return agentsapp.AllAgents()
 }
 
 func ActiveAgentForPhase(phase string) *Agent {
-	return agentdomain.ActiveAgentForPhase(phase)
+	return agentsapp.ActiveAgentForPhase(phase)
 }
 
 func SecondaryAgentForPhase(phase string) *Agent {
-	return agentdomain.SecondaryAgentForPhase(phase)
+	return agentsapp.SecondaryAgentForPhase(phase)
 }

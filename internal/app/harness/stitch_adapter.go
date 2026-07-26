@@ -1,9 +1,6 @@
 package harness
 
-import (
-	"fmt"
-	"strings"
-)
+import "fmt"
 
 type StitchDesignAdapter struct{}
 
@@ -106,89 +103,28 @@ func (s *StitchDesignAdapter) Status() (*DesignStatus, error) {
 }
 
 func generateStitchDesignMD(state *State, request string) string {
-	var sb strings.Builder
-	sb.WriteString("# DESIGN.md\n\n")
-	sb.WriteString("> Design system and generation rules for Google Stitch.\n\n")
-	sb.WriteString("## Project\n\n")
-	sb.WriteString("- Name: " + state.ProjectName + "\n")
+	requestLine := ""
 	if request != "" {
-		sb.WriteString("- Request: " + request + "\n")
+		requestLine = "- Request: " + request + "\n"
 	}
-	sb.WriteString("\n## Design principles\n\n")
-	sb.WriteString("- Generate high-fidelity UI, not low-fidelity wireframes.\n")
-	sb.WriteString("- Preserve product scope and user goals from Shipwright artifacts.\n")
-	sb.WriteString("- Create responsive mobile, tablet, and desktop variants.\n")
-	sb.WriteString("- Prefer reusable components, clear hierarchy, accessible contrast, and realistic copy.\n")
-	sb.WriteString("- Export screenshots and HTML evidence for every generated screen.\n")
-	sb.WriteString("\n## Required outputs\n\n")
-	sb.WriteString("- Stitch project/screen IDs.\n")
-	sb.WriteString("- Screenshot exports.\n")
-	sb.WriteString("- HTML exports.\n")
-	sb.WriteString("- Design-to-code component map when frontend components exist.\n")
-	return sb.String()
+	return mustRenderTemplate("templates/project/harness/design/stitch-design.md", RenderVars{
+		"project_name": state.ProjectName,
+		"request_line": requestLine,
+	})
 }
 
 func generateStitchDesignTask(state *State, request string) string {
-	var sb strings.Builder
-	sb.WriteString("# Stitch Design Task\n\n")
-	sb.WriteString("Use Google Stitch as the primary design provider for this project. Do not use OpenPencil unless the user explicitly asks for it.\n\n")
-	sb.WriteString("## Request\n\n")
-	if request != "" {
-		sb.WriteString(request + "\n\n")
-	} else {
-		sb.WriteString(state.ProjectName + "\n\n")
-	}
-	sb.WriteString("## Credentials\n\n")
-	sb.WriteString("Use Stitch only when `STITCH_API_KEY` is set, or `STITCH_ACCESS_TOKEN` + `GOOGLE_CLOUD_PROJECT` are set. If credentials are unavailable, report blocked and continue with doc-only artifacts only after explaining the limitation.\n\n")
-	sb.WriteString("## Workflow\n\n")
-	sb.WriteString("1. Read `.harness/artifacts/product/context.md`, `.harness/artifacts/product/scope.md`, and `.harness/artifacts/design/stitch/DESIGN.md`.\n")
-	sb.WriteString("2. If recreating an existing UI, capture source route screenshots first and write `.harness/artifacts/design/route-inventory.md`.\n")
-	sb.WriteString("3. Use Stitch SDK/MCP to create or update a Stitch project and generate mobile/tablet/desktop screens.\n")
-	sb.WriteString("4. Generate variants only when useful; choose one recommended direction and document alternatives.\n")
-	sb.WriteString("5. Export screenshots to `.harness/artifacts/design/stitch/exports/`.\n")
-	sb.WriteString("6. Export HTML to `.harness/artifacts/design/stitch/html/` when available.\n")
-	sb.WriteString("7. Write `.harness/artifacts/design/stitch/stitch-report.md` with project ID, screen IDs, prompts, exports, and known limitations.\n")
-	sb.WriteString("8. Write or update `.harness/artifacts/design/prototype.md`, `.harness/artifacts/design/responsive-qa.md`, `.harness/artifacts/design/design-decisions.md`, and `.harness/artifacts/design/code-component-map.md` when components exist.\n")
-	sb.WriteString("9. For existing UI baselines, compare Stitch screenshots against source screenshots in `.harness/artifacts/design/fidelity-report.md`; do not pass if the design materially diverges.\n\n")
-	sb.WriteString("## Guardrails\n\n")
-	sb.WriteString("- Stitch is the design provider; OpenPencil is not required.\n")
-	sb.WriteString("- Do not claim fidelity without source screenshot vs Stitch screenshot comparison.\n")
-	sb.WriteString("- Do not claim implementation readiness without code-component-map for reusable UI.\n")
-	sb.WriteString("- Do not commit generated HTML as production frontend unless the frontend engineer explicitly accepts it as source.\n")
-	return sb.String()
+	return mustRenderTemplate("templates/project/harness/design/stitch-task.md", RenderVars{
+		"request": requestOrProjectName(state, request),
+	})
 }
 
 func generateStitchPrototypePlaceholder(state *State, request string) string {
-	var sb strings.Builder
-	sb.WriteString("# Prototype\n\n")
-	sb.WriteString("> Stitch-first design placeholder. The UI/UX Designer must replace this with Stitch screen IDs, screenshots, HTML export references, and interaction notes.\n\n")
-	sb.WriteString("## Provider\n\nGoogle Stitch\n\n")
-	sb.WriteString("## Request\n\n")
-	if request != "" {
-		sb.WriteString(request + "\n")
-	} else {
-		sb.WriteString(state.ProjectName + "\n")
-	}
-	return sb.String()
+	return mustRenderTemplate("templates/project/harness/design/stitch-prototype.md", RenderVars{
+		"request": requestOrProjectName(state, request),
+	})
 }
 
 func generateStitchResponsiveQAPlaceholder() string {
-	return `# Responsive & Accessibility QA
-
-> Stitch-first placeholder. Replace after generated screenshots are exported and inspected.
-
-## Required Stitch evidence
-
-| Screen | Mobile | Tablet | Desktop | Notes |
-|--------|--------|--------|---------|-------|
-| TBD | Pending | Pending | Pending | Generate and inspect Stitch exports. |
-
-## Gates
-
-- [ ] Stitch screenshots exported for mobile, tablet, and desktop.
-- [ ] No clipped content or broken layout in exports.
-- [ ] Touch targets are >= 44x44 on mobile.
-- [ ] Contrast is acceptable for text and primary UI components.
-- [ ] Existing UI baseline, if any, was compared against source screenshots.
-`
+	return mustRenderTemplate("templates/project/harness/design/stitch-responsive-qa.md", nil)
 }

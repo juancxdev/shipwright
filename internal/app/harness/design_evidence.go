@@ -208,10 +208,10 @@ func readOptionalArtifact(path string) string {
 
 func WriteDesignGateReport(state *State) error {
 	checks := EvaluateDesignEvidenceGates(state)
-	var sb strings.Builder
-	sb.WriteString("# Design Evidence Gates\n\n")
-	sb.WriteString(RenderDesignGateSummary(checks))
-	return WriteFile(".harness/artifacts/design/design-gates.md", sb.String())
+	content := mustRenderTemplate("templates/project/harness/runtime/design-gates.md", RenderVars{
+		"gate_summary": RenderDesignGateSummary(checks),
+	})
+	return WriteFile(".harness/artifacts/design/design-gates.md", content)
 }
 
 func EnsureDesignEvidenceDirs() error {

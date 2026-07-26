@@ -35,6 +35,11 @@ func Init(args []string) {
 	}
 	PrintSuccess("Estructura de carpetas creada")
 
+	if err := harness.EnsureCommunicationPolicy(); err != nil {
+		Fail(fmt.Sprintf("error creando communication policy: %s", err))
+	}
+	PrintSuccess("Communication policy creada (.harness/communication-policy.md)")
+
 	roles := harness.ListRoleNames()
 	if err := harness.WriteRoles(); err != nil {
 		Fail(fmt.Sprintf("error escribiendo roles: %s", err))
@@ -132,7 +137,7 @@ func Init(args []string) {
 
 	fmt.Println()
 	fmt.Println("Estructura creada:")
-	fmt.Println("  .harness/          — estado, project profile, TDD policy, model policy, skill registry, skill packs, skill lock, agentes, approvals, integrations")
+	fmt.Println("  .harness/          — estado, communication policy, project profile, TDD policy, model policy, skill registry, skill packs, skill lock, agentes, approvals, integrations")
 	fmt.Println("  .harness/artifacts/product/           — discovery, contexto, alcance")
 	fmt.Println("  .harness/artifacts/project/           — planificación PMBOK-lite")
 	fmt.Println("  .harness/artifacts/design/            — UX/UI (Stitch-first, OpenPencil optional)")

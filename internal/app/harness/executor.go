@@ -106,6 +106,19 @@ func writeTrackedFile(path, content string, result *ExecutorGenerateResult) erro
 	return nil
 }
 
+func ensureTrackedFile(path, content string, result *ExecutorGenerateResult) error {
+	if ArtifactExists(path) {
+		return nil
+	}
+	if err := WriteFile(path, content); err != nil {
+		return err
+	}
+	if result != nil {
+		result.FilesCreated = append(result.FilesCreated, path)
+	}
+	return nil
+}
+
 func writeExecutableTrackedFile(path, content string, result *ExecutorGenerateResult) error {
 	if err := writeTrackedFile(path, content, result); err != nil {
 		return err

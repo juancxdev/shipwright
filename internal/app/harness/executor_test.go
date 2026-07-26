@@ -17,7 +17,13 @@ func TestGenericExecutorGeneratesAgentsMD(t *testing.T) {
 	if result.Name != ExecutorGeneric {
 		t.Fatalf("name = %s", result.Name)
 	}
+	if !ArtifactExists(CommunicationPolicyFile) {
+		t.Fatalf("expected generated file %s", CommunicationPolicyFile)
+	}
 	assertFileContains(t, "AGENTS.md", "Shipwright Project Instructions")
+	assertFileContains(t, "AGENTS.md", ".harness/communication-policy.md")
+	assertFileContains(t, CommunicationPolicyFile, "neutral professional Spanish")
+	assertFileContains(t, CommunicationPolicyFile, "overrides global/personal assistant personality settings")
 	assertFileContains(t, ExecutorStateFile, ExecutorGeneric)
 
 	status, err := GenericExecutorAdapter{}.Status()
@@ -41,6 +47,7 @@ func TestOpenCodeExecutorGeneratesSupportedFiles(t *testing.T) {
 	}
 
 	expected := []string{
+		CommunicationPolicyFile,
 		"AGENTS.md",
 		filepath.Join(".harness", "bin", "shipwright"),
 		filepath.Join(".harness", "bin", "shipwright.cmd"),
@@ -61,6 +68,9 @@ func TestOpenCodeExecutorGeneratesSupportedFiles(t *testing.T) {
 		}
 	}
 	assertFileContains(t, "AGENTS.md", "OpenCode integration")
+	assertFileContains(t, "AGENTS.md", ".harness/communication-policy.md")
+	assertFileContains(t, CommunicationPolicyFile, "neutral professional Spanish")
+	assertFileContains(t, CommunicationPolicyFile, "Do not use regional dialects")
 	assertFileContains(t, "AGENTS.md", ".harness/project-profile.md")
 	assertFileContains(t, "AGENTS.md", ".harness/tdd-policy.md")
 	assertFileContains(t, "AGENTS.md", ".harness/skill-digests.md")
@@ -82,6 +92,9 @@ func TestOpenCodeExecutorGeneratesSupportedFiles(t *testing.T) {
 	assertFileContains(t, filepath.Join(".opencode", "mcp", "stitch-proxy.mjs"), ".harness")
 	assertFileContains(t, filepath.Join(".opencode", "mcp", "README.md"), "npm install --prefix .opencode/mcp")
 	assertFileContains(t, "AGENTS.md", "Shipwright Orchestrator Autopilot")
+	assertFileContains(t, "AGENTS.md", "The orchestrator is a coordinator, not an executor")
+	assertFileContains(t, "AGENTS.md", "Always delegate active role work")
+	assertFileContains(t, "AGENTS.md", "If OpenCode task/subagent delegation is unavailable, stop")
 	assertFileContains(t, "AGENTS.md", "shipwright start")
 	assertFileContains(t, "AGENTS.md", "Do not ask the user to run `next`")
 	assertFileContains(t, "AGENTS.md", "shipwright approve scope")
@@ -114,6 +127,7 @@ func TestOpenCodeExecutorGeneratesSupportedFiles(t *testing.T) {
 		t.Fatal("root opencode.json should not be generated; OpenCode config belongs in .opencode/opencode.json")
 	}
 	assertFileContains(t, filepath.Join(".opencode", "agents", "product-owner.md"), "mode: subagent")
+	assertFileContains(t, filepath.Join(".opencode", "agents", "product-owner.md"), "communication-policy.md")
 	assertFileContains(t, filepath.Join(".opencode", "agents", "product-owner.md"), "project-profile.md")
 	assertFileContains(t, filepath.Join(".opencode", "agents", "frontend-engineer.md"), "tdd-policy.md")
 	assertFileContains(t, filepath.Join(".opencode", "agents", "frontend-engineer.md"), "provider work must be handled by `ui-ux-designer`")
@@ -169,6 +183,27 @@ func TestOpenCodeProviderToolsAreDesignerOnly(t *testing.T) {
 		if _, ok := frontendPermissionMap[key]; ok {
 			t.Fatalf("frontend-engineer permission map must not allow provider tool %s", key)
 		}
+	}
+}
+
+func TestExecutorDoesNotOverwriteExistingCommunicationPolicy(t *testing.T) {
+	withTempWorkingDir(t)
+
+	customPolicy := "# Communication Policy\n\nCustom project tone.\n"
+	if err := WriteFile(CommunicationPolicyFile, customPolicy); err != nil {
+		t.Fatalf("write custom policy: %v", err)
+	}
+
+	if _, err := GenerateExecutor(ExecutorOpenCode); err != nil {
+		t.Fatalf("GenerateExecutor: %v", err)
+	}
+
+	data, err := os.ReadFile(CommunicationPolicyFile)
+	if err != nil {
+		t.Fatalf("read communication policy: %v", err)
+	}
+	if string(data) != customPolicy {
+		t.Fatalf("communication policy overwritten:\n%s", string(data))
 	}
 }
 

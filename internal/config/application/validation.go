@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strings"
 
-	agents "shipwright/internal/agents/domain"
+	agents "shipwright/internal/agents/application"
 )
 
 const (

@@ -2,6 +2,7 @@ package harness
 
 import (
 	"fmt"
+	"strings"
 
 	designdomain "shipwright/internal/design/domain"
 )
@@ -42,21 +43,19 @@ func DesignProvidersFor(integrations *Integrations) []DesignProvider {
 }
 
 func writeDesignProviderReport(path string, provider, status, message string, files []string) error {
-	content := fmt.Sprintf(`# Design Provider Report
-
-- Provider: %s
-- Status: %s
-- Updated: %s
-
-## Message
-
-%s
-`, provider, status, NowISO(), message)
+	var filesSection strings.Builder
 	if len(files) > 0 {
-		content += "\n## Files\n\n"
+		filesSection.WriteString("\n## Files\n\n")
 		for _, file := range files {
-			content += fmt.Sprintf("- `%s`\n", file)
+			filesSection.WriteString(fmt.Sprintf("- `%s`\n", file))
 		}
 	}
+	content := mustRenderTemplate("templates/project/harness/runtime/design-provider-report.md", RenderVars{
+		"provider":      provider,
+		"status":        status,
+		"updated":       NowISO(),
+		"message":       message,
+		"files_section": filesSection.String(),
+	})
 	return WriteFile(path, content)
 }

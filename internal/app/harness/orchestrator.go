@@ -260,46 +260,10 @@ func RequestChange(s *State, reason string) *ChangeResult {
 	crID := generateCRID()
 	crFile := fmt.Sprintf(".harness/artifacts/project/change-requests/CR-%s.md", crID)
 
-	crContent := fmt.Sprintf(`# CR-%s — Change Request
-
-## Solicitud
-
-%s
-
-## Motivo
-
-(pendiente de completar)
-
-## Impacto funcional
-
-(pendiente)
-
-## Impacto técnico
-
-(pendiente)
-
-## Impacto en alcance
-
-(pendiente)
-
-## Impacto en tiempo/esfuerzo
-
-(pendiente)
-
-## Riesgos
-
-(pendiente)
-
-## Decisión
-
-- [ ] aprobado
-- [ ] rechazado
-- [ ] postergado
-
-## Aprobado por
-
-(pendiente)
-`, crID, escapeForMarkdown(reason))
+	crContent := mustRenderTemplate("templates/project/harness/runtime/change-request.md", RenderVars{
+		"cr_id":  crID,
+		"reason": escapeForMarkdown(reason),
+	})
 
 	if err := WriteFile(crFile, crContent); err != nil {
 		return &ChangeResult{
@@ -337,28 +301,9 @@ func StartRequest(s *State, request string) error {
 
 	s.InitialRequest = request
 
-	discoveryContent := fmt.Sprintf(`# Discovery
-
-## Solicitud del usuario
-
-%s
-
-## Preguntas de discovery
-
-(El Product Owner agent debe completar esta sección con preguntas para el usuario.
-
-El harness NO avanza de DISCOVERY sin:
-
-- .harness/artifacts/product/context.md
-- .harness/artifacts/product/assumptions.md
-- .harness/artifacts/product/open-questions.md (sin preguntas críticas pendientes)
-
-Completá esos archivos y ejecutá: shipwright next)
-
-## Respuestas del usuario
-
-(pendiente)
-`, escapeForMarkdown(request))
+	discoveryContent := mustRenderTemplate("templates/project/harness/runtime/discovery.md", RenderVars{
+		"request": escapeForMarkdown(request),
+	})
 
 	if err := WriteFile(".harness/artifacts/product/discovery.md", discoveryContent); err != nil {
 		return fmt.Errorf("no se pudo crear .harness/artifacts/product/discovery.md: %w", err)

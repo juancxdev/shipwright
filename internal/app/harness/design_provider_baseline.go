@@ -143,33 +143,17 @@ func DiscoverBaselineRoutes(profile *ProjectProfile) []string {
 func generateBaselineWebTask(state *State, request string) string {
 	profile, _ := LoadProjectProfile()
 	routes := DiscoverBaselineRoutes(profile)
-	var sb strings.Builder
-	sb.WriteString("# Evidence-first Web Baseline Task\n\n")
-	sb.WriteString("Shipwright requires baseline evidence before OpenDesign, Stitch, OpenPencil, or doc-only redesign output. Do not invent assets. Do not replace logos, icons, imagery, fonts, or copy without explicit user approval.\n\n")
-	sb.WriteString("## Request\n\n")
-	if strings.TrimSpace(request) != "" {
-		sb.WriteString(request + "\n\n")
-	} else if state != nil {
-		sb.WriteString(state.ProjectName + "\n\n")
-	}
-	sb.WriteString("## Required outputs\n\n")
-	sb.WriteString("- `.harness/artifacts/design/route-inventory.md` listing every discovered route/view and included/excluded status.\n")
-	sb.WriteString("- `.harness/artifacts/design/source-screenshots/` with desktop, tablet, and mobile source screenshots for included routes.\n")
-	sb.WriteString("- `.harness/artifacts/design/asset-manifest.json` with all logos, images, icons, fonts, and key brand assets; mark logo assets with `role: \"logo\"`.\n")
-	sb.WriteString("- `.harness/artifacts/design/visual-inventory.md`, `.harness/artifacts/design/token-inventory.md`, `.harness/artifacts/design/component-inventory.md`, and `.harness/artifacts/design/code-component-map.md` when applicable.\n")
-	sb.WriteString("- `.harness/artifacts/design/fidelity-report.md` with `Status: pass|conditional-pass|fail`, route coverage, asset preservation, screenshot comparison, and provider publish status.\n\n")
+	var routesSection strings.Builder
 	if len(routes) > 0 {
-		sb.WriteString("## Routes detected from project profile\n\n")
+		routesSection.WriteString("\n## Routes detected from project profile\n\n")
 		for _, route := range routes {
-			sb.WriteString(fmt.Sprintf("- `%s`\n", route))
+			routesSection.WriteString(fmt.Sprintf("- `%s`\n", route))
 		}
-		sb.WriteString("\n")
+		routesSection.WriteString("\n")
 	}
-	sb.WriteString("## Hard gates\n\n")
-	sb.WriteString("- `baseline-captured`: route inventory and source screenshots exist.\n")
-	sb.WriteString("- `assets-preserved`: `asset-manifest.json` includes real assets and generated design does not substitute them.\n")
-	sb.WriteString("- `provider-published`: selected provider publish/import succeeded, or user explicitly accepted fallback.\n")
-	sb.WriteString("- `fidelity-verified`: fidelity report is not fail/partial without explicit acceptance.\n")
-	sb.WriteString("- `token/quota-ok`: provider did not fail due to token/quota exhaustion.\n")
-	return sb.String()
+
+	return mustRenderTemplate("templates/project/harness/design/baseline-web-task.md", RenderVars{
+		"request":        requestOrProjectName(state, request),
+		"routes_section": routesSection.String(),
+	})
 }
