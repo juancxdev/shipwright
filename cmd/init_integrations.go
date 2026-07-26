@@ -513,25 +513,54 @@ func validateStitchDuringInit(portableConfig *harness.PortableConfig) {
 }
 
 func configureOpenDesignDuringInit(reader *bufio.Reader, portableConfig *harness.PortableConfig, current harness.DetectionResult) harness.DetectionResult {
+	probe := harness.RealSystemProbe{}
 	if current.Configured && strings.TrimSpace(portableConfig.Integrations.OpenDesign.MCPCommand) != "" {
 		PrintInfo("OpenDesign ya tiene comando MCP configurado.")
-		return harness.DetectOpenDesignWithConfig(harness.RealSystemProbe{}, portableConfig)
+		return harness.DetectOpenDesignWithConfig(probe, portableConfig)
 	}
 
 	fmt.Println()
 	fmt.Println("Configuración OpenDesign")
-	fmt.Println("Pegá los paths una sola vez; Shipwright generará el MCP de OpenCode por vos.")
-	command := askInitValue(reader, "OpenDesign MCP command / node path (Enter para omitir)")
-	if command == "" {
-		return harness.DetectOpenDesignWithConfig(harness.RealSystemProbe{}, portableConfig)
+	fmt.Println("Buscando configuración local de OpenDesign...")
+	autoDetected := harness.AutoConfigureOpenDesign(probe, portableConfig)
+	if autoDetected.Configured && strings.TrimSpace(portableConfig.Integrations.OpenDesign.MCPCommand) != "" {
+		PrintSuccess("OpenDesign autodetectado")
+		fmt.Printf("  command: %s\n", portableConfig.Integrations.OpenDesign.MCPCommand)
+		if len(portableConfig.Integrations.OpenDesign.MCPArgs) > 0 {
+			fmt.Printf("  args:    %s\n", strings.Join(portableConfig.Integrations.OpenDesign.MCPArgs, " "))
+		}
+		if portableConfig.Integrations.OpenDesign.DataDir != "" {
+			fmt.Printf("  data:    %s\n", portableConfig.Integrations.OpenDesign.DataDir)
+		}
+		if portableConfig.Integrations.OpenDesign.IPCPath != "" {
+			fmt.Printf("  ipc:     %s\n", portableConfig.Integrations.OpenDesign.IPCPath)
+		}
+		if !autoDetected.Available && autoDetected.Reason != "" {
+			PrintInfo(autoDetected.Reason)
+		}
+		return autoDetected
 	}
-	cliArg := askInitValue(reader, "OpenDesign daemon cli.js path")
-	modeArg := askInitValue(reader, "OpenDesign MCP arg (Enter=mcp)")
+
+	PrintInfo("No pude autodetectar OpenDesign. Paso a configuración manual.")
+	fmt.Println("Tip: si OpenDesign tiene el CLI `od` instalado, asegurate de que esté en PATH y reintentá `shipwright init`.")
+	fmt.Println("Si usás el repo local de OpenDesign, podés setear OPENDESIGN_ROOT y Shipwright buscará apps/daemon/dist/cli.js.")
+	fmt.Println()
+	fmt.Println("Configuración manual OpenDesign")
+	fmt.Println("Dejá vacío cualquier campo que no conozcas; Shipwright usará fallback doc-only si no alcanza.")
+	command := askInitValue(reader, "Comando MCP o Node (ej: od, /opt/homebrew/bin/node; Enter para omitir)")
+	if command == "" {
+		return harness.DetectOpenDesignWithConfig(probe, portableConfig)
+	}
+	cliArg := askInitValue(reader, "Path a cli.js si usás Node (Enter si el comando ya es od)")
+	modeArg := askInitValue(reader, "Argumento MCP (Enter=mcp)")
 	if modeArg == "" {
 		modeArg = "mcp"
 	}
-	dataDir := askInitValue(reader, "OD_DATA_DIR (Enter para omitir)")
-	ipcPath := askInitValue(reader, "OD_SIDECAR_IPC_PATH (Enter para omitir)")
+	dataDir := askInitValue(reader, "Carpeta de datos OD_DATA_DIR (Enter para omitir)")
+	ipcPath := askInitValue(reader, "Socket OD_SIDECAR_IPC_PATH (Enter para usar default si aplica)")
+	if ipcPath == "" && cliArg != "" {
+		ipcPath = "/tmp/open-design/ipc/default/daemon.sock"
+	}
 
 	portableConfig.Integrations.OpenDesign.MCPCommand = command
 	portableConfig.Integrations.OpenDesign.MCPArgs = []string{}
@@ -543,5 +572,5 @@ func configureOpenDesignDuringInit(reader *bufio.Reader, portableConfig *harness
 	portableConfig.Integrations.OpenDesign.IPCPath = ipcPath
 	portableConfig.Integrations.OpenDesign.Mode = harness.ConfigModeMCP
 	portableConfig.Integrations.OpenDesign.Fallback = "design-doc-only"
-	return harness.DetectOpenDesignWithConfig(harness.RealSystemProbe{}, portableConfig)
+	return harness.DetectOpenDesignWithConfig(probe, portableConfig)
 }

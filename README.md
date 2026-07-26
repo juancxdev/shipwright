@@ -423,15 +423,24 @@ You should see a connected server named `stitch`; the UI/UX Designer can then us
 
 ### OpenDesign design MCP (optional)
 
-If you run OpenDesign locally, do not edit `.opencode/opencode.json` by hand. Configure it through Shipwright once, then regenerate OpenCode assets:
+If you run OpenDesign locally, do not edit `.opencode/opencode.json` by hand. Shipwright tries to autodetect OpenDesign during `shipwright init` when you select the OpenDesign integration. You can also run autodetection later:
+
+```bash
+shipwright integrations configure opendesign
+shipwright executor generate opencode
+opencode mcp list
+```
+
+Autodetection checks `od` in PATH, Node, `OPENDESIGN_ROOT`, `OPEN_DESIGN_ROOT`, `OD_ROOT`, `OPENDESIGN_*`/`OD_*` env vars, and common local checkout paths such as `~/Documents/TOOLS/APPs/open-design`.
+
+Manual fallback is still available when autodetection cannot infer the setup:
 
 ```bash
 shipwright integrations configure opendesign \
-  --command "/opt/homebrew/Cellar/node@24/24.15.0/bin/node" \
-  --arg "/Users/developer/Documents/TOOLS/APPs/open-design/apps/daemon/dist/cli.js" \
-  --arg mcp \
-  --data-dir "/Users/developer/Documents/TOOLS/APPs/open-design/.od" \
-  --ipc-path "/tmp/open-design/ipc/default/daemon.sock"
+  --command /opt/homebrew/bin/node \
+  --arg /path/to/open-design/apps/daemon/dist/cli.js --arg mcp \
+  --data-dir /path/to/open-design/.od \
+  --ipc-path /tmp/open-design/ipc/default/daemon.sock
 
 shipwright executor generate opencode
 opencode mcp list

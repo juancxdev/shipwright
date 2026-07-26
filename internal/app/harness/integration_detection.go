@@ -52,3 +52,7 @@ func DetectOpenDesign(probe platform.SystemProbe) DetectionResult {
 func DetectOpenDesignWithConfig(probe platform.SystemProbe, cfg *config.PortableConfig) DetectionResult {
 	return integrations.DetectOpenDesignWithConfig(probe, cfg)
 }
+
+func AutoConfigureOpenDesign(probe platform.SystemProbe, cfg *config.PortableConfig) DetectionResult {
+	return integrations.AutoConfigureOpenDesign(probe, cfg)
+}

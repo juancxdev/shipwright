@@ -398,24 +398,25 @@ func configureOpenDesign(args []string) {
 	flags := flag.NewFlagSet("opendesign", flag.ContinueOnError)
 	flags.SetOutput(ioDiscard{})
 	var mcpArgs repeatFlag
-	command := flags.String("command", "", "OpenDesign MCP command, usually an absolute node path")
+	command := flags.String("command", "", "OpenDesign MCP command, usually od or an absolute node path")
 	flags.Var(&mcpArgs, "arg", "OpenDesign MCP argument; repeat for each argument")
 	dataDir := flags.String("data-dir", "", "OpenDesign OD_DATA_DIR")
 	ipcPath := flags.String("ipc-path", "", "OpenDesign OD_SIDECAR_IPC_PATH")
 	fromEnv := flags.Bool("from-env", false, "read OPENDESIGN_* / OD_* env vars")
+	auto := flags.Bool("auto", false, "autodetect OpenDesign config; default when no manual flags are provided")
 	help := flags.Bool("help", false, "show help")
 	if err := flags.Parse(args); err != nil {
-		Fail("usage: shipwright integrations configure opendesign --command <node> --arg <cli.js> --arg mcp --data-dir <dir> --ipc-path <socket>")
+		Fail("usage: shipwright integrations configure opendesign [--auto|--from-env|--command <od-or-node> --arg <cli.js> --arg mcp]")
 	}
 	if *help {
-		fmt.Println("usage: shipwright integrations configure opendesign --command <node> --arg <cli.js> --arg mcp --data-dir <dir> --ipc-path <socket>")
+		fmt.Println("usage: shipwright integrations configure opendesign [--auto|--from-env|--command <od-or-node> --arg <cli.js> --arg mcp]")
 		fmt.Println()
-		fmt.Println("Example:")
-		fmt.Println("  shipwright integrations configure opendesign \\")
-		fmt.Println("    --command /opt/homebrew/bin/node \\")
-		fmt.Println("    --arg /path/to/open-design/apps/daemon/dist/cli.js --arg mcp \\")
-		fmt.Println("    --data-dir /path/to/open-design/.od \\")
-		fmt.Println("    --ipc-path /tmp/open-design/ipc/default/daemon.sock")
+		fmt.Println("Default:")
+		fmt.Println("  shipwright integrations configure opendesign")
+		fmt.Println("    Attempts autodetection from `od`, Node, OPENDESIGN_ROOT, OPENDESIGN_* and OD_* env vars.")
+		fmt.Println()
+		fmt.Println("Manual fallback:")
+		fmt.Println("  shipwright integrations configure opendesign --command /opt/homebrew/bin/node --arg /path/to/open-design/apps/daemon/dist/cli.js --arg mcp --data-dir /path/to/open-design/.od --ipc-path /tmp/open-design/ipc/default/daemon.sock")
 		return
 	}
 
@@ -439,13 +440,22 @@ func configureOpenDesign(args []string) {
 	if strings.TrimSpace(*ipcPath) != "" {
 		cfg.Integrations.OpenDesign.IPCPath = strings.TrimSpace(*ipcPath)
 	}
+	manualInput := strings.TrimSpace(*command) != "" || len(mcpArgs) > 0 || strings.TrimSpace(*dataDir) != "" || strings.TrimSpace(*ipcPath) != ""
+	if *auto || !manualInput {
+		detected := harness.AutoConfigureOpenDesign(probe, cfg)
+		if detected.Configured && strings.TrimSpace(cfg.Integrations.OpenDesign.MCPCommand) != "" {
+			PrintSuccess("OpenDesign autodetectado")
+		} else if !manualInput {
+			Fail("No pude autodetectar OpenDesign. Instalá el CLI `od`, seteá OPENDESIGN_ROOT, o usá --command/--arg manual.")
+		}
+	}
 	cfg.Integrations.OpenDesign.Mode = harness.ConfigModeMCP
 	cfg.Integrations.OpenDesign.Fallback = "design-doc-only"
 	if strings.TrimSpace(cfg.Integrations.OpenDesign.MCPCommand) == "" {
-		Fail("OpenDesign necesita --command o OPENDESIGN_MCP_COMMAND")
+		Fail("OpenDesign necesita --command, `od` en PATH, OPENDESIGN_ROOT, o OPENDESIGN_MCP_COMMAND")
 	}
 	if len(cfg.Integrations.OpenDesign.MCPArgs) == 0 {
-		Fail("OpenDesign necesita al menos un --arg, normalmente: --arg /path/to/cli.js --arg mcp")
+		Fail("OpenDesign necesita argumentos MCP; con `od` es: mcp; con Node es: <cli.js> mcp")
 	}
 	if err := cfg.Save(); err != nil {
 		Fail(fmt.Sprintf("cannot save portable config: %s", err))
