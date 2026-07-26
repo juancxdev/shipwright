@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"shipwright/pkg/harness"
+	"shipwright/internal/app/harness"
 )
 
 func Config(args []string) {

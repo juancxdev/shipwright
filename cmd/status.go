@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"shipwright/pkg/harness"
+	"shipwright/internal/app/harness"
 )
 
 func Status(args []string) {
@@ -112,6 +112,9 @@ func Status(args []string) {
 			fmt.Printf("  decisions:   %s\n", boolCheck(dStatus.HasDecisions))
 			fmt.Printf("  prototype:   %s\n", boolCheck(dStatus.HasPrototype))
 			fmt.Printf("  responsive:  %s\n", boolCheck(dStatus.HasResponsiveQA))
+			fmt.Printf("  baseline:    %s\n", boolCheck(dStatus.HasRouteInventory && dStatus.HasSourceScreenshots))
+			fmt.Printf("  assets:      %s\n", boolCheck(dStatus.HasAssetManifest))
+			fmt.Printf("  fidelity:    %s\n", boolCheck(dStatus.HasFidelityReport))
 			if dStatus.PenFile != "" {
 				penExists := harness.ArtifactExists(dStatus.PenFile)
 				fmt.Printf("  pen file:    %s (%s)\n", dStatus.PenFile, boolCheck(penExists))

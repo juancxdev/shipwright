@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"shipwright/pkg/harness"
+	"shipwright/internal/app/harness"
 )
 
 type openCodeModelFlagParseResult struct {

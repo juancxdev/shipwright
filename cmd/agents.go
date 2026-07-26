@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"shipwright/pkg/harness"
+	"shipwright/internal/app/harness"
 )
 
 func Agents(args []string) {

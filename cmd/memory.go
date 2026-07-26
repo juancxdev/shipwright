@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"shipwright/pkg/harness"
+	"shipwright/internal/app/harness"
 )
 
 func Memory(args []string) {

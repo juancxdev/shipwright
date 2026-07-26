@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"shipwright/pkg/harness"
+	"shipwright/internal/app/harness"
 )
 
 func Executor(args []string) {

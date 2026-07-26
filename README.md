@@ -364,7 +364,7 @@ OpenPencil is optional. If explicitly used, save remains a gate: agents must exp
 
 For existing web projects, including Astro sites, the baseline workflow tells the UI/UX Designer to inventory all routes/views first; inspect routes, layouts, components, styles, rendered screenshots, and assets; write `.harness/artifacts/design/route-inventory.md`, `.harness/artifacts/design/reverse-engineering.md`, `.harness/artifacts/design/visual-inventory.md`, and `.harness/artifacts/design/fidelity-report.md`; generate the current UI with Stitch; compare Stitch exports against source evidence; then apply requested design changes only after the baseline fidelity gate passes.
 
-Skill pack rules live as declarative manifests in `pkg/harness/templates/project/harness/skill-packs/`. Shipwright does not execute external installers during `init`; if you already used autoskills or another provider that writes `.agents/skills`, import those skills explicitly:
+Skill pack rules live as declarative manifests in `internal/skills/application/templates/project/harness/skill-packs/`. Shipwright does not execute external installers during `init`; if you already used autoskills or another provider that writes `.agents/skills`, import those skills explicitly:
 
 ```bash
 shipwright skills providers

@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"shipwright/pkg/harness"
+	"shipwright/internal/app/harness"
 )
 
 func Init(args []string) {
@@ -94,6 +94,12 @@ func Init(args []string) {
 	}
 	PrintSuccess(fmt.Sprintf("TDD policy creada (.harness/tdd-policy.json, mode=%s)", tddPolicy.Mode))
 
+	modelPolicy := harness.DefaultModelPolicy(portableConfig.Executors.OpenCode)
+	if err := harness.SaveModelPolicy(modelPolicy); err != nil {
+		Fail(fmt.Sprintf("error guardando model policy: %s", err))
+	}
+	PrintSuccess("Model policy creada (.harness/model-policy.json)")
+
 	if executorName != "" {
 		result, err := harness.GenerateExecutor(executorName)
 		if err != nil {
@@ -101,6 +107,12 @@ func Init(args []string) {
 		}
 		PrintSuccess(fmt.Sprintf("Executor %s generado (%d creados, %d actualizados)", result.Name, len(result.FilesCreated), len(result.FilesUpdated)))
 	}
+
+	manifest, err := harness.SaveRecommendedSkillPackManifest(profile)
+	if err != nil {
+		Fail(fmt.Sprintf("error guardando skill pack manifest: %s", err))
+	}
+	PrintSuccess(fmt.Sprintf("Skill pack manifest creado (.harness/skill-packs.json, %d recomendados)", len(manifest.Recommended)))
 
 	registry, err := harness.RefreshSkillRegistry()
 	if err != nil {
@@ -120,7 +132,7 @@ func Init(args []string) {
 
 	fmt.Println()
 	fmt.Println("Estructura creada:")
-	fmt.Println("  .harness/          — estado, project profile, TDD policy, skill registry, skill assignments, skill digests, agentes, approvals, integrations")
+	fmt.Println("  .harness/          — estado, project profile, TDD policy, model policy, skill registry, skill packs, skill lock, agentes, approvals, integrations")
 	fmt.Println("  .harness/artifacts/product/           — discovery, contexto, alcance")
 	fmt.Println("  .harness/artifacts/project/           — planificación PMBOK-lite")
 	fmt.Println("  .harness/artifacts/design/            — UX/UI (Stitch-first, OpenPencil optional)")

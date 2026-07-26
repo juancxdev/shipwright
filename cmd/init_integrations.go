@@ -13,7 +13,7 @@ import (
 
 	"golang.org/x/term"
 
-	"shipwright/pkg/harness"
+	"shipwright/internal/app/harness"
 )
 
 type initIntegrationOption struct {

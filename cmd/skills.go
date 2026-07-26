@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"shipwright/pkg/harness"
+	"shipwright/internal/app/harness"
 )
 
 func Skills(args []string) {
@@ -14,6 +14,70 @@ func Skills(args []string) {
 		return
 	}
 	switch args[0] {
+	case "install":
+		EnsureHarness()
+		if len(args) < 2 {
+			Fail("usage: shipwright skills install recommended")
+		}
+		switch args[1] {
+		case "recommended":
+			result, err := harness.InstallRecommendedSkillPacks()
+			if err != nil {
+				Fail(fmt.Sprintf("error instalando skill packs: %s", err))
+			}
+			registry, err := harness.RefreshSkillRegistry()
+			if err != nil {
+				Fail(fmt.Sprintf("error refrescando skill registry: %s", err))
+			}
+			assignments, _ := harness.RefreshSkillAssignmentsFromRegistry(registry)
+			_, _ = harness.RefreshSkillDigestsFromRegistry(registry)
+			PrintSuccess(fmt.Sprintf("Skill packs instalados (%d packs, %d skills)", len(result.InstalledPacks), len(result.InstalledSkills)))
+			if len(result.InstalledPacks) > 0 {
+				fmt.Printf("Packs: %s\n", strings.Join(result.InstalledPacks, ", "))
+			}
+			if len(result.SkippedSkills) > 0 {
+				fmt.Printf("Skipped: %s\n", strings.Join(result.SkippedSkills, ", "))
+			}
+			if assignments != nil {
+				PrintSuccess(fmt.Sprintf("Skill assignments actualizados (%d recomendaciones)", len(assignments.Skills)))
+			}
+			fmt.Printf("Lockfile: %s\n", result.LockPath)
+		case "--from":
+			if len(args) < 3 {
+				Fail("usage: shipwright skills install --from <path-or-url>")
+			}
+			result, err := harness.InstallSkillsFromSource(args[2])
+			if err != nil {
+				Fail(fmt.Sprintf("error instalando skills externas: %s", err))
+			}
+			registry, _ := harness.RefreshSkillRegistry()
+			if registry != nil {
+				_, _ = harness.RefreshSkillAssignmentsFromRegistry(registry)
+				_, _ = harness.RefreshSkillDigestsFromRegistry(registry)
+			}
+			PrintSuccess(fmt.Sprintf("Skills externas instaladas (%d)", len(result.InstalledSkills)))
+			if len(result.InstalledSkills) > 0 {
+				fmt.Printf("Skills: %s\n", strings.Join(result.InstalledSkills, ", "))
+			}
+			if len(result.Skipped) > 0 {
+				fmt.Printf("Skipped: %s\n", strings.Join(result.Skipped, ", "))
+			}
+			fmt.Printf("Lockfile: %s\n", result.LockPath)
+		default:
+			Fail(fmt.Sprintf("unknown skills install target: %s", args[1]))
+		}
+	case "update":
+		EnsureHarness()
+		result, err := harness.UpdateInstalledSkillPacks()
+		if err != nil {
+			Fail(fmt.Sprintf("error actualizando skill packs: %s", err))
+		}
+		registry, _ := harness.RefreshSkillRegistry()
+		if registry != nil {
+			_, _ = harness.RefreshSkillAssignmentsFromRegistry(registry)
+			_, _ = harness.RefreshSkillDigestsFromRegistry(registry)
+		}
+		PrintSuccess(fmt.Sprintf("Skill packs actualizados (%d packs, %d skills)", len(result.InstalledPacks), len(result.InstalledSkills)))
 	case "refresh":
 		EnsureHarness()
 		registry, err := harness.RefreshSkillRegistry()
@@ -41,6 +105,7 @@ func Skills(args []string) {
 			Fail("skill registry no encontrado. Ejecutá 'shipwright skills refresh'.")
 		}
 		printSkillRegistryStatus(registry)
+		printSkillPackStatusSummary()
 	case "show":
 		EnsureHarness()
 		if len(args) < 2 {
@@ -135,6 +200,11 @@ func printSkillsUsage() {
 	fmt.Print(`Shipwright Skills
 
 Usage:
+  shipwright skills install recommended
+                                Install recommended bundled skill packs with lockfile
+  shipwright skills install --from <path-or-url>
+                                Install external SKILL.md files into .harness/skills with lockfile
+  shipwright skills update         Refresh currently locked bundled skill packs
   shipwright skills refresh        Scan installed skills and write registry + assignments + digests
   shipwright skills status         Show indexed skills and warnings
   shipwright skills show <name>    Show one indexed skill
@@ -287,6 +357,24 @@ func printAutoSkillsImportJSON(result *harness.AutoSkillsImportResult) {
 		Fail(fmt.Sprintf("error serializando autoskills import: %s", err))
 	}
 	fmt.Println(string(data))
+}
+
+func printSkillPackStatusSummary() {
+	manifest, manifestErr := harness.LoadSkillPackManifest()
+	lock, lockErr := harness.LoadSkillLock()
+	fmt.Println()
+	fmt.Println("Skill packs:")
+	if manifestErr == nil {
+		fmt.Printf("  recommended: %d\n", len(manifest.Recommended))
+	} else {
+		fmt.Println("  recommended: not generated")
+	}
+	if lockErr == nil {
+		fmt.Printf("  locked packs: %d\n", len(lock.Packs))
+		fmt.Printf("  locked skills: %d\n", len(lock.Skills))
+	} else {
+		fmt.Println("  locked: no")
+	}
 }
 
 func printSkillProviders() {

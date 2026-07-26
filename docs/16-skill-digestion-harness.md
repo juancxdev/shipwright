@@ -117,7 +117,7 @@ OpenCode bootstrap installs Shipwright-managed UI/UX skills into `.opencode/skil
 
 When a detected or planned stack suggests UI/frontend work, assignments add these skills under `frontend-ui-quality` so designer, frontend, and QA roles get stronger interface guidance.
 
-The mapping is declarative. Skill pack manifests live in `pkg/harness/templates/project/harness/skill-packs/`; Go code loads these manifests and evaluates them against `.harness/project-profile.json`.
+The mapping is declarative. Skill pack manifests live in `internal/app/harness/templates/project/harness/skill-packs/`; Go code loads these manifests and evaluates them against `.harness/project-profile.json`.
 
 ## Stitch-first design provider
 

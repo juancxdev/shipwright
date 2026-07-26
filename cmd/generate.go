@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"shipwright/pkg/harness"
+	"shipwright/internal/app/harness"
 )
 
 func Generate(args []string) {

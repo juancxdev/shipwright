@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"shipwright/pkg/harness"
+	"shipwright/internal/app/harness"
 )
 
 func Design(args []string) {
@@ -156,6 +156,10 @@ func designStatus(args []string) {
 	printArtifactStatus(".harness/artifacts/design/wireframes.md", status.HasWireframes)
 	printArtifactStatus(".harness/artifacts/design/prototype.md", status.HasPrototype)
 	printArtifactStatus(".harness/artifacts/design/responsive-qa.md", status.HasResponsiveQA)
+	printArtifactStatus(harness.DesignRouteInventoryFile, status.HasRouteInventory)
+	printArtifactStatus(harness.DesignAssetManifestFile, status.HasAssetManifest)
+	printArtifactStatus(harness.DesignSourceScreenshotsDir+"/*", status.HasSourceScreenshots)
+	printArtifactStatus(harness.DesignFidelityReportFile, status.HasFidelityReport)
 
 	if status.HasTaskFile {
 		switch status.Adapter {
@@ -174,6 +178,11 @@ func designStatus(args []string) {
 	if state != nil {
 		if state.CurrentPhase == harness.StateUXDesign || state.CurrentPhase == harness.StateUXApproval {
 			allReady := status.HasBrief && status.HasFlows && status.HasPrototype && status.HasResponsiveQA
+			for _, check := range status.GateChecks {
+				if check.Blocking && !check.Pass {
+					allReady = false
+				}
+			}
 			if allReady {
 				fmt.Println("✓ All required design artifacts present.")
 				if state.CurrentPhase == harness.StateUXDesign {
@@ -184,7 +193,12 @@ func designStatus(args []string) {
 				}
 			} else {
 				fmt.Println("✗ Missing required artifacts for UX_APPROVAL.")
-				fmt.Println("  Need: .harness/artifacts/design/ux-brief.md, .harness/artifacts/design/user-flows.md, .harness/artifacts/design/prototype.md, .harness/artifacts/design/responsive-qa.md")
+				fmt.Println("  Need: ux-brief.md, user-flows.md, prototype.md, responsive-qa.md, baseline evidence, asset manifest, provider publish evidence, and fidelity pass")
+				for _, check := range status.GateChecks {
+					if check.Blocking && !check.Pass {
+						fmt.Printf("  ✗ %s — %s\n", check.Gate, check.Message)
+					}
+				}
 			}
 		}
 	}

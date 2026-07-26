@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"shipwright/pkg/harness"
+	"shipwright/internal/app/harness"
 )
 
 func TestParseInitOptionsDefaultsToInteractiveOpenCode(t *testing.T) {
