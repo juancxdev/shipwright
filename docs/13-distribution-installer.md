@@ -30,10 +30,12 @@ Backward-compatible model overrides:
 
 ```bash
 shipwright init --executor opencode \
+  --balanced-model opencode-go/deepseek-v4-flash \
   --reasoning-model opencode-go/deepseek-v4-flash \
   --fast-model opencode-go/deepseek-v4-flash
 
 shipwright executor generate opencode \
+  --balanced-model opencode-go/deepseek-v4-flash \
   --reasoning-model opencode-go/deepseek-v4-flash \
   --fast-model opencode-go/deepseek-v4-flash
 ```

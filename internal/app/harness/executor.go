@@ -141,6 +141,10 @@ func opencodeAgentPath(name string) string {
 	return filepath.Join(".opencode", "agents", name+".md")
 }
 
+func opencodeAgentsPath() string {
+	return filepath.Join(".opencode", "AGENTS.md")
+}
+
 func opencodeSkillPath(name string) string {
 	return filepath.Join(".opencode", "skills", name, "SKILL.md")
 }

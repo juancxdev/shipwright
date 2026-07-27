@@ -115,6 +115,7 @@ Model overrides remain supported:
 
 ```bash
 shipwright init \
+  --balanced-model opencode-go/deepseek-v4-flash \
   --reasoning-model opencode-go/deepseek-v4-flash \
   --fast-model opencode-go/deepseek-v4-flash
 ```
@@ -123,6 +124,7 @@ And regeneration remains supported:
 
 ```bash
 shipwright executor generate opencode \
+  --balanced-model opencode-go/deepseek-v4-flash \
   --reasoning-model opencode-go/deepseek-v4-flash \
   --fast-model opencode-go/deepseek-v4-flash
 ```

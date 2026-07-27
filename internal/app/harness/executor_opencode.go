@@ -12,7 +12,7 @@ type OpenCodeExecutorAdapter struct{}
 func (OpenCodeExecutorAdapter) Name() string { return ExecutorOpenCode }
 
 func (OpenCodeExecutorAdapter) Description() string {
-	return "OpenCode project bootstrap: AGENTS.md, .opencode/opencode.json, agents, commands, and skills."
+	return "OpenCode project bootstrap: .opencode/AGENTS.md, .opencode/opencode.json, agents, commands, and skills."
 }
 
 func (OpenCodeExecutorAdapter) Generate() (*ExecutorGenerateResult, error) {
@@ -20,7 +20,7 @@ func (OpenCodeExecutorAdapter) Generate() (*ExecutorGenerateResult, error) {
 	if err := ensureTrackedFile(CommunicationPolicyFile, DefaultCommunicationPolicyMarkdown(), result); err != nil {
 		return nil, err
 	}
-	if err := writeTrackedFile("AGENTS.md", opencodeAgentsMD(), result); err != nil {
+	if err := writeTrackedFile(opencodeAgentsPath(), opencodeAgentsMD(), result); err != nil {
 		return nil, err
 	}
 	if err := writeExecutableTrackedFile(filepath.Join(".harness", "bin", "shipwright"), opencodeShipwrightWrapperSH(), result); err != nil {
@@ -68,14 +68,14 @@ func (OpenCodeExecutorAdapter) Generate() (*ExecutorGenerateResult, error) {
 			return nil, err
 		}
 	}
-	result.Message = "OpenCode executor generated. OpenCode will read AGENTS.md and .opencode/opencode.json with .opencode/agents, .opencode/commands, and .opencode/skills."
+	result.Message = "OpenCode executor generated. OpenCode will read .opencode/AGENTS.md and .opencode/opencode.json with .opencode/agents, .opencode/commands, and .opencode/skills."
 	return result, nil
 }
 
 func (OpenCodeExecutorAdapter) Status() (*ExecutorStatus, error) {
 	files := []string{
 		CommunicationPolicyFile,
-		"AGENTS.md",
+		opencodeAgentsPath(),
 		filepath.Join(".harness", "bin", "shipwright"),
 		filepath.Join(".harness", "bin", "shipwright.cmd"),
 		openCodeConfigPath(),
@@ -96,6 +96,9 @@ func (OpenCodeExecutorAdapter) Status() (*ExecutorStatus, error) {
 		files = append(files, filepath.Join(".opencode", "commands", command.Filename))
 	}
 	status := requiredStatus(ExecutorOpenCode, files)
+	if ArtifactExists("AGENTS.md") {
+		status.Warnings = append(status.Warnings, "root AGENTS.md exists; Shipwright writes OpenCode instructions to .opencode/AGENTS.md to keep executor assets together.")
+	}
 	if ArtifactExists("opencode.json") {
 		status.Warnings = append(status.Warnings, "root opencode.json exists; Shipwright writes OpenCode project config to .opencode/opencode.json to keep executor assets together.")
 	}
@@ -121,12 +124,13 @@ func opencodeJSONWithModels(modelConfig PortableOpenCodeExecutorConfig) string {
 
 func opencodeJSONWithConfig(modelConfig PortableOpenCodeExecutorConfig, cfg *PortableConfig) string {
 	modelConfig.Normalize()
+	integrations := loadOptionalIntegrations()
 	agents := map[string]any{
 		"shipwright-orchestrator": map[string]any{
 			"mode":        "primary",
 			"description": "Shipwright lifecycle orchestrator - reads harness state and delegates work to Shipwright role agents",
 			"model":       ResolveOpenCodeModelWithPolicy("shipwright-orchestrator", modelConfig, LoadOrDefaultModelPolicy(modelConfig)),
-			"prompt":      "{file:../AGENTS.md}",
+			"prompt":      "{file:./AGENTS.md}",
 			"permission": map[string]any{
 				"edit":     "ask",
 				"bash":     "ask",
@@ -150,33 +154,40 @@ func opencodeJSONWithConfig(modelConfig PortableOpenCodeExecutorConfig, cfg *Por
 			"description": extractSkillDescription(skill.Content),
 			"model":       ResolveOpenCodeModelWithPolicy(skill.Name, modelConfig, LoadOrDefaultModelPolicy(modelConfig)),
 			"prompt":      fmt.Sprintf("{file:./agents/%s.md}", skill.Name),
-			"permission":  opencodePermissionMapForAgent(skill.Name, permission),
-			"tools":       opencodeToolsForAgent(skill.Name),
+			"permission":  opencodePermissionMapForAgentWithIntegrations(skill.Name, permission, integrations),
+			"tools":       opencodeToolsForAgentWithIntegrations(skill.Name, integrations),
 		}
 	}
 
 	payload := map[string]any{
 		"$schema":       "https://opencode.ai/config.json",
 		"default_agent": "shipwright-orchestrator",
-		"instructions":  []string{"../AGENTS.md"},
 		"agent":         agents,
 		"command":       opencodeCommandConfig(),
 	}
-	if mcp := opencodeMCPConfig(cfg); len(mcp) > 0 {
+	if mcp := opencodeMCPConfig(cfg, integrations); len(mcp) > 0 {
 		payload["mcp"] = mcp
 	}
 	data, _ := json.MarshalIndent(payload, "", "  ")
 	return string(data) + "\n"
 }
 
-func opencodeMCPConfig(cfg *PortableConfig) map[string]any {
+func loadOptionalIntegrations() *Integrations {
+	integrations, err := LoadIntegrations()
+	if err != nil {
+		return nil
+	}
+	return integrations
+}
+
+func opencodeMCPConfig(cfg *PortableConfig, integrations *Integrations) map[string]any {
 	if cfg == nil {
 		return nil
 	}
 	mcp := map[string]any{}
 
 	stitch := DetectStitchWithConfig(RealSystemProbe{}, cfg)
-	if stitch.Available {
+	if providerEnabled(integrations, DesignModeStitch) && stitch.Available {
 		mcp["stitch"] = map[string]any{
 			"type":    "local",
 			"command": opencodeStitchMCPCommand(),
@@ -185,7 +196,7 @@ func opencodeMCPConfig(cfg *PortableConfig) map[string]any {
 	}
 
 	opendesign := DetectOpenDesignWithConfig(RealSystemProbe{}, cfg)
-	if opendesign.Configured && opendesign.Installed {
+	if providerEnabled(integrations, DesignModeOpenDesign) && opendesign.Configured && opendesign.Installed {
 		mcp["open-design"] = map[string]any{
 			"type":    "local",
 			"command": opencodeOpenDesignMCPCommand(),
@@ -194,7 +205,7 @@ func opencodeMCPConfig(cfg *PortableConfig) map[string]any {
 	}
 
 	detected := DetectOpenPencilWithConfig(RealSystemProbe{}, cfg)
-	if detected.Installed && detected.Path != "" {
+	if providerEnabled(integrations, DesignModeOpenPencil) && detected.Installed && detected.Path != "" {
 		var command []string
 		switch detected.PathKind {
 		case DetectionPathBinary:
@@ -212,6 +223,22 @@ func opencodeMCPConfig(cfg *PortableConfig) map[string]any {
 	}
 
 	return mcp
+}
+
+func providerEnabled(integrations *Integrations, provider string) bool {
+	if integrations == nil {
+		return true
+	}
+	switch provider {
+	case DesignModeStitch:
+		return integrations.Stitch.Enabled
+	case DesignModeOpenDesign:
+		return integrations.OpenDesign.Enabled
+	case DesignModeOpenPencil:
+		return integrations.OpenPencil.Enabled
+	default:
+		return false
+	}
 }
 
 func opencodeStitchMCPPackageJSON() string {
@@ -291,9 +318,10 @@ func opencodeStitchMCPReadme() string {
 		"## OpenDesign\n\n" +
 		"Configure once through Shipwright, not by editing OpenCode JSON manually:\n\n" +
 		"```bash\n" +
-		"shipwright integrations configure opendesign --command /path/to/node --arg /path/to/open-design/apps/daemon/dist/cli.js --arg mcp --data-dir /path/to/open-design/.od --ipc-path /tmp/open-design/ipc/default/daemon.sock\n" +
+		"shipwright integrations configure opendesign --command /path/to/node --arg /path/to/open-design/apps/daemon/dist/cli.js --arg mcp --daemon-url http://127.0.0.1:7377 --data-dir /path/to/open-design/.od --ipc-path /tmp/open-design/ipc/default/daemon.sock\n" +
 		"shipwright executor generate opencode\n" +
 		"```\n\n" +
+		"`--ipc-path` is a Shipwright config flag, not an OpenDesign daemon flag. Do not run `cli.js daemon --ipc-path`.\n\n" +
 		"Then restart OpenCode and verify `open-design` with `opencode mcp list`.\n"
 }
 
@@ -342,6 +370,11 @@ exit 127
 	if strings.TrimSpace(cfg.Integrations.OpenDesign.DataDir) != "" {
 		builder.WriteString("export OD_DATA_DIR=")
 		builder.WriteString(shellQuote(cfg.Integrations.OpenDesign.DataDir))
+		builder.WriteString("\n")
+	}
+	if strings.TrimSpace(cfg.Integrations.OpenDesign.DaemonURL) != "" {
+		builder.WriteString("export OD_DAEMON_URL=")
+		builder.WriteString(shellQuote(strings.TrimRight(strings.TrimSpace(cfg.Integrations.OpenDesign.DaemonURL), "/")))
 		builder.WriteString("\n")
 	}
 	if strings.TrimSpace(cfg.Integrations.OpenDesign.IPCPath) != "" {
@@ -412,22 +445,32 @@ func opencodeTaskPermissions() map[string]any {
 }
 
 func opencodeToolsForAgent(name string) map[string]any {
+	return opencodeToolsForAgentWithIntegrations(name, nil)
+}
+
+func opencodeToolsForAgentWithIntegrations(name string, integrations *Integrations) map[string]any {
 	switch name {
 	case "ui-ux-designer":
 		tools := map[string]any{
-			"read":          true,
-			"write":         true,
-			"edit":          true,
-			"bash":          false,
-			"task":          false,
-			"stitch_*":      true,
-			"open-design_*": true,
-			"opendesign_*":  true,
-			"open_design_*": true,
-			"open-pencil_*": true,
+			"read":  true,
+			"write": true,
+			"edit":  true,
+			"bash":  false,
+			"task":  false,
 		}
-		for _, tool := range opencodeOpenDesignToolNames() {
-			tools[tool] = true
+		if providerEnabled(integrations, DesignModeStitch) {
+			tools["stitch_*"] = true
+		}
+		if providerEnabled(integrations, DesignModeOpenDesign) {
+			tools["open-design_*"] = true
+			tools["opendesign_*"] = true
+			tools["open_design_*"] = true
+			for _, tool := range opencodeOpenDesignToolNames() {
+				tools[tool] = true
+			}
+		}
+		if providerEnabled(integrations, DesignModeOpenPencil) {
+			tools["open-pencil_*"] = true
 		}
 		return tools
 	case "product-owner", "project-manager":
@@ -464,11 +507,15 @@ func opencodeOpenDesignToolNames() []string {
 }
 
 func opencodePermissionMapForAgent(name string, permission opencodePermission) map[string]any {
+	return opencodePermissionMapForAgentWithIntegrations(name, permission, nil)
+}
+
+func opencodePermissionMapForAgentWithIntegrations(name string, permission opencodePermission, integrations *Integrations) map[string]any {
 	out := map[string]any{
 		"edit": permission.Edit,
 		"bash": permission.Bash,
 	}
-	if name == "ui-ux-designer" {
+	if name == "ui-ux-designer" && providerEnabled(integrations, DesignModeOpenDesign) {
 		out["open-design_*"] = "allow"
 		out["opendesign_*"] = "allow"
 		out["open_design_*"] = "allow"

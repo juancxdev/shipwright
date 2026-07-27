@@ -25,6 +25,7 @@ func TestCLISmokeHelpInitConfigValidateAndDoctor(t *testing.T) {
 	initOutput := captureStdout(t, func() {
 		cmd.Init([]string{
 			"--executor", "opencode",
+			"--balanced-model", "anthropic/claude-sonnet-4-20250514",
 			"--reasoning-model", "openai/gpt-5.5",
 			"--fast-model", "opencode-go/deepseek-v4-flash",
 			"--agent-model", "technical-lead=openai/gpt-5.5",
@@ -33,7 +34,7 @@ func TestCLISmokeHelpInitConfigValidateAndDoctor(t *testing.T) {
 	if !strings.Contains(initOutput, "Portable config creada") || !strings.Contains(initOutput, "Project calibration creada") || !strings.Contains(initOutput, "TDD policy creada") {
 		t.Fatalf("init output missing portable config message:\n%s", initOutput)
 	}
-	for _, path := range []string{".harness/state.json", ".harness/config.json", ".harness/integrations.json", ".harness/project-profile.json", ".harness/project-profile.md", ".harness/tdd-policy.json", ".harness/tdd-policy.md", ".harness/skill-registry.json", ".harness/skill-registry.md", ".harness/skill-assignments.json", ".harness/skill-assignments.md", ".harness/skill-digests.json", ".harness/skill-digests.md", "AGENTS.md", ".harness/bin/shipwright", ".opencode/opencode.json", ".opencode/agents/product-owner.md"} {
+	for _, path := range []string{".harness/state.json", ".harness/config.json", ".harness/integrations.json", ".harness/project-profile.json", ".harness/project-profile.md", ".harness/tdd-policy.json", ".harness/tdd-policy.md", ".harness/skill-registry.json", ".harness/skill-registry.md", ".harness/skill-assignments.json", ".harness/skill-assignments.md", ".harness/skill-digests.json", ".harness/skill-digests.md", ".opencode/AGENTS.md", ".harness/bin/shipwright", ".opencode/opencode.json", ".opencode/agents/product-owner.md"} {
 		if _, err := os.Stat(filepath.Join(tmp, path)); err != nil {
 			t.Fatalf("expected %s after init: %v", path, err)
 		}
@@ -90,7 +91,7 @@ func TestCLIInitDefaultsToOpenCodeExecutor(t *testing.T) {
 	if !strings.Contains(initOutput, "Executor opencode generado") {
 		t.Fatalf("init output should mention default opencode executor:\n%s", initOutput)
 	}
-	for _, path := range []string{"AGENTS.md", ".opencode/opencode.json", ".harness/bin/shipwright", ".harness/project-profile.md", ".harness/tdd-policy.md", ".harness/skill-registry.md", ".harness/skill-digests.md", ".harness/executor.json"} {
+	for _, path := range []string{".opencode/AGENTS.md", ".opencode/opencode.json", ".harness/bin/shipwright", ".harness/project-profile.md", ".harness/tdd-policy.md", ".harness/skill-registry.md", ".harness/skill-digests.md", ".harness/executor.json"} {
 		if _, err := os.Stat(filepath.Join(tmp, path)); err != nil {
 			t.Fatalf("expected %s after default init: %v", path, err)
 		}

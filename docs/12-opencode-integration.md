@@ -22,8 +22,8 @@ shipwright init --executor opencode
 This creates the normal Shipwright project structure and OpenCode-supported files:
 
 ```txt
-AGENTS.md
 .opencode/
+  AGENTS.md
   opencode.json
   agents/
     product-owner.md
@@ -69,7 +69,7 @@ Shipwright configures OpenCode with:
 - `.harness/skill-registry.md` as reusable skill index;
 - `.harness/skill-digests.md` as compact role-specific skill rules;
 - `default_agent: "shipwright-orchestrator"`
-- `AGENTS.md` autopilot instructions
+- `.opencode/AGENTS.md` autopilot instructions
 - a project-local CLI wrapper at `.harness/bin/shipwright`
 - Shipwright role subagents under `.opencode/agents/`
 - slash commands under `.opencode/commands/`
@@ -82,7 +82,7 @@ The orchestrator should:
 4. Read the active agent with `.harness/bin/shipwright agents active`.
 5. Delegate to the matching role.
 6. Ask the user questions in chat when the role needs more context.
-7. Generate artifacts itself through the active role; do not ask the user to manually fill files.
+7. Never execute role work inline as the orchestrator; if delegation is unavailable, report `delegation unavailable`.
 8. Stop at approval gates.
 
 ## Add OpenCode to an existing Shipwright project
@@ -117,19 +117,19 @@ Recommended flow:
 
 1. `/shipwright-status`
 2. `/shipwright-active-agent`
-3. Invoke or follow the matching Shipwright role agent.
+3. Invoke the matching Shipwright role agent.
 4. Make only the changes allowed by the active Shipwright phase.
 5. Return evidence and the next Shipwright command.
 
 ## Generated OpenCode files
 
-### AGENTS.md
+### .opencode/AGENTS.md
 
-Project-level rules. OpenCode reads this as project context.
+OpenCode orchestrator rules colocated with the OpenCode executor assets. The `shipwright-orchestrator` prompt points directly to this file.
 
 ### .opencode/opencode.json
 
-Project OpenCode config colocated with the OpenCode executor assets. It uses the official schema, `../AGENTS.md` as instruction source, registered Shipwright agents, registered Shipwright commands, permissions, tool access, and default model assignments.
+Project OpenCode config colocated with the OpenCode executor assets. It uses the official schema, `.opencode/AGENTS.md` as instruction source, registered Shipwright agents, registered Shipwright commands, permissions, tool access, and default model assignments.
 
 Generated defaults:
 
@@ -168,6 +168,7 @@ Shipwright does not force one model for every role. OpenCode models are stored i
   "executors": {
     "opencode": {
       "default_model": "anthropic/claude-sonnet-4-20250514",
+      "balanced_model": "anthropic/claude-sonnet-4-20250514",
       "reasoning_model": "anthropic/claude-sonnet-4-20250514",
       "fast_model": "anthropic/claude-haiku-4-20250514",
       "agent_models": {}
@@ -176,24 +177,28 @@ Shipwright does not force one model for every role. OpenCode models are stored i
 }
 ```
 
-Reasoning-heavy roles use `reasoning_model` by default:
+Balanced roles use `balanced_model` by default:
 
 - `shipwright-orchestrator`
-- `technical-lead`
+- `product-owner`
+- `ui-ux-designer`
 - `frontend-engineer`
 - `backend-engineer`
+
+Reasoning-heavy roles use `reasoning_model` by default:
+
+- `technical-lead`
 - `qa-security-reviewer`
 
 Fast/documentary roles use `fast_model` by default:
 
-- `product-owner`
 - `project-manager`
-- `ui-ux-designer`
 
 Override at init time:
 
 ```bash
 shipwright init --executor opencode \
+  --balanced-model anthropic/claude-sonnet-4-20250514 \
   --reasoning-model openai/gpt-5.5 \
   --fast-model opencode-go/deepseek-v4-flash
 ```
@@ -210,6 +215,7 @@ Or use environment variables for machine-specific overrides:
 
 ```bash
 export SHIPWRIGHT_OPENCODE_REASONING_MODEL=openai/gpt-5.5
+export SHIPWRIGHT_OPENCODE_BALANCED_MODEL=anthropic/claude-sonnet-4-20250514
 export SHIPWRIGHT_OPENCODE_FAST_MODEL=opencode-go/deepseek-v4-flash
 export SHIPWRIGHT_OPENCODE_AGENT_MODELS="technical-lead=openai/gpt-5.5,product-owner=opencode-go/deepseek-v4-flash"
 ```

@@ -168,7 +168,7 @@ shipwright init --no-interactive
 
 `shipwright init` generates:
 
-- `AGENTS.md`
+- `.opencode/AGENTS.md`
 - `.opencode/opencode.json`
 - `.opencode/agents/*.md`
 - `.opencode/commands/*.md`
@@ -278,6 +278,7 @@ Choose models at bootstrap time:
 
 ```bash
 shipwright init \
+  --balanced-model anthropic/claude-sonnet-4-20250514 \
   --reasoning-model openai/gpt-5.5 \
   --fast-model opencode-go/deepseek-v4-flash
 ```
@@ -294,6 +295,7 @@ Regenerate OpenCode configuration later:
 
 ```bash
 shipwright executor generate opencode \
+  --balanced-model opencode-go/deepseek-v4-flash \
   --reasoning-model opencode-go/deepseek-v4-flash \
   --fast-model opencode-go/deepseek-v4-flash
 ```

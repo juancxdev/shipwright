@@ -131,3 +131,10 @@ Required when OpenDesign is used:
 - `.harness/artifacts/design/prototype.md`
 - `.harness/artifacts/design/responsive-qa.md`
 - `.harness/artifacts/design/fidelity-report.md` for existing UI baselines
+
+## Daemon connection rules
+
+- Read `.harness/config.json` and `.harness/integrations.json` before checking OpenDesign. If `opendesign.daemon_url` is configured, the generated `.opencode/mcp/open-design.sh` wrapper exports it as `OD_DAEMON_URL`.
+- Do not start OpenDesign daemon processes from the agent unless the user explicitly asks. Prefer reporting the configured daemon URL/status and asking the user to start OpenDesign.
+- Never run `cli.js daemon --ipc-path`; OpenDesign daemon does not support that flag. `--ipc-path` is a Shipwright configuration flag that maps to `OD_SIDECAR_IPC_PATH`.
+- If OpenDesign MCP cannot connect, report `blocked` with: configured command, daemon URL, data dir, IPC path, and the exact `shipwright integrations configure opendesign --daemon-url ...` command to fix it.

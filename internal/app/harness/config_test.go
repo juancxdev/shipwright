@@ -172,6 +172,7 @@ func TestLoadEffectivePortableConfigEnvOverridesOpenCodeModels(t *testing.T) {
 		goos: "linux",
 		env: map[string]string{
 			"SHIPWRIGHT_OPENCODE_DEFAULT_MODEL":   "opencode-go/deepseek-v4-flash",
+			"SHIPWRIGHT_OPENCODE_BALANCED_MODEL":  "anthropic/claude-sonnet-4-20250514",
 			"SHIPWRIGHT_OPENCODE_REASONING_MODEL": "openai/gpt-5.5",
 			"SHIPWRIGHT_OPENCODE_FAST_MODEL":      "opencode-go/deepseek-v4-flash",
 			"SHIPWRIGHT_OPENCODE_AGENT_MODELS":    "technical-lead=openai/gpt-5.5,product-owner=opencode-go/deepseek-v4-flash",
@@ -183,6 +184,9 @@ func TestLoadEffectivePortableConfigEnvOverridesOpenCodeModels(t *testing.T) {
 
 	if cfg.Executors.OpenCode.ReasoningModel != "openai/gpt-5.5" {
 		t.Fatalf("reasoning model = %s", cfg.Executors.OpenCode.ReasoningModel)
+	}
+	if cfg.Executors.OpenCode.BalancedModel != "anthropic/claude-sonnet-4-20250514" {
+		t.Fatalf("balanced model = %s", cfg.Executors.OpenCode.BalancedModel)
 	}
 	if cfg.Executors.OpenCode.AgentModels["technical-lead"] != "openai/gpt-5.5" {
 		t.Fatalf("technical-lead model = %s", cfg.Executors.OpenCode.AgentModels["technical-lead"])

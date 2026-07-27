@@ -33,6 +33,7 @@ type DetectionResult struct {
 	Version    string                `json:"version,omitempty"`
 	Path       string                `json:"path,omitempty"`
 	PathKind   string                `json:"path_kind,omitempty"`
+	DaemonURL  string                `json:"daemon_url,omitempty"`
 	Status     string                `json:"status"`
 	Reason     string                `json:"reason,omitempty"`
 	Fallback   string                `json:"fallback,omitempty"`
@@ -430,6 +431,11 @@ func DetectOpenDesignWithConfig(probe platform.SystemProbe, cfg *config.Portable
 		strings.TrimSpace(probe.Getenv("OPENDESIGN_SIDECAR_IPC_PATH")),
 		strings.TrimSpace(probe.Getenv("OD_SIDECAR_IPC_PATH")),
 	)
+	daemonURL := firstNonEmpty(
+		strings.TrimSpace(probe.Getenv("OPENDESIGN_DAEMON_URL")),
+		strings.TrimSpace(probe.Getenv("OPEN_DESIGN_DAEMON_URL")),
+		strings.TrimSpace(probe.Getenv("OD_DAEMON_URL")),
+	)
 	if cfg != nil {
 		if strings.TrimSpace(cfg.Integrations.OpenDesign.Fallback) != "" {
 			fallback = cfg.Integrations.OpenDesign.Fallback
@@ -443,14 +449,18 @@ func DetectOpenDesignWithConfig(probe platform.SystemProbe, cfg *config.Portable
 		if strings.TrimSpace(cfg.Integrations.OpenDesign.IPCPath) != "" {
 			ipcPath = strings.TrimSpace(cfg.Integrations.OpenDesign.IPCPath)
 		}
+		if strings.TrimSpace(cfg.Integrations.OpenDesign.DaemonURL) != "" {
+			daemonURL = strings.TrimRight(strings.TrimSpace(cfg.Integrations.OpenDesign.DaemonURL), "/")
+		}
 	}
 	if command == "" {
 		return DetectionResult{
-			Name:     "opendesign",
-			Platform: platform,
-			Status:   DetectionNotInstalled,
-			Reason:   "OpenDesign MCP command not configured; run 'shipwright integrations configure opendesign'.",
-			Fallback: fallback,
+			Name:      "opendesign",
+			Platform:  platform,
+			Status:    DetectionNotInstalled,
+			Reason:    "OpenDesign MCP command not configured; run 'shipwright integrations configure opendesign'.",
+			Fallback:  fallback,
+			DaemonURL: daemonURL,
 		}
 	}
 
@@ -467,6 +477,7 @@ func DetectOpenDesignWithConfig(probe platform.SystemProbe, cfg *config.Portable
 				PathKind:   DetectionPathBinary,
 				Reason:     "OpenDesign MCP command path not found",
 				Fallback:   fallback,
+				DaemonURL:  daemonURL,
 			}
 		}
 		if info.IsDir() {
@@ -479,6 +490,7 @@ func DetectOpenDesignWithConfig(probe platform.SystemProbe, cfg *config.Portable
 				PathKind:   DetectionPathBinary,
 				Reason:     "OpenDesign MCP command path is a directory",
 				Fallback:   fallback,
+				DaemonURL:  daemonURL,
 			}
 		}
 	} else if path, err := probe.LookPath(command); err == nil && strings.TrimSpace(path) != "" {
@@ -493,6 +505,7 @@ func DetectOpenDesignWithConfig(probe platform.SystemProbe, cfg *config.Portable
 			PathKind:   DetectionPathBinary,
 			Reason:     "OpenDesign MCP command not found in PATH",
 			Fallback:   fallback,
+			DaemonURL:  daemonURL,
 		}
 	}
 
@@ -523,6 +536,7 @@ func DetectOpenDesignWithConfig(probe platform.SystemProbe, cfg *config.Portable
 		Active:     active,
 		Path:       resolved,
 		PathKind:   DetectionPathBinary,
+		DaemonURL:  daemonURL,
 		Status:     status,
 		Reason:     reason,
 		Fallback:   fallback,

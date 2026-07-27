@@ -87,6 +87,9 @@ func integrationsStatus(args []string) {
 	if len(integrations.OpenDesign.MCPArgs) > 0 {
 		fmt.Printf("  args:     %s\n", strings.Join(integrations.OpenDesign.MCPArgs, " "))
 	}
+	if integrations.OpenDesign.DaemonURL != "" {
+		fmt.Printf("  daemon:   %s\n", integrations.OpenDesign.DaemonURL)
+	}
 	if integrations.OpenDesign.DataDir != "" {
 		fmt.Printf("  data dir: %s\n", integrations.OpenDesign.DataDir)
 	}
@@ -326,6 +329,9 @@ func integrationsDetect(args []string) {
 	if opendesign.Path != "" {
 		fmt.Printf("  command:      %s\n", opendesign.Path)
 	}
+	if opendesign.DaemonURL != "" {
+		fmt.Printf("  daemon:       %s\n", opendesign.DaemonURL)
+	}
 	if opendesign.Reason != "" {
 		fmt.Printf("  reason:       %s\n", opendesign.Reason)
 	}
@@ -400,6 +406,7 @@ func configureOpenDesign(args []string) {
 	var mcpArgs repeatFlag
 	command := flags.String("command", "", "OpenDesign MCP command, usually od or an absolute node path")
 	flags.Var(&mcpArgs, "arg", "OpenDesign MCP argument; repeat for each argument")
+	daemonURL := flags.String("daemon-url", "", "OpenDesign daemon HTTP URL, for example http://127.0.0.1:7377")
 	dataDir := flags.String("data-dir", "", "OpenDesign OD_DATA_DIR")
 	ipcPath := flags.String("ipc-path", "", "OpenDesign OD_SIDECAR_IPC_PATH")
 	fromEnv := flags.Bool("from-env", false, "read OPENDESIGN_* / OD_* env vars")
@@ -416,7 +423,7 @@ func configureOpenDesign(args []string) {
 		fmt.Println("    Attempts autodetection from `od`, Node, OPENDESIGN_ROOT, OPENDESIGN_* and OD_* env vars.")
 		fmt.Println()
 		fmt.Println("Manual fallback:")
-		fmt.Println("  shipwright integrations configure opendesign --command /opt/homebrew/bin/node --arg /path/to/open-design/apps/daemon/dist/cli.js --arg mcp --data-dir /path/to/open-design/.od --ipc-path /tmp/open-design/ipc/default/daemon.sock")
+		fmt.Println("  shipwright integrations configure opendesign --command /opt/homebrew/bin/node --arg /path/to/open-design/apps/daemon/dist/cli.js --arg mcp --daemon-url http://127.0.0.1:7377 --data-dir /path/to/open-design/.od --ipc-path /tmp/open-design/ipc/default/daemon.sock")
 		return
 	}
 
@@ -434,13 +441,16 @@ func configureOpenDesign(args []string) {
 	if len(mcpArgs) > 0 {
 		cfg.Integrations.OpenDesign.MCPArgs = append([]string{}, mcpArgs...)
 	}
+	if strings.TrimSpace(*daemonURL) != "" {
+		cfg.Integrations.OpenDesign.DaemonURL = strings.TrimRight(strings.TrimSpace(*daemonURL), "/")
+	}
 	if strings.TrimSpace(*dataDir) != "" {
 		cfg.Integrations.OpenDesign.DataDir = strings.TrimSpace(*dataDir)
 	}
 	if strings.TrimSpace(*ipcPath) != "" {
 		cfg.Integrations.OpenDesign.IPCPath = strings.TrimSpace(*ipcPath)
 	}
-	manualInput := strings.TrimSpace(*command) != "" || len(mcpArgs) > 0 || strings.TrimSpace(*dataDir) != "" || strings.TrimSpace(*ipcPath) != ""
+	manualInput := strings.TrimSpace(*command) != "" || len(mcpArgs) > 0 || strings.TrimSpace(*daemonURL) != "" || strings.TrimSpace(*dataDir) != "" || strings.TrimSpace(*ipcPath) != ""
 	if *auto || !manualInput {
 		detected := harness.AutoConfigureOpenDesign(probe, cfg)
 		if detected.Configured && strings.TrimSpace(cfg.Integrations.OpenDesign.MCPCommand) != "" {

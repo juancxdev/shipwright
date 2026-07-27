@@ -140,8 +140,14 @@ func TestAutoConfigureOpenDesignUsesDaemonInstallInfoFirst(t *testing.T) {
 	if cfg.Integrations.OpenDesign.DataDir != "/tools/open-design/.od" {
 		t.Fatalf("data dir = %q", cfg.Integrations.OpenDesign.DataDir)
 	}
+	if cfg.Integrations.OpenDesign.DaemonURL != "http://127.0.0.1:56868" {
+		t.Fatalf("daemon URL = %q", cfg.Integrations.OpenDesign.DaemonURL)
+	}
 	if cfg.Integrations.OpenDesign.IPCPath != "/tmp/open-design/ipc/default/daemon.sock" {
 		t.Fatalf("ipc path = %q", cfg.Integrations.OpenDesign.IPCPath)
+	}
+	if got.DaemonURL != "http://127.0.0.1:56868" {
+		t.Fatalf("detection daemon URL = %q", got.DaemonURL)
 	}
 	if got.Status != DetectionAvailable || !got.Available {
 		t.Fatalf("detection = %+v, want available", got)

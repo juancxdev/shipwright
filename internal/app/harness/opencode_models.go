@@ -4,6 +4,7 @@ import "strings"
 
 type OpenCodeModelOverrides struct {
 	DefaultModel   string
+	BalancedModel  string
 	ReasoningModel string
 	FastModel      string
 	AgentModels    map[string]string
@@ -16,9 +17,14 @@ func ApplyOpenCodeModelOverrides(cfg *PortableConfig, overrides OpenCodeModelOve
 	changed := false
 	cfg.Normalize()
 	fastOverride := trimEnv(overrides.FastModel)
+	balancedOverride := trimEnv(overrides.BalancedModel)
 	defaultOverride := trimEnv(overrides.DefaultModel)
 	if value := trimEnv(overrides.DefaultModel); value != "" {
 		cfg.Executors.OpenCode.DefaultModel = value
+		changed = true
+	}
+	if value := balancedOverride; value != "" {
+		cfg.Executors.OpenCode.BalancedModel = value
 		changed = true
 	}
 	if value := trimEnv(overrides.ReasoningModel); value != "" {
@@ -32,6 +38,9 @@ func ApplyOpenCodeModelOverrides(cfg *PortableConfig, overrides OpenCodeModelOve
 	if defaultOverride == "" && fastOverride != "" && isImplicitOpenCodeDefaultModel(cfg.Executors.OpenCode.DefaultModel) {
 		cfg.Executors.OpenCode.DefaultModel = fastOverride
 		changed = true
+	}
+	if balancedOverride == "" && isImplicitOpenCodeDefaultModel(cfg.Executors.OpenCode.BalancedModel) {
+		cfg.Executors.OpenCode.BalancedModel = cfg.Executors.OpenCode.DefaultModel
 	}
 	if len(overrides.AgentModels) > 0 {
 		if cfg.Executors.OpenCode.AgentModels == nil {
@@ -84,6 +93,9 @@ func ResolveOpenCodeModel(agent string, cfg PortableOpenCodeExecutorConfig) stri
 	if isOpenCodeReasoningAgent(agent) {
 		return cfg.ReasoningModel
 	}
+	if isOpenCodeBalancedAgent(agent) {
+		return cfg.BalancedModel
+	}
 	if isOpenCodeFastAgent(agent) {
 		return cfg.FastModel
 	}
@@ -99,9 +111,18 @@ func isOpenCodeReasoningAgent(agent string) bool {
 	}
 }
 
+func isOpenCodeBalancedAgent(agent string) bool {
+	switch agent {
+	case "shipwright-orchestrator", "product-owner", "ui-ux-designer", "frontend-engineer", "backend-engineer":
+		return true
+	default:
+		return false
+	}
+}
+
 func isOpenCodeFastAgent(agent string) bool {
 	switch agent {
-	case "shipwright-orchestrator", "product-owner", "project-manager", "ui-ux-designer", "frontend-engineer", "backend-engineer":
+	case "project-manager":
 		return true
 	default:
 		return false

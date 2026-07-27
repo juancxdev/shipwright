@@ -75,7 +75,7 @@ func executorStatus(args []string) {
 
 func executorGenerate(args []string) {
 	if len(args) == 0 {
-		Fail("usage: shipwright executor generate <generic|opencode> [--reasoning-model <model>] [--fast-model <model>] [--agent-model role=model]")
+		Fail("usage: shipwright executor generate <generic|opencode> [--balanced-model <model>] [--reasoning-model <model>] [--fast-model <model>] [--agent-model role=model]")
 	}
 	name := strings.TrimSpace(args[0])
 	modelFlags := parseOpenCodeModelFlags(args[1:])

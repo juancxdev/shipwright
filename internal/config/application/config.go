@@ -43,6 +43,7 @@ type PortableExecutorsConfig struct {
 
 type PortableOpenCodeExecutorConfig struct {
 	DefaultModel   string            `json:"default_model,omitempty"`
+	BalancedModel  string            `json:"balanced_model,omitempty"`
 	ReasoningModel string            `json:"reasoning_model,omitempty"`
 	FastModel      string            `json:"fast_model,omitempty"`
 	AgentModels    map[string]string `json:"agent_models,omitempty"`
@@ -68,6 +69,7 @@ type PortableOpenDesignConfig struct {
 	Mode       string   `json:"mode"`
 	MCPCommand string   `json:"mcp_command,omitempty"`
 	MCPArgs    []string `json:"mcp_args,omitempty"`
+	DaemonURL  string   `json:"daemon_url,omitempty"`
 	DataDir    string   `json:"data_dir,omitempty"`
 	IPCPath    string   `json:"ipc_path,omitempty"`
 	Fallback   string   `json:"fallback"`
@@ -247,6 +249,7 @@ func (cfg *PortableConfig) Normalize() {
 func DefaultOpenCodeExecutorConfig() PortableOpenCodeExecutorConfig {
 	return PortableOpenCodeExecutorConfig{
 		DefaultModel:   "anthropic/claude-sonnet-4-20250514",
+		BalancedModel:  "anthropic/claude-sonnet-4-20250514",
 		ReasoningModel: "anthropic/claude-sonnet-4-20250514",
 		FastModel:      "anthropic/claude-haiku-4-20250514",
 		AgentModels:    map[string]string{},
@@ -256,6 +259,9 @@ func DefaultOpenCodeExecutorConfig() PortableOpenCodeExecutorConfig {
 func (cfg *PortableOpenCodeExecutorConfig) Normalize() {
 	if cfg.DefaultModel == "" {
 		cfg.DefaultModel = "anthropic/claude-sonnet-4-20250514"
+	}
+	if cfg.BalancedModel == "" {
+		cfg.BalancedModel = cfg.DefaultModel
 	}
 	if cfg.ReasoningModel == "" {
 		cfg.ReasoningModel = cfg.DefaultModel
@@ -310,6 +316,9 @@ func (cfg *PortableConfig) Merge(override PortableIntegrationsConfig) {
 	if len(override.OpenDesign.MCPArgs) > 0 {
 		cfg.Integrations.OpenDesign.MCPArgs = append([]string{}, override.OpenDesign.MCPArgs...)
 	}
+	if override.OpenDesign.DaemonURL != "" {
+		cfg.Integrations.OpenDesign.DaemonURL = override.OpenDesign.DaemonURL
+	}
 	if override.OpenDesign.DataDir != "" {
 		cfg.Integrations.OpenDesign.DataDir = override.OpenDesign.DataDir
 	}
@@ -340,6 +349,9 @@ func (cfg *PortableConfig) Merge(override PortableIntegrationsConfig) {
 func (cfg *PortableConfig) MergeExecutors(override PortableExecutorsConfig) {
 	if override.OpenCode.DefaultModel != "" {
 		cfg.Executors.OpenCode.DefaultModel = override.OpenCode.DefaultModel
+	}
+	if override.OpenCode.BalancedModel != "" {
+		cfg.Executors.OpenCode.BalancedModel = override.OpenCode.BalancedModel
 	}
 	if override.OpenCode.ReasoningModel != "" {
 		cfg.Executors.OpenCode.ReasoningModel = override.OpenCode.ReasoningModel
@@ -390,6 +402,15 @@ func (cfg *PortableConfig) ApplyEnv(probe platform.SystemProbe) {
 	if value := trimEnv(probe.Getenv("OPENDESIGN_MCP_ARGS")); value != "" {
 		cfg.Integrations.OpenDesign.MCPArgs = parseEnvList(value)
 	}
+	if value := trimEnv(probe.Getenv("OPENDESIGN_DAEMON_URL")); value != "" {
+		cfg.Integrations.OpenDesign.DaemonURL = value
+	}
+	if value := trimEnv(probe.Getenv("OPEN_DESIGN_DAEMON_URL")); value != "" {
+		cfg.Integrations.OpenDesign.DaemonURL = value
+	}
+	if value := trimEnv(probe.Getenv("OD_DAEMON_URL")); value != "" {
+		cfg.Integrations.OpenDesign.DaemonURL = value
+	}
 	if value := trimEnv(probe.Getenv("OPENDESIGN_DATA_DIR")); value != "" {
 		cfg.Integrations.OpenDesign.DataDir = value
 	}
@@ -413,6 +434,9 @@ func (cfg *PortableConfig) ApplyEnv(probe platform.SystemProbe) {
 	}
 	if value := trimEnv(probe.Getenv("SHIPWRIGHT_OPENCODE_DEFAULT_MODEL")); value != "" {
 		cfg.Executors.OpenCode.DefaultModel = value
+	}
+	if value := trimEnv(probe.Getenv("SHIPWRIGHT_OPENCODE_BALANCED_MODEL")); value != "" {
+		cfg.Executors.OpenCode.BalancedModel = value
 	}
 	if value := trimEnv(probe.Getenv("SHIPWRIGHT_OPENCODE_REASONING_MODEL")); value != "" {
 		cfg.Executors.OpenCode.ReasoningModel = value

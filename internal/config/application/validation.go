@@ -155,6 +155,11 @@ func validateIntegrationsConfig(prefix string, cfg PortableIntegrationsConfig, r
 	for index, arg := range cfg.OpenDesign.MCPArgs {
 		issues = append(issues, validateCommandShape(fmt.Sprintf("%s.opendesign.mcp_args.%d", prefix, index), arg)...)
 	}
+	if strings.TrimSpace(cfg.OpenDesign.DaemonURL) != "" {
+		if issue := ValidateHTTPURL(prefix+".opendesign.daemon_url", cfg.OpenDesign.DaemonURL); issue != nil {
+			issues = append(issues, *issue)
+		}
+	}
 	issues = append(issues, validatePathShape(prefix+".opendesign.data_dir", cfg.OpenDesign.DataDir)...)
 	issues = append(issues, validatePathShape(prefix+".opendesign.ipc_path", cfg.OpenDesign.IPCPath)...)
 	issues = append(issues, validatePathShape(prefix+".openpencil.app_path", cfg.OpenPencil.AppPath)...)
@@ -166,6 +171,7 @@ func validateIntegrationsConfig(prefix string, cfg PortableIntegrationsConfig, r
 func validateExecutorsConfig(cfg PortableExecutorsConfig) []ConfigValidationIssue {
 	var issues []ConfigValidationIssue
 	issues = append(issues, validateOptionalModel("executors.opencode.default_model", cfg.OpenCode.DefaultModel)...)
+	issues = append(issues, validateOptionalModel("executors.opencode.balanced_model", cfg.OpenCode.BalancedModel)...)
 	issues = append(issues, validateOptionalModel("executors.opencode.reasoning_model", cfg.OpenCode.ReasoningModel)...)
 	issues = append(issues, validateOptionalModel("executors.opencode.fast_model", cfg.OpenCode.FastModel)...)
 	knownAgents := knownOpenCodeAgents()

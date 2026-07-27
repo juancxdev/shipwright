@@ -12,11 +12,12 @@ const (
 	TierFast      = "fast"
 	TierBalanced  = "balanced"
 	TierReasoning = "reasoning"
-	TierVisual    = "visual"
+	TierDefault   = "default"
 )
 
 type Config struct {
 	DefaultModel   string
+	BalancedModel  string
 	ReasoningModel string
 	FastModel      string
 	AgentModels    map[string]string
@@ -32,31 +33,27 @@ type Policy struct {
 
 func Default(cfg Config, generatedAt string) *Policy {
 	cfg = normalizeConfig(cfg)
-	balanced := cfg.DefaultModel
-	if strings.TrimSpace(balanced) == "" {
-		balanced = cfg.FastModel
-	}
 	return &Policy{
 		Version:     Version,
 		GeneratedAt: generatedAt,
 		Tiers: map[string]string{
 			TierFast:      cfg.FastModel,
-			TierBalanced:  balanced,
+			TierBalanced:  cfg.BalancedModel,
 			TierReasoning: cfg.ReasoningModel,
-			TierVisual:    cfg.FastModel,
+			TierDefault:   cfg.DefaultModel,
 		},
 		Agents: map[string]string{
-			"shipwright-orchestrator": TierFast,
+			"shipwright-orchestrator": TierBalanced,
 			"project-manager":         TierFast,
 			"product-owner":           TierBalanced,
 			"technical-lead":          TierReasoning,
 			"qa-security-reviewer":    TierReasoning,
-			"ui-ux-designer":          TierVisual,
+			"ui-ux-designer":          TierBalanced,
 			"frontend-engineer":       TierBalanced,
 			"backend-engineer":        TierBalanced,
 		},
 		Notes: []string{
-			"Orchestrator routes work and should stay cheap unless explicitly overridden.",
+			"Orchestrator routes work and uses the balanced tier to keep delegation reliable.",
 			"Reasoning is reserved for architecture, security review, and high-risk decisions.",
 		},
 	}
@@ -89,6 +86,12 @@ func Normalize(policy *Policy, fallback Config, generatedAt string) {
 			policy.Agents[agent] = tier
 		}
 	}
+	if policy.Agents["shipwright-orchestrator"] == TierFast {
+		policy.Agents["shipwright-orchestrator"] = TierBalanced
+	}
+	if policy.Agents["ui-ux-designer"] == "visual" {
+		policy.Agents["ui-ux-designer"] = TierBalanced
+	}
 }
 
 func Resolve(agent string, cfg Config, policy *Policy, legacyResolver func(string) string) string {
@@ -116,7 +119,7 @@ func RenderMarkdown(policy *Policy, generatedAt string) string {
 	sb.WriteString("# Model Policy\n\n")
 	sb.WriteString(fmt.Sprintf("**Generated:** %s\n\n", policy.GeneratedAt))
 	sb.WriteString("## Tiers\n\n")
-	for _, tier := range []string{TierFast, TierBalanced, TierReasoning, TierVisual} {
+	for _, tier := range []string{TierFast, TierBalanced, TierReasoning, TierDefault} {
 		sb.WriteString(fmt.Sprintf("- `%s`: `%s`\n", tier, policy.Tiers[tier]))
 	}
 	sb.WriteString("\n## Agent bindings\n\n")
@@ -129,7 +132,7 @@ func RenderMarkdown(policy *Policy, generatedAt string) string {
 		sb.WriteString(fmt.Sprintf("- `%s` → `%s`\n", agent, policy.Agents[agent]))
 	}
 	sb.WriteString("\n## Rules\n\n")
-	sb.WriteString("- Keep `shipwright-orchestrator` on the fast tier; it routes work, it does not solve the whole project.\n")
+	sb.WriteString("- Keep `shipwright-orchestrator` on the balanced tier; it routes work and must reliably delegate.\n")
 	sb.WriteString("- Use reasoning for technical architecture, security, and high-risk reviews.\n")
 	sb.WriteString("- Use per-agent overrides only for explicit project needs.\n")
 	return sb.String()
@@ -138,6 +141,9 @@ func RenderMarkdown(policy *Policy, generatedAt string) string {
 func normalizeConfig(cfg Config) Config {
 	if cfg.DefaultModel == "" {
 		cfg.DefaultModel = "anthropic/claude-sonnet-4-20250514"
+	}
+	if cfg.BalancedModel == "" {
+		cfg.BalancedModel = cfg.DefaultModel
 	}
 	if cfg.ReasoningModel == "" {
 		cfg.ReasoningModel = cfg.DefaultModel

@@ -1,3 +1,12 @@
+## Provider selection is authoritative
+
+Before using any design MCP tool, read `.harness/integrations.json`. The `enabled` flags are authoritative. Do not use a provider just because its MCP tools are visible globally in OpenCode.
+
+- If `opendesign.enabled=true`, use OpenDesign artifact tools and do not ask for OpenPencil desktop/canvas.
+- If `openpencil.enabled=false`, never call `open-pencil_*` and never block on OpenPencil desktop/document setup.
+- If `stitch.enabled=false`, never call `stitch_*` unless the user explicitly changes integrations and regenerates the executor.
+- If the selected provider is unavailable, report that provider as blocked; do not silently switch to another visual provider without explicit user approval.
+
 ## Provider ownership boundary
 
 You own all design-provider work. Do not delegate Stitch, OpenDesign, OpenPencil, or canvas/artifact publishing tasks to `frontend-engineer`; that role intentionally lacks provider MCP permissions. If implementation is needed, first publish/record approved design artifacts and hand off only the implementation-ready artifact paths, screenshots, component map, and constraints.

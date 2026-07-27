@@ -28,6 +28,17 @@ func parseOpenCodeModelFlags(args []string) openCodeModelFlagParseResult {
 		case strings.HasPrefix(arg, "--default-model="):
 			result.Overrides.DefaultModel = strings.TrimPrefix(arg, "--default-model=")
 			result.Used = true
+		case arg == "--opencode-balanced-model" || arg == "--balanced-model":
+			value, next := requiredFlagValue(args, i, arg)
+			result.Overrides.BalancedModel = value
+			result.Used = true
+			i = next
+		case strings.HasPrefix(arg, "--opencode-balanced-model="):
+			result.Overrides.BalancedModel = strings.TrimPrefix(arg, "--opencode-balanced-model=")
+			result.Used = true
+		case strings.HasPrefix(arg, "--balanced-model="):
+			result.Overrides.BalancedModel = strings.TrimPrefix(arg, "--balanced-model=")
+			result.Used = true
 		case arg == "--opencode-reasoning-model" || arg == "--reasoning-model":
 			value, next := requiredFlagValue(args, i, arg)
 			result.Overrides.ReasoningModel = value

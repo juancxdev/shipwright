@@ -15,7 +15,7 @@ const (
 	ModelTierFast      = modelpolicy.TierFast
 	ModelTierBalanced  = modelpolicy.TierBalanced
 	ModelTierReasoning = modelpolicy.TierReasoning
-	ModelTierVisual    = modelpolicy.TierVisual
+	ModelTierDefault   = modelpolicy.TierDefault
 )
 
 type ModelPolicy modelpolicy.Policy
@@ -91,6 +91,7 @@ func toModelPolicyConfig(cfg PortableOpenCodeExecutorConfig) modelpolicy.Config 
 	cfg.Normalize()
 	return modelpolicy.Config{
 		DefaultModel:   cfg.DefaultModel,
+		BalancedModel:  cfg.BalancedModel,
 		ReasoningModel: cfg.ReasoningModel,
 		FastModel:      cfg.FastModel,
 		AgentModels:    cfg.AgentModels,

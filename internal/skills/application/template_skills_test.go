@@ -21,6 +21,31 @@ func TestAgentSkillsLoadFromProjectTemplates(t *testing.T) {
 	if !strings.Contains(AgentCommonProtocol, "Shipwright Agent — Common Protocol") {
 		t.Fatalf("shared agent common template was not loaded")
 	}
+	if !strings.Contains(AgentCommonProtocol, "Professional Identity Contract") {
+		t.Fatalf("shared agent common template missing professional identity contract")
+	}
+	if !strings.Contains(po.Content, "Senior Product Owner and Business Analyst") {
+		t.Fatalf("product-owner template missing senior professional identity")
+	}
+	for _, role := range []struct {
+		name string
+		want string
+	}{
+		{"project-manager", "Senior Delivery Manager / Project Manager"},
+		{"technical-lead", "Staff / Principal Technical Lead"},
+		{"ui-ux-designer", "Senior Product Designer / UI/UX Designer"},
+		{"frontend-engineer", "Senior Frontend Engineer"},
+		{"backend-engineer", "Senior Backend Engineer"},
+		{"qa-security-reviewer", "Senior QA / Security Reviewer"},
+	} {
+		skill := GetAgentSkill(role.name)
+		if skill == nil {
+			t.Fatalf("%s skill not loaded", role.name)
+		}
+		if !strings.Contains(skill.Content, role.want) || !strings.Contains(skill.Content, "## Professional Identity") {
+			t.Fatalf("%s template missing professional identity %q", role.name, role.want)
+		}
+	}
 }
 
 func TestCuratedSkillTemplatesLoaded(t *testing.T) {

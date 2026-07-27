@@ -21,6 +21,7 @@ type IntegrationConfig struct {
 	MCPServerPath  string   `json:"mcp_server_path,omitempty"`
 	MCPCommand     string   `json:"mcp_command,omitempty"`
 	MCPArgs        []string `json:"mcp_args,omitempty"`
+	DaemonURL      string   `json:"daemon_url,omitempty"`
 	DataDir        string   `json:"data_dir,omitempty"`
 	IPCPath        string   `json:"ipc_path,omitempty"`
 	HealthURL      string   `json:"health_url,omitempty"`
@@ -84,6 +85,7 @@ func (i *Integrations) ApplyPortableConfig(cfg *config.PortableConfig) {
 	i.OpenDesign.Mode = cfg.Integrations.OpenDesign.Mode
 	i.OpenDesign.MCPCommand = cfg.Integrations.OpenDesign.MCPCommand
 	i.OpenDesign.MCPArgs = append([]string{}, cfg.Integrations.OpenDesign.MCPArgs...)
+	i.OpenDesign.DaemonURL = cfg.Integrations.OpenDesign.DaemonURL
 	i.OpenDesign.DataDir = cfg.Integrations.OpenDesign.DataDir
 	i.OpenDesign.IPCPath = cfg.Integrations.OpenDesign.IPCPath
 	i.OpenDesign.Fallback = cfg.Integrations.OpenDesign.Fallback
@@ -140,6 +142,7 @@ func (i *Integrations) ApplyOpenDesignDetection(opendesign DetectionResult) {
 	i.OpenDesign.Status = opendesign.Status
 	i.OpenDesign.Reason = opendesign.Reason
 	i.OpenDesign.Version = opendesign.Version
+	i.OpenDesign.DaemonURL = opendesign.DaemonURL
 	i.OpenDesign.Fallback = opendesign.Fallback
 	i.OpenDesign.LastDetectedAt = nowISO()
 }

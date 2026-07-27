@@ -98,6 +98,7 @@ You can choose default role models during init:
 
 ```bash
 shipwright init \
+  --balanced-model anthropic/claude-sonnet-4-20250514 \
   --reasoning-model openai/gpt-5.5 \
   --fast-model opencode-go/deepseek-v4-flash
 ```
@@ -114,6 +115,7 @@ Regenerate OpenCode config later:
 
 ```bash
 shipwright executor generate opencode \
+  --balanced-model anthropic/claude-sonnet-4-20250514 \
   --reasoning-model openai/gpt-5.5 \
   --fast-model opencode-go/deepseek-v4-flash
 ```

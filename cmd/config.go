@@ -93,6 +93,7 @@ func configEnv(args []string) {
 	fmt.Println()
 	fmt.Println("OpenCode models:")
 	fmt.Println("  SHIPWRIGHT_OPENCODE_DEFAULT_MODEL     Fallback model for generated OpenCode agents")
+	fmt.Println("  SHIPWRIGHT_OPENCODE_BALANCED_MODEL    Mid-level model for orchestration and implementation roles")
 	fmt.Println("  SHIPWRIGHT_OPENCODE_REASONING_MODEL   Model for reasoning-heavy roles")
 	fmt.Println("  SHIPWRIGHT_OPENCODE_FAST_MODEL        Model for lighter/documentary roles")
 	fmt.Println("  SHIPWRIGHT_OPENCODE_AGENT_MODELS      Comma list: role=model,role=model")

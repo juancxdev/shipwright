@@ -54,12 +54,12 @@ func AutoConfigureOpenDesign(probe platform.SystemProbe, cfg *config.PortableCon
 	}
 
 	if path, err := probe.LookPath("od"); err == nil && strings.TrimSpace(path) != "" {
-		applyOpenDesignConfig(cfg, path, []string{"mcp"}, "", defaultOpenDesignIPCPath(probe))
+		applyOpenDesignConfig(cfg, path, []string{"mcp"}, "", "", defaultOpenDesignIPCPath(probe))
 		return DetectOpenDesignWithConfig(probe, cfg)
 	}
 
 	if path, err := probe.LookPath("open-design"); err == nil && strings.TrimSpace(path) != "" {
-		applyOpenDesignConfig(cfg, path, []string{"mcp"}, "", defaultOpenDesignIPCPath(probe))
+		applyOpenDesignConfig(cfg, path, []string{"mcp"}, "", "", defaultOpenDesignIPCPath(probe))
 		return DetectOpenDesignWithConfig(probe, cfg)
 	}
 
@@ -71,7 +71,7 @@ func AutoConfigureOpenDesign(probe platform.SystemProbe, cfg *config.PortableCon
 	if nodePath == "" {
 		return DetectOpenDesignWithConfig(probe, cfg)
 	}
-	applyOpenDesignConfig(cfg, nodePath, []string{cliPath, "mcp"}, dataDir, defaultOpenDesignIPCPath(probe))
+	applyOpenDesignConfig(cfg, nodePath, []string{cliPath, "mcp"}, "", dataDir, defaultOpenDesignIPCPath(probe))
 	return DetectOpenDesignWithConfig(probe, cfg)
 }
 
@@ -204,7 +204,7 @@ func applyOpenDesignInstallInfoConfig(cfg *config.PortableConfig, info *openDesi
 		dataDir = firstNonEmpty(info.Env["OD_DATA_DIR"], info.Env["OPENDESIGN_DATA_DIR"])
 		ipcPath = firstNonEmpty(info.Env["OD_SIDECAR_IPC_PATH"], info.Env["OPENDESIGN_SIDECAR_IPC_PATH"])
 	}
-	applyOpenDesignConfig(cfg, info.Command, info.Args, dataDir, ipcPath)
+	applyOpenDesignConfig(cfg, info.Command, info.Args, strings.TrimSpace(info.DaemonURL), dataDir, ipcPath)
 }
 
 func normalizeOpenDesignExistingConfig(probe platform.SystemProbe, cfg *config.PortableConfig) bool {
@@ -225,9 +225,12 @@ func normalizeOpenDesignExistingConfig(probe platform.SystemProbe, cfg *config.P
 	return true
 }
 
-func applyOpenDesignConfig(cfg *config.PortableConfig, command string, args []string, dataDir string, ipcPath string) {
+func applyOpenDesignConfig(cfg *config.PortableConfig, command string, args []string, daemonURL string, dataDir string, ipcPath string) {
 	cfg.Integrations.OpenDesign.MCPCommand = strings.TrimSpace(command)
 	cfg.Integrations.OpenDesign.MCPArgs = append([]string{}, args...)
+	if strings.TrimSpace(daemonURL) != "" {
+		cfg.Integrations.OpenDesign.DaemonURL = strings.TrimRight(strings.TrimSpace(daemonURL), "/")
+	}
 	if strings.TrimSpace(dataDir) != "" {
 		cfg.Integrations.OpenDesign.DataDir = strings.TrimSpace(dataDir)
 	}
