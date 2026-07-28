@@ -62,6 +62,15 @@ Do not assume a global binary is installed; use the project-local wrapper.
 
 ### Delegation boundaries
 
+- Treat role ownership as a routing contract. When the user request includes specialist work, delegate to the owner below instead of executing it inline:
+  - `product-owner`: discovery questions, product context, personas, business rules, functional scope, acceptance criteria, assumptions, open questions, and scope changes.
+  - `project-manager`: delivery planning, phase coordination, risks, dependencies, milestones, stakeholder notes, change-control records, and closure/readiness tracking.
+  - `technical-lead`: architecture, technical design, API/contracts, data models, integration strategy, security/quality constraints, implementation slicing, and technical backlog structure.
+  - `ui-ux-designer`: UI/UX design, interaction design, visual design, responsive/accessibility design decisions, prototypes, design fidelity reports, design-to-code component mapping, and all Stitch/OpenDesign/OpenPencil/Figma-like provider work.
+  - `frontend-engineer`: frontend implementation in HTML, CSS, JavaScript, TypeScript, React, Vue, Svelte, Angular, Flutter UI, mobile UI layers, component code, client state, frontend tests, accessibility implementation, and consuming approved design artifacts.
+  - `backend-engineer`: backend implementation, APIs, services, domain logic, persistence, migrations, auth/permissions, jobs, integrations, observability, backend tests, and data/security enforcement.
+  - `qa-security-reviewer`: QA verification, regression review, security review, threat/abuse checks, test evidence review, contract compliance, and release risk findings.
+- If a request spans multiple ownership areas, delegate the first lifecycle-appropriate owner and summarize the handoff. Do not split the work inline as the orchestrator.
 - Provider/canvas work belongs ONLY to `ui-ux-designer`: Stitch, OpenDesign, OpenPencil, Figma-like canvas/artifact generation, design publishing, and design fidelity reports.
 - Never delegate OpenDesign/Stitch/OpenPencil tasks to `frontend-engineer`, even if the provider output is HTML/CSS/React-like. Frontend does not have provider MCP permissions by design.
 - `frontend-engineer` starts after UX/design approval and consumes approved artifacts only: `.harness/artifacts/design/prototype.md`, `.harness/artifacts/design/fidelity-report.md`, `.harness/artifacts/design/code-component-map.md`, screenshots, contracts, and frontend tasks.
@@ -71,7 +80,7 @@ Do not assume a global binary is installed; use the project-local wrapper.
 
 Do not tell the user to execute raw approval commands unless they explicitly ask for CLI instructions. Instead, ask in natural language. Examples:
 
-- `¿Aprobás este alcance o querés cambios?`
+- `¿Apruebas este alcance o quieres cambios?`
 - If user says `aprobado`, `aprobar scope`, `sí, aprobar`, or equivalent, run ``shipwright approve scope`.
 - If user requests changes, run `.harness/bin/shipwright request-change "<reason>"` and route back to the active role.
 After approving a gate, continue safe internal transitions yourself until the next role needs user input or another approval gate appears.

@@ -24,4 +24,3 @@ If `.harness/integrations.json` enables OpenPencil or `.opencode/opencode.json` 
 - If a separate `pencil` MCP server is connected, do not use it for Shipwright OpenPencil work; it may be bound to another desktop host.
 - First validation call: prefer `open-pencil_get_editor_state`, but use any equivalent available `open-pencil_*` state/canvas/snapshot tool if that exact name is absent.
 - Only fall back to doc-only mode if no usable `open-pencil_*` MCP tool is available or all state/design calls fail.
-

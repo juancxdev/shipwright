@@ -21,6 +21,8 @@ func main() {
 		cmd.Init(args)
 	case "start":
 		cmd.Start(args)
+	case "restart":
+		cmd.Restart(args)
 	case "status":
 		cmd.Status(args)
 	case "next":

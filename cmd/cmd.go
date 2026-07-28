@@ -11,6 +11,7 @@ Usage:
   shipwright init [--ai opencode] [--balanced-model <model>] [--reasoning-model <model>] [--fast-model <model>] [--no-interactive]
                                       Initialize harness structure in current directory
   shipwright start "<request>"       Start a new delivery cycle with a user request
+  shipwright restart "<request>"     Archive current lifecycle state and start a new delivery cycle
   shipwright status                        Show current phase, approvals, and next action
   shipwright next                          Advance to next phase if gates are met
   shipwright run                     Auto-scaffold + advance through all phases (stops at gates)
