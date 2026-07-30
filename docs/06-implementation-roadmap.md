@@ -103,9 +103,9 @@ Tareas:
 
 Para MVP:
 
-- Go si querés binario portable tipo Gentle-AI/Engram.
-- TypeScript si querés iterar rápido con tooling Node/MCP.
-- Python si querés prototipar muy rápido.
+- Go si quieres binario portable tipo Gentle-AI/Engram.
+- TypeScript si quieres iterar rápido con tooling Node/MCP.
+- Python si quieres prototipar muy rápido.
 
 Mi recomendación arquitectónica:
 

@@ -102,7 +102,7 @@ func Skills(args []string) {
 		EnsureHarness()
 		registry, err := harness.LoadSkillRegistry()
 		if err != nil {
-			Fail("skill registry no encontrado. Ejecutá 'shipwright skills refresh'.")
+			Fail("skill registry no encontrado. Ejecuta 'shipwright skills refresh'.")
 		}
 		printSkillRegistryStatus(registry)
 		printSkillPackStatusSummary()
@@ -113,7 +113,7 @@ func Skills(args []string) {
 		}
 		registry, err := harness.LoadSkillRegistry()
 		if err != nil {
-			Fail("skill registry no encontrado. Ejecutá 'shipwright skills refresh'.")
+			Fail("skill registry no encontrado. Ejecuta 'shipwright skills refresh'.")
 		}
 		skill := harness.FindSkill(registry, args[1])
 		if skill == nil {
@@ -178,7 +178,7 @@ func Skills(args []string) {
 		EnsureHarness()
 		digests, err := harness.LoadSkillDigests()
 		if err != nil {
-			Fail("skill digests no encontrados. Ejecutá 'shipwright skills refresh'.")
+			Fail("skill digests no encontrados. Ejecuta 'shipwright skills refresh'.")
 		}
 		if len(args) >= 2 {
 			digest := harness.FindSkillDigest(digests, args[1])

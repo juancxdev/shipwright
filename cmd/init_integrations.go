@@ -101,7 +101,7 @@ func runInitIntegrationWizard(portableConfig *harness.PortableConfig, integratio
 			validateStitchDuringInit(portableConfig)
 		} else {
 			PrintInfo("Stitch quedó activado, pero todavía faltan credenciales")
-			PrintInfo("Seteá STITCH_API_KEY o guardalo luego con el wizard/secret local")
+			PrintInfo("Configura STITCH_API_KEY o guárdalo luego con el wizard/secret local")
 		}
 	} else {
 		integrations.DisableStitch()
@@ -349,7 +349,7 @@ func renderInitIntegrationChecklist(options []initIntegrationOption, selected ma
 
 func askInitIntegrationSelection(reader *bufio.Reader, options []initIntegrationOption) map[string]bool {
 	for {
-		fmt.Print("Seleccioná integraciones (ej: 1,2 o engram,stitch; Enter=recomendado; 0=ninguna): ")
+		fmt.Print("Selecciona integraciones (ej: 1,2 o engram,stitch; Enter=recomendado; 0=ninguna): ")
 		answer, _ := reader.ReadString('\n')
 		selected, err := parseInitIntegrationSelection(answer, options)
 		if err == nil {
@@ -439,7 +439,7 @@ func askInitYesNo(reader *bufio.Reader, question string, defaultYes bool) bool {
 		case "n", "no":
 			return false
 		default:
-			fmt.Println("Respondé sí o no.")
+			fmt.Println("Responde sí o no.")
 		}
 	}
 }
@@ -462,7 +462,7 @@ func configureStitchCredentials(reader *bufio.Reader, portableConfig *harness.Po
 	}
 	fmt.Println()
 	fmt.Println("Credenciales Stitch")
-	fmt.Println("Pegá tu API key de Stitch si querés validarlo ahora.")
+	fmt.Println("Pega tu API key de Stitch si quieres validarlo ahora.")
 	fmt.Println("Ojo: por compatibilidad multiplataforma, la entrada se ve en la terminal.")
 	fmt.Println("Se guardará en .harness/secrets.local.env y esa ruta queda ignorada por .harness/.gitignore.")
 	apiKey := askInitValue(reader, apiKeyEnv+" (Enter para omitir)")
@@ -506,7 +506,7 @@ func validateStitchDuringInit(portableConfig *harness.PortableConfig) {
 		PrintInfo("Stitch connection check skipped: " + result.Detail)
 		return
 	}
-	PrintInfo(fmt.Sprintf("Stitch connection check no quedó saludable (%s). Revisá la API key o el endpoint.", result.Status))
+	PrintInfo(fmt.Sprintf("Stitch connection check no quedó saludable (%s). Revisa la API key o el endpoint.", result.Status))
 	if result.Detail != "" {
 		PrintInfo("detalle: " + result.Detail)
 	}
@@ -542,8 +542,8 @@ func configureOpenDesignDuringInit(reader *bufio.Reader, portableConfig *harness
 	}
 
 	PrintInfo("No pude autodetectar OpenDesign. Paso a configuración manual.")
-	fmt.Println("Tip: si OpenDesign tiene el CLI `od` instalado, asegurate de que esté en PATH y reintentá `shipwright init`.")
-	fmt.Println("Si usás el repo local de OpenDesign, podés setear OPENDESIGN_ROOT y Shipwright buscará apps/daemon/dist/cli.js.")
+	fmt.Println("Tip: si OpenDesign tiene el CLI `od` instalado, asegúrate de que esté en PATH y reintenta `shipwright init`.")
+	fmt.Println("Si usas el repo local de OpenDesign, puedes configurar OPENDESIGN_ROOT y Shipwright buscará apps/daemon/dist/cli.js.")
 	fmt.Println()
 	fmt.Println("Configuración manual OpenDesign")
 	fmt.Println("Dejá vacío cualquier campo que no conozcas; Shipwright usará fallback doc-only si no alcanza.")
@@ -551,7 +551,7 @@ func configureOpenDesignDuringInit(reader *bufio.Reader, portableConfig *harness
 	if command == "" {
 		return harness.DetectOpenDesignWithConfig(probe, portableConfig)
 	}
-	cliArg := askInitValue(reader, "Path a cli.js si usás Node (Enter si el comando ya es od)")
+	cliArg := askInitValue(reader, "Path a cli.js si usas Node (Enter si el comando ya es od)")
 	modeArg := askInitValue(reader, "Argumento MCP (Enter=mcp)")
 	if modeArg == "" {
 		modeArg = "mcp"

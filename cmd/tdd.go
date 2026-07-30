@@ -26,7 +26,7 @@ func TDD(args []string) {
 	case "policy":
 		policy, err := harness.LoadTDDPolicy()
 		if err != nil {
-			Fail(fmt.Sprintf("no se pudo leer TDD policy; ejecutá 'shipwright tdd refresh': %s", err))
+			Fail(fmt.Sprintf("no se pudo leer TDD policy; ejecuta 'shipwright tdd refresh': %s", err))
 		}
 		fmt.Print(harness.RenderTDDPolicyMarkdown(policy))
 	case "help", "-h", "--help":

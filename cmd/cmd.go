@@ -135,7 +135,7 @@ func Exit(code int) {
 
 func EnsureHarness() {
 	if !harnessInitialized() {
-		Fail("harness no inicializado. Ejecutá 'shipwright init' primero.")
+		Fail("harness no inicializado. Ejecuta 'shipwright init' primero.")
 	}
 }
 

@@ -22,7 +22,7 @@ func Advance(s *State) *AdvanceResult {
 		return &AdvanceResult{
 			Transitioned: false,
 			From:         s.CurrentPhase,
-			Message:      fmt.Sprintf("No hay transición 'next' desde %s. Usá 'shipwright approve <gate>' o 'shipwright request-change' según corresponda.", s.CurrentPhase),
+			Message:      fmt.Sprintf("No hay transición 'next' desde %s. Usa 'shipwright approve <gate>' o 'shipwright request-change' según corresponda.", s.CurrentPhase),
 		}
 	}
 
@@ -38,7 +38,7 @@ func Advance(s *State) *AdvanceResult {
 				return &AdvanceResult{
 					Transitioned: false,
 					From:         s.CurrentPhase,
-					BlockReason:  "No se decidió si el proyecto requiere UI. Editá .harness/state.json y seteá requires_ui a true o false.",
+					BlockReason:  "No se decidió si el proyecto requiere UI. Edita .harness/state.json y configura requires_ui a true o false.",
 				}
 			}
 			if *s.RequiresUI {
@@ -51,7 +51,7 @@ func Advance(s *State) *AdvanceResult {
 				return &AdvanceResult{
 					Transitioned: false,
 					From:         s.CurrentPhase,
-					BlockReason:  "No se decidió si el proyecto requiere UI. Editá .harness/state.json y seteá requires_ui a true o false.",
+					BlockReason:  "No se decidió si el proyecto requiere UI. Edita .harness/state.json y configura requires_ui a true o false.",
 				}
 			}
 			if !*s.RequiresUI {
@@ -296,7 +296,7 @@ func RequestChange(s *State, reason string) *ChangeResult {
 
 func StartRequest(s *State, request string) error {
 	if s.CurrentPhase != StateIntake {
-		return fmt.Errorf("el harness ya fue iniciado (fase actual: %s). Usá 'shipwright next' para avanzar.", s.CurrentPhase)
+		return fmt.Errorf("el harness ya fue iniciado (fase actual: %s). Usa 'shipwright next' para avanzar.", s.CurrentPhase)
 	}
 
 	s.InitialRequest = request

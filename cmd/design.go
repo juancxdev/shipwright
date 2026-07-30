@@ -39,7 +39,7 @@ func designStart(args []string) {
 	}
 
 	if state.RequiresUI == nil {
-		Fail("requires_ui no está decidido. Seteá requires_ui en .harness/state.json a true o false primero.")
+		Fail("requires_ui no está decidido. Configura requires_ui en .harness/state.json a true o false primero.")
 	}
 
 	if !*state.RequiresUI {

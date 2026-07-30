@@ -456,7 +456,7 @@ func configureOpenDesign(args []string) {
 		if detected.Configured && strings.TrimSpace(cfg.Integrations.OpenDesign.MCPCommand) != "" {
 			PrintSuccess("OpenDesign autodetectado")
 		} else if !manualInput {
-			Fail("No pude autodetectar OpenDesign. Instalá el CLI `od`, seteá OPENDESIGN_ROOT, o usá --command/--arg manual.")
+			Fail("No pude autodetectar OpenDesign. Instala el CLI `od`, configura OPENDESIGN_ROOT, o usa --command/--arg manual.")
 		}
 	}
 	cfg.Integrations.OpenDesign.Mode = harness.ConfigModeMCP

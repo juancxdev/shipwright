@@ -155,7 +155,7 @@ func Init(args []string) {
 	fmt.Println("Próximo paso:")
 	fmt.Println("  shipwright start \"tu petición de producto\"")
 	if executorName == harness.ExecutorOpenCode {
-		fmt.Println("  o simplemente ejecutá: opencode")
+		fmt.Println("  o simplemente ejecuta: opencode")
 	}
 	printOptionalSkillImportHint(profile, assignments)
 }
@@ -243,10 +243,10 @@ func printOptionalSkillImportHint(profile *harness.ProjectProfile, assignments *
 	}
 	fmt.Println("  Shipwright no ejecuta instaladores externos durante init.")
 	if harness.AutoSkillsAvailable() {
-		fmt.Println("  Se detectó .agents/skills. Podés importarlas con:")
+		fmt.Println("  Se detectó .agents/skills. Puedes importarlas con:")
 		fmt.Println("    shipwright skills import autoskills")
 	} else {
-		fmt.Println("  Si usás autoskills después, importá sus skills con:")
+		fmt.Println("  Si usas autoskills después, importa sus skills con:")
 		fmt.Println("    shipwright skills import autoskills")
 	}
 }

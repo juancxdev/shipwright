@@ -43,7 +43,7 @@ func Scaffold(args []string) {
 	}
 
 	if state.CurrentPhase == harness.StateIntake {
-		Fail("estás en INTAKE. Ejecutá 'shipwright start \"<request>\"' primero.")
+		Fail("estás en INTAKE. Ejecuta 'shipwright start \"<request>\"' primero.")
 	}
 
 	if state.CurrentPhase == harness.StateClosed {

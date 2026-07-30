@@ -1,9 +1,9 @@
 # 07 — Prompt para pedir implementación a un agente
 
-Usá este prompt cuando quieras pedirle a un agente que empiece a implementar el MVP.
+Usa este prompt cuando quieras pedirle a un agente que empiece a implementar el MVP.
 
 ```txt
-Actuá como Senior Software Architect e implementá el MVP del Agentic Software Delivery Harness siguiendo estos documentos:
+Actúa como Senior Software Architect e implementa el MVP del Agentic Software Delivery Harness siguiendo estos documentos:
 
 - README.md
 - 00-vision.md
@@ -17,13 +17,13 @@ Actuá como Senior Software Architect e implementá el MVP del Agentic Software 
 Reglas obligatorias:
 
 1. No implementes todo el roadmap.
-2. Implementá solo Fase 0 y Fase 1.
+2. Implementa solo Fase 0 y Fase 1.
 3. No agregues integraciones reales con OpenPencil, Engram, Jira, GitHub Issues ni CI todavía.
-4. Usá almacenamiento local con Markdown y JSON.
+4. Usa almacenamiento local con Markdown y JSON.
 5. El harness debe impedir avanzar de fase si faltan artefactos o approvals.
 6. Todo avance debe registrarse en .harness/artifacts/progress/history.md.
 7. No declares nada como terminado sin evidencia.
-8. Si falta contexto, no inventes: registrá una pregunta o bloqueo.
+8. Si falta contexto, no inventes: registra una pregunta o bloqueo.
 
 MVP a implementar:
 
@@ -65,5 +65,5 @@ Criterios de aceptación:
 - El sistema registra history.
 - El diseño permite agregar OpenPencil, Engram y Jira después sin reescribir el núcleo.
 
-Primero explorá el repositorio y proponé el plan de implementación incremental. Después implementá solo la primera tanda.
+Primero explora el repositorio y propone el plan de implementación incremental. Después implementa solo la primera tanda.
 ```
